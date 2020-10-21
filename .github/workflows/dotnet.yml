@@ -18,6 +18,6 @@ jobs:
       with:
         dotnet-version: 5.0.100-rc.2.20479.15
     - name: Install dependencies
-      run: dotnet restore
+      run: dotnet restore Server/AuthServer.Server.csproj 
     - name: Build
       run: dotnet build --configuration Release Server/AuthServer.Server.csproj
