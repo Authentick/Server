@@ -1,14 +1,16 @@
 {
 	"name": "AuthServer",
-	"build": {
-		"dockerfile": "Dockerfile"
-	},
-
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "authserverdev",
+	"forwardPorts": [
+		5000,
+		5001,
+		8080
+	],
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
 		"terminal.integrated.shell.linux": "/bin/bash"
 	},
-
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"ms-dotnettools.csharp"

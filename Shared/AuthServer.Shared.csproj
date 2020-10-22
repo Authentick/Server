@@ -19,5 +19,6 @@
 
   <ItemGroup>
     <Protobuf Include="Protos\Auth.proto" />
+    <Protobuf Include="Protos\Client.proto" />
   </ItemGroup>
 </Project>
