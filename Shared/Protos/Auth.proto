@@ -1,15 +1,15 @@
 syntax = "proto3";
 
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+
 option csharp_namespace = "AuthServer.Shared";
 
 service Auth {
-  rpc SayHello (HelloRequest) returns (HelloReply);
+  rpc WhoAmI (google.protobuf.Empty) returns (WhoAmIReply);
 }
 
-message HelloRequest {
-  string name = 1;
-}
-
-message HelloReply {
-  string message = 1;
+message WhoAmIReply {
+  bool isAuthenticated = 1;
+  google.protobuf.StringValue userId = 2;
 }

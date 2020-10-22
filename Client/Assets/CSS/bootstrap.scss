@@ -1,1 +1,12 @@
+@use "variables.scss";
+
+$theme-colors: (
+  "primary": variables.$main-theme-color,
+  "secondary": #f8f9fa,
+  "transparent-light": variables.$transparent-light-color, 
+);
+
+$body-bg: variables.$main-background-color;
+$font-family-sans-serif: 'Open Sans', sans-serif;
+
 @import "../../node_modules/bootstrap/scss/bootstrap";

@@ -1,11 +1,13 @@
+using AuthServer.Client.Util;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Grpc.Net.Client;
 using Grpc.Net.Client.Web;
-using Microsoft.AspNetCore.Components;
 
 namespace AuthServer.Client
 {
@@ -21,6 +23,10 @@ namespace AuthServer.Client
             {
                 return new AuthServer.Shared.Auth.AuthClient(GetGrpcChannel(services));
             });
+            builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
+
+            builder.Services.AddOptions();
+            builder.Services.AddAuthorizationCore();
 
             await builder.Build().RunAsync();
         }

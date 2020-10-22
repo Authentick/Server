@@ -1,17 +1,27 @@
 ﻿@page "/"
 
-@inject AuthServer.Shared.Auth.AuthClient AuthClient
+<button @onclick="LogUsername">Log username</button>
 
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
+<p>@_authMessage</p>
 
 @code {
-    private AuthServer.Shared.HelloReply Message;
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
 
-    protected override async Task OnInitializedAsync() {
-        var foo = new AuthServer.Shared.HelloRequest{Name="Test"}; 
+    private string _authMessage;
 
-        Message = await AuthClient.SayHelloAsync(foo);
+    private async Task LogUsername()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            _authMessage = $"{user.Identity.Name} is authenticated.";
+        }
+        else
+        {
+            _authMessage = "The user is NOT authenticated.";
+        }
     }
 }

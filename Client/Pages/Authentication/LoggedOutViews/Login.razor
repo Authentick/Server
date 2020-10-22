@@ -1,0 +1,38 @@
+@page "/login"
+
+@layout AuthBase
+
+<div class="h-100">
+    <h1>Authenticate</h1>
+    @if (!string.IsNullOrEmpty(_failReason))
+    {
+        <text>@_failReason</text>
+    }
+    <form class="d-flex flex-column justify-content-start h-100" @onsubmit="@SubmitForm" method="post">
+        <div class="pt-3">
+            <label for="email">Email</label>
+            <input type="email" class="form-control w-100 mt-2" required name="email" @bind="@Email" />
+        </div>
+
+        <div class="pt-3">
+            <div>
+                <label for="password">Password</label>
+                <a href="reset" class="float-right">Forgot password?</a>
+            </div>
+            <input type="password" class="form-control w-100 mt-2" required name="password" @bind="@Password" />
+        </div>
+
+        <button type="submit" class="btn btn-success  mt-3">Log in</button>
+    </form>
+</div>
+
+@code {
+    private string Email;
+    private string Password;
+    private string _failReason;
+
+    private async Task SubmitForm()
+    {
+
+    }
+}

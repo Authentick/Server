@@ -1,0 +1,60 @@
+@inherits LayoutComponentBase
+
+@inject NavigationManager NavigationManager
+
+@implements IDisposable
+
+<div class="d-flex justify-content-center h-100 align-items-center auth-base-root">
+    <div class="authentication-card d-flex flex-column-reverse flex-md-row justify-content-between">
+        <div class="left-side">
+            <div class="p-2 d-flex flex-column align-items-center justify-content-center">
+                <h1 class="text-center py-4">Auth<i>Server</i></h1>
+
+                <span class="text-center px-5 text-white-50">
+                    <p>Securely authenticate and authorize access to your internal resources.</p>
+                </span>
+
+                <div class="text-center pt-2">
+                    @if(_uri == "/login") {
+                        <p>Don't have an account?</p>
+                        <p>
+                            <a href="/register">Get started!</a>
+                        </p>
+                    } else if (_uri == "/register") {
+                        <p>Already have an account?</p>
+                        <p>
+                            <a href="/login">Login</a>
+                        </p>
+                    }
+                </div>
+
+                <p class="text-xs text-center pt-5">
+                    Read our <a href="#">terms</a> and <a href="">conditions</a>.
+                </p>
+            </div>
+        </div>
+        <div class="right-side p-4 w-100">
+            @Body
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _uri;
+
+    protected override void OnInitialized() {
+        NavigationManager.LocationChanged += LocationChanged;
+        LocationChanged(null, null);
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= LocationChanged;
+    }
+
+    private void LocationChanged(object sender, LocationChangedEventArgs e) {
+        Uri uri = new Uri(NavigationManager.Uri);
+        _uri = uri.AbsolutePath;
+        StateHasChanged();
+    }
+}

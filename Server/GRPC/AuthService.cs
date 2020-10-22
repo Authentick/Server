@@ -1,14 +1,17 @@
 using System.Threading.Tasks;
 using AuthServer.Shared;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 
 namespace AuthServer.Server.GRPC
 {
     public class AuthService : AuthServer.Shared.Auth.AuthBase
     {
-        public override async Task<HelloReply> SayHello(HelloRequest request, ServerCallContext context)
+
+        public override Task<WhoAmIReply> WhoAmI(Empty request, ServerCallContext context)
         {
-            return new HelloReply { Message = "Test" };
+            var result = new WhoAmIReply { IsAuthenticated = true, UserId = "foobar" };
+            return Task.FromResult(result);
         }
     }
 }

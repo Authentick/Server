@@ -15,5 +15,11 @@
     <ProjectReference Include="..\Shared\AuthServer.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Watch Include="..\**\*.razor" />
+    <Watch Include="..\**\*.proto" />
+    <Watch Include="..\**\*.cs" />
+  </ItemGroup>
+
 
 </Project>
