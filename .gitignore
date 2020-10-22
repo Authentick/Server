@@ -35,3 +35,9 @@ msbuild.wrn
 
 # Visual Studio 2015
 .vs/
+
+# NPM
+Client/node_modules/
+
+# Generated CSS
+Client/wwwroot/css/
