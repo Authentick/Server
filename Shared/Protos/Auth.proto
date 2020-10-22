@@ -1,6 +1,8 @@
 syntax = "proto3";
 
-service Greeter {
+option csharp_namespace = "AuthServer.Shared";
+
+service Auth {
   rpc SayHello (HelloRequest) returns (HelloReply);
 }
 
