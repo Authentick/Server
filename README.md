@@ -1,0 +1,2 @@
+# AuthServer
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/043ecc4717194904bfea73ab56af5947)](https://app.codacy.com/gh/LukasReschke/AuthServer?utm_source=github.com&utm_medium=referral&utm_content=LukasReschke/AuthServer&utm_campaign=Badge_Grade_Settings)
