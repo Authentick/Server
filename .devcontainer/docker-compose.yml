@@ -1,0 +1,20 @@
+version: '3'
+services:
+  authserverdev:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      volumes:
+        - .:/workspace:cached
+      command: /bin/sh -c "while sleep 1000; do :; done"
+      ports:
+        - 8080:8080
+  db:
+      image: postgres
+      restart: always
+      environment:
+        POSTGRES_PASSWORD: example
+  adminer:
+      image: adminer
+      restart: always
+      network_mode: service:authserverdev

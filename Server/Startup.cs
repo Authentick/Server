@@ -50,6 +50,7 @@ namespace AuthServer.Server
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllers();
                 endpoints.MapRazorPages();
                 endpoints.MapGrpcService<AuthService>();
                 endpoints.MapFallbackToFile("index.html");
