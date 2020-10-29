@@ -19,7 +19,4 @@ RUN npm install --global gulp-cli
 
 # .NET
 RUN dotnet tool install --global dotnet-ef --version 5.0.0-rc.2.20475.6
-RUN cat << \EOF >> ~/.bash_profile \
-export PATH="$PATH:/root/.dotnet/tools" \
-EOF
-
+RUN echo "export PATH=\"$PATH:/root/.dotnet/tools\"" >> ~/.bash_profile
