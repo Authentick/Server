@@ -9,7 +9,7 @@ on:
 
 jobs:
   push_base:
-    name: Push Base Docker Container to Github Packages
+    name: Push Dev Docker Container to Github Packages
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
@@ -21,5 +21,5 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
           path: .devcontainer/
           registry: docker.pkg.github.com
-          repository: lukasreschke/authserver/dev
+          repository: lukasreschke/authserver/authserverdev
           tags: latest
