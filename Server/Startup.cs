@@ -4,6 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using AuthServer.Server.GRPC;
+using AuthServer.Server.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace AuthServer.Server
 {
@@ -20,6 +22,13 @@ namespace AuthServer.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<AuthDbContext>(options =>
+                options.UseNpgsql(
+                    Configuration.GetConnectionString("AuthDb"),
+                    o => o.UseNodaTime()
+                )
+            );
+
             services.AddGrpc();
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -28,6 +37,8 @@ namespace AuthServer.Server
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            UpdateDatabase(app);
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -55,6 +66,17 @@ namespace AuthServer.Server
                 endpoints.MapGrpcService<AuthService>();
                 endpoints.MapFallbackToFile("index.html");
             });
+        }
+
+        private static void UpdateDatabase(IApplicationBuilder app)
+        {
+            using var serviceScope = app.ApplicationServices
+                .GetRequiredService<IServiceScopeFactory>()
+                .CreateScope();
+
+            using var authDbContext = serviceScope.ServiceProvider.GetService<AuthDbContext>();
+
+            authDbContext.Database.Migrate();
         }
     }
 }

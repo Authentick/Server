@@ -16,3 +16,10 @@ RUN apt-get install -y nodejs
 
 # Gulp
 RUN npm install --global gulp-cli
+
+# .NET
+RUN dotnet tool install --global dotnet-ef --version 5.0.0-rc.2.20475.6
+RUN cat << \EOF >> ~/.bash_profile \
+export PATH="$PATH:/root/.dotnet/tools" \
+EOF
+
