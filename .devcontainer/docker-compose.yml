@@ -6,6 +6,7 @@ services:
         dockerfile: Dockerfile
       volumes:
         - .:/workspace:cached
+        - /var/run/docker.sock:/var/run/docker-host.sock
       command: /bin/sh -c "while sleep 1000; do :; done"
       depends_on:
         - db
