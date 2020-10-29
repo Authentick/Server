@@ -21,6 +21,9 @@ RUN npm install --global gulp-cli
 RUN dotnet tool install --global dotnet-ef --version 5.0.0-rc.2.20475.6
 RUN echo "export PATH=\"$PATH:/root/.dotnet/tools\"" >> ~/.bash_profile
 
+# Networking tools
+RUN apt-get install -y iputils-ping dnsutils
+
 # Docker
 RUN apt-get -y install \
     apt-transport-https \

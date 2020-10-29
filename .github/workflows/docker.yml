@@ -1,0 +1,24 @@
+name: Publish Docker images
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '.devcontainer/Dockerfile'
+
+jobs:
+  push_base:
+    name: Push Base Docker Container to Github Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Push to GitHub Packages
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          path: .devcontainer/
+          registry: docker.pkg.github.com
+          repository: lukasreschke/authserver/dev
+          tags: latest
