@@ -19,7 +19,6 @@ jobs:
       run: |
           cd .devcontainer/
           echo  ${{ secrets.CR_PAT }} | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
-          docker pull ghcr.io/lukasreschke/authserver-dev:latest
-          docker build . --tag ghcr.io/lukasreschke/authserver-dev:$GITHUB_SHA --cache-from ghcr.io/lukasreschke/authserver-dev:latest
+          docker build . --tag ghcr.io/lukasreschke/authserver-dev:$GITHUB_SHA
           docker push ghcr.io/lukasreschke/authserver-dev:${GITHUB_SHA}
 
