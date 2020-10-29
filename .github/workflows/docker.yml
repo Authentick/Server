@@ -6,20 +6,19 @@ on:
       - main
     paths:
       - '.devcontainer/Dockerfile'
+      - '.github/workflows/docker.yml'
 
-jobs:
-  push_base:
-    name: Push Dev Docker Container to Github Packages
+  build-dev:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Check out the repo
-        uses: actions/checkout@v2
-      - name: Push to GitHub Packages
-        uses: docker/build-push-action@v1
-        with:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          path: .devcontainer/
-          registry: docker.pkg.github.com
-          repository: lukasreschke/authserver/authserverdev
-          tags: latest
+    - uses: actions/checkout@v1
+  
+    - name: Push to Github Container Registry
+      run: |
+          cd .devcontainer/
+          echo  ${{ secrets.CR_PAT }} | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+          docker pull ghcr.io/lukasreschke/authserver-dev:latest
+          docker build . --tag ghcr.io/lukasreschke/authserver-dev:$GITHUB_SHA --cache-from ghcr.io/lukasreschke/authserver-dev:latest
+          docker push ghcr.io/lukasreschke/authserver-dev:${GITHUB_SHA}
+
