@@ -11,6 +11,9 @@
 	"settings": {
 		"terminal.integrated.shell.linux": "/bin/bash"
 	},
+	"runArgs": [
+		"--privileged"
+	],
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"ms-dotnettools.csharp"
