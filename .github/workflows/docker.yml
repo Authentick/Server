@@ -8,7 +8,8 @@ on:
       - '.devcontainer/Dockerfile'
       - '.github/workflows/docker.yml'
 
-  builddev:
+jobs:
+  build-dev:
     runs-on: ubuntu-latest
 
     steps:
