@@ -1,9 +1,13 @@
-@page "/login"
+@page "/register"
 
 @layout AuthBase
 
+@inject AuthServer.Shared.Auth.AuthClient AuthClient
+
+@using AuthServer.Shared
+
 <div class="h-100">
-    <h1>Authenticate</h1>
+    <h1>Register</h1>
     @if (!string.IsNullOrEmpty(_failReason))
     {
         <text>@_failReason</text>
@@ -17,12 +21,11 @@
         <div class="pt-3">
             <div>
                 <label for="password">Password</label>
-                <a href="reset" class="float-right">Forgot password?</a>
             </div>
             <input type="password" class="form-control w-100 mt-2" required name="password" @bind="@Password" />
         </div>
 
-        <button type="submit" class="btn btn-success  mt-3">Log in</button>
+        <button type="submit" class="btn btn-success  mt-3">Register</button>
     </form>
 </div>
 
@@ -33,6 +36,11 @@
 
     private async Task SubmitForm()
     {
-        
+        RegisterRequest request = new RegisterRequest {
+            Email = Email,
+            Password = Password
+        };
+
+        await AuthClient.RegisterAsync(request);
     }
 }

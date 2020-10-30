@@ -7,9 +7,30 @@ option csharp_namespace = "AuthServer.Shared";
 
 service Auth {
   rpc WhoAmI (google.protobuf.Empty) returns (WhoAmIReply);
+  rpc Login (LoginRequest) returns (LoginReply);
+  rpc Register (RegisterRequest) returns (RegisterReply);
 }
 
 message WhoAmIReply {
   bool isAuthenticated = 1;
   google.protobuf.StringValue userId = 2;
+}
+
+message LoginRequest {
+  string userId = 1;
+  string password = 2;
+}
+
+message LoginReply {
+  bool success = 1;
+  google.protobuf.StringValue message = 2;
+}
+
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message RegisterReply {
+  bool success = 1;
 }

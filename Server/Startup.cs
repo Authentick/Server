@@ -9,6 +9,11 @@ using AuthServer.Server.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Hangfire;
+using Hangfire.PostgreSql;
+using Dapper;
+using AuthServer.Server.Services;
+using AuthServer.Server.Services.Email;
 
 namespace AuthServer.Server
 {
@@ -36,7 +41,7 @@ namespace AuthServer.Server
             services.AddControllersWithViews();
             services.AddRazorPages();
 
-               // Identity
+            // Identity
             services.AddIdentity<AppUser, IdentityRole<Guid>>(config =>
             {
                 config.SignIn.RequireConfirmedEmail = true;
@@ -51,6 +56,14 @@ namespace AuthServer.Server
                 options.Cookie.Name = "asid";
                 options.LoginPath = "/login";
             });
+
+            // Email
+            services.AddScoped<IEmailSender, SmtpEmailSender>();
+
+            // Hangfire
+            SqlMapper.AddTypeHandler(new NodaDateTimeHandler());
+            services.AddHangfire(config =>
+                config.UsePostgreSqlStorage(Configuration.GetConnectionString("HangfireDb")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -74,8 +87,14 @@ namespace AuthServer.Server
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
 
+            // Routing
             app.UseRouting();
 
+            // Hangfire
+            app.UseHangfireServer();
+            app.UseHangfireDashboard();
+
+            // GRPC
             app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true });
 
             app.UseEndpoints(endpoints =>
