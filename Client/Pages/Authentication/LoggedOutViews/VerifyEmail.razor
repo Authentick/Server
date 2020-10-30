@@ -1,0 +1,57 @@
+@page "/email/confirm/"
+
+@layout AuthBase
+
+@inject AuthServer.Shared.Auth.AuthClient AuthClient
+@inject NavigationManager Navigation
+
+@using AuthServer.Shared
+@using Microsoft.AspNetCore.WebUtilities
+
+<div class="d-flex flex-column justify-content-between h-100">
+    <span>
+        <h1>Confirm account creation</h1>
+        @if (!_ended)
+        {
+            <p>Please click the below button to confirm your email address.</p>
+            <p>If you didn't recently register on AuthServer, please close this page again.</p>
+        }
+        else
+        {
+            if (_succeeded)
+            {
+                <p>Email successfully confirmed.</p>
+            }
+            else
+            {
+                <p>Invalid email confirmation token.</p>
+            }
+        }
+    </span>
+
+    @if(!_ended) {
+        <button type="submit" class="btn btn-success" @onclick="@ConfirmAccount">Finish account creation</button>
+    }
+</div>
+
+@code {
+    private bool _ended = false;
+    private bool _succeeded = false;
+
+    protected async Task ConfirmAccount()
+    {
+        var query = new Uri(Navigation.Uri).Query;
+
+        var parsedQuery = QueryHelpers.ParseQuery(query);
+
+        VerifyEmailRequest request = new VerifyEmailRequest {
+            Code = parsedQuery["code"],
+            UserId = parsedQuery["userId"],
+        };
+
+        VerifyEmailReply reply = await AuthClient.VerifyEmailAsync(request);
+
+        _succeeded = reply.Success;
+        _ended = true;
+    }
+}

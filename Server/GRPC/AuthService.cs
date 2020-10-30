@@ -1,3 +1,4 @@
+using System.Text;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using AuthServer.Server.Services.Email;
@@ -6,6 +7,7 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Hangfire;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace AuthServer.Server.GRPC
 {
@@ -60,16 +62,37 @@ namespace AuthServer.Server.GRPC
                 string code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
                 BackgroundJob.Enqueue<IEmailSender>(x => x.SendEmailAsync(
-                    "foo@example.com",
+                    request.Email,
                     "Foo",
                     "Test",
-                    code
+                    "/email/confirm?userId=" + user.Id.ToString() + "&code=" + WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))
                 ));
 
                 return new RegisterReply { Success = true };
             }
 
             return new RegisterReply { Success = false };
+        }
+
+        public override async Task<VerifyEmailReply> VerifyEmail(VerifyEmailRequest request, ServerCallContext context)
+        {
+            AppUser user = await _userManager.FindByIdAsync(request.UserId);
+
+            if (user == null)
+            {
+                return new VerifyEmailReply { Success = false };
+            }
+
+            string code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Code));
+
+            IdentityResult result = await _userManager.ConfirmEmailAsync(user, code);
+
+            if (result.Succeeded)
+            {
+                return new VerifyEmailReply { Success = true };
+            }
+
+            return new VerifyEmailReply { Success = false };
         }
 
         public override Task<WhoAmIReply> WhoAmI(Empty request, ServerCallContext context)

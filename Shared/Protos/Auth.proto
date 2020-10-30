@@ -9,6 +9,7 @@ service Auth {
   rpc WhoAmI (google.protobuf.Empty) returns (WhoAmIReply);
   rpc Login (LoginRequest) returns (LoginReply);
   rpc Register (RegisterRequest) returns (RegisterReply);
+  rpc VerifyEmail (VerifyEmailRequest) returns (VerifyEmailReply);
 }
 
 message WhoAmIReply {
@@ -32,5 +33,14 @@ message RegisterRequest {
 }
 
 message RegisterReply {
+  bool success = 1;
+}
+
+message VerifyEmailRequest {
+  string userId = 1;
+  string code = 2;
+}
+
+message VerifyEmailReply {
   bool success = 1;
 }
