@@ -9,6 +9,7 @@ services:
       depends_on:
         - db
       ports:
+        - 1025:1025
         - 8080:8080
         - 8025:8025
   db:
@@ -28,5 +29,3 @@ services:
       image: mailhog/mailhog
       restart: always
       network_mode: service:authserverdev
-      ports:
-        - 1025:1025

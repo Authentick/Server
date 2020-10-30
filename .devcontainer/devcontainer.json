@@ -5,7 +5,8 @@
 	"forwardPorts": [
 		5000,
 		5001,
-		8080
+		8080,
+		8025
 	],
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
