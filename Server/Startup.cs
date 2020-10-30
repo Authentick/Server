@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -6,6 +7,8 @@ using Microsoft.Extensions.Hosting;
 using AuthServer.Server.GRPC;
 using AuthServer.Server.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace AuthServer.Server
 {
@@ -32,6 +35,22 @@ namespace AuthServer.Server
             services.AddGrpc();
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+               // Identity
+            services.AddIdentity<AppUser, IdentityRole<Guid>>(config =>
+            {
+                config.SignIn.RequireConfirmedEmail = true;
+            })
+                .AddEntityFrameworkStores<AuthDbContext>()
+                .AddDefaultTokenProviders();
+            services
+                .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie();
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.Cookie.Name = "asid";
+                options.LoginPath = "/login";
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

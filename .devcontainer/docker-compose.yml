@@ -8,8 +8,10 @@ services:
       command: /bin/sh -c "while sleep 1000; do :; done"
       depends_on:
         - db
+        - mailhog
       ports:
         - 8080:8080
+        - 8025:8025
   db:
       image: postgres
       restart: always
@@ -23,3 +25,9 @@ services:
       network_mode: service:authserverdev
       depends_on:
         - db
+  mailhog:
+      image: mailhog/mailhog
+      restart: always
+      network_mode: service:authserverdev
+      ports:
+        - 1025:1025
