@@ -43,7 +43,11 @@ namespace AuthServer.Server.GRPC
                 }
             }
 
-            return new LoginReply { Success = false };
+            return new LoginReply
+            {
+                Success = false,
+                Message = "Login failed"
+            };
         }
 
         public override async Task<RegisterReply> Register(RegisterRequest request, ServerCallContext context)
@@ -97,7 +101,18 @@ namespace AuthServer.Server.GRPC
 
         public override Task<WhoAmIReply> WhoAmI(Empty request, ServerCallContext context)
         {
-            var result = new WhoAmIReply { IsAuthenticated = true, UserId = "foobar" };
+            string? userId = _userManager.GetUserId(context.GetHttpContext().User);
+
+            WhoAmIReply result;
+            if (userId != null)
+            {
+                result = new WhoAmIReply { IsAuthenticated = true, UserId = userId };
+            }
+            else
+            {
+                result = new WhoAmIReply { IsAuthenticated = false };
+            }
+
             return Task.FromResult(result);
         }
     }

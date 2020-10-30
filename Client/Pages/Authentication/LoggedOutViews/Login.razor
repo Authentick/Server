@@ -2,6 +2,10 @@
 
 @layout AuthBase
 
+@inject AuthServer.Shared.Auth.AuthClient AuthClient
+
+@using AuthServer.Shared
+
 <div class="h-100">
     <h1>Authenticate</h1>
     @if (!string.IsNullOrEmpty(_failReason))
@@ -33,6 +37,15 @@
 
     private async Task SubmitForm()
     {
-        
+        LoginRequest request = new LoginRequest {
+            UserId = Email,
+            Password = Password
+        };   
+
+        LoginReply reply = await AuthClient.LoginAsync(request);
+
+        if(reply.Message != null) {
+            _failReason = reply.Message;
+        }
     }
 }
