@@ -19,6 +19,7 @@ RUN npm install --global gulp-cli
 
 # .NET
 RUN dotnet tool install --global dotnet-ef --version 5.0.0-rc.2.20475.6
+RUN dotnet tool install --global dotnet-aspnet-codegenerator --version 5.0.0-rc.2.20516.1
 RUN echo "export PATH=\"$PATH:/root/.dotnet/tools\"" >> ~/.bash_profile
 
 # Networking tools

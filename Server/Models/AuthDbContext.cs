@@ -1,9 +1,12 @@
+using System;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
 
 namespace AuthServer.Server.Models
 {
-    public class AuthDbContext : DbContext
+    public class AuthDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
     {
         public AuthDbContext(DbContextOptions<AuthDbContext> options) : base(options) { }
 
@@ -14,5 +17,10 @@ namespace AuthServer.Server.Models
     {
         public int Id { get; set; }
         public Instant CreationTime { get; set; }
+    }
+
+    public class AppUser : IdentityUser<Guid>
+    {
+        
     }
 }
