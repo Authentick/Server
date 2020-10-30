@@ -30,16 +30,13 @@ namespace AuthServer.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            // DB Context
             services.AddDbContext<AuthDbContext>(options =>
                 options.UseNpgsql(
                     Configuration.GetConnectionString("AuthDb"),
                     o => o.UseNodaTime()
                 )
             );
-
-            services.AddGrpc();
-            services.AddControllersWithViews();
-            services.AddRazorPages();
 
             // Identity
             services.AddIdentity<AppUser, IdentityRole<Guid>>(config =>
@@ -56,6 +53,11 @@ namespace AuthServer.Server
                 options.Cookie.Name = "asid";
                 options.LoginPath = "/login";
             });
+
+            // Framework
+            services.AddGrpc();
+            services.AddControllersWithViews();
+            services.AddRazorPages();
 
             // Email
             services.AddScoped<IEmailSender, SmtpEmailSender>();
@@ -97,6 +99,11 @@ namespace AuthServer.Server
             // GRPC
             app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true });
 
+            // Auth
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            // Endpoints
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
