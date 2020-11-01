@@ -1,0 +1,21 @@
+@mixin md-icon-size($size: 24px) {
+    font-size: $size;
+    height: $size;
+    width: $size;
+  }
+  
+  .md-icon-18 {
+    @include md-icon-size(18px);
+  }
+  
+  .md-icon-24 {
+    @include md-icon-size(24px);
+  }
+  
+  .md-icon-34 {
+    @include md-icon-size(34px);
+  }
+
+  .md-icon-42 {
+    @include md-icon-size(42px);
+  }
