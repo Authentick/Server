@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "AuthServer.Shared.Security";
+
+service Sessions {
+  rpc ListActiveSessions (google.protobuf.Empty) returns (SessionListReply);
+  rpc ListInactiveSessions (google.protobuf.Empty) returns (SessionListReply);
+  rpc InvalidateSession (InvalidateSessionRequest) returns (InvalidateSessionReply);
+}
+
+message SessionListReply {
+    repeated Session session = 1;
+}
+
+message Session {
+    string id = 1;
+    string name = 2;
+    string lastActive = 3;
+    string lastLocation = 4;
+    repeated string ipAdresses = 5;
+    string signedIn = 6;
+}
+
+message InvalidateSessionRequest {
+  string id = 1;
+}
+
+message InvalidateSessionReply {
+  bool success = 1;
+}

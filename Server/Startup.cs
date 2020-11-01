@@ -14,6 +14,8 @@ using Hangfire.PostgreSql;
 using Dapper;
 using AuthServer.Server.Services;
 using AuthServer.Server.Services.Email;
+using AuthServer.Server.GRPC.Security;
+using AuthServer.Server.Services.Authentication;
 
 namespace AuthServer.Server
 {
@@ -39,6 +41,7 @@ namespace AuthServer.Server
             );
 
             // Identity
+            services.AddScoped<CookieAuthenticationEventListener>();
             services.AddIdentity<AppUser, IdentityRole<Guid>>(config =>
             {
                 config.SignIn.RequireConfirmedEmail = true;
@@ -52,6 +55,7 @@ namespace AuthServer.Server
             {
                 options.Cookie.Name = "asid";
                 options.LoginPath = "/login";
+                options.EventsType = typeof(CookieAuthenticationEventListener);
             });
 
             // Framework
@@ -66,6 +70,9 @@ namespace AuthServer.Server
             SqlMapper.AddTypeHandler(new NodaDateTimeHandler());
             services.AddHangfire(config =>
                 config.UsePostgreSqlStorage(Configuration.GetConnectionString("HangfireDb")));
+
+            // Reverse Proxy
+            services.AddReverseProxy().LoadFromConfig(Configuration.GetSection("ReverseProxy")); 
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -109,6 +116,8 @@ namespace AuthServer.Server
                 endpoints.MapControllers();
                 endpoints.MapRazorPages();
                 endpoints.MapGrpcService<AuthService>();
+                endpoints.MapGrpcService<SessionsService>();
+                endpoints.MapGrpcService<SettingsService>();
                 endpoints.MapFallbackToFile("index.html");
             });
         }

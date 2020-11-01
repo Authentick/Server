@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "AuthServer.Shared.Security";
+
+service Settings {
+  rpc ChangePassword (ChangePasswordRequest) returns (ChangePasswordReply);
+  rpc ListAuthenticatorApps (google.protobuf.Empty) returns (TwoFactorListReply);
+  rpc ListAuthenticatorKeys (google.protobuf.Empty) returns (TwoFactorListReply);
+  rpc RemoveAuthenticator (RemoveAuthenticatorRequest) returns (RemoveAuthenticatorReply);
+  rpc AddNewAuthenticatorApp (AddNewAuthenticatorAppRequest) returns (AddNewAuthenticatorAppReply);
+}
+
+message ChangePasswordRequest {
+  string currentPassword = 1;
+  string newPassword = 2;
+}
+
+message ChangePasswordReply { 
+  bool success = 1;
+}
+
+message TwoFactorListReply {
+  repeated TwoFactorDevice twoFactorDevices = 1;
+}
+
+message TwoFactorDevice {
+  string id = 1;
+  string name = 2;
+  string added = 3;
+  string lastUsed = 4;
+}
+
+message RemoveAuthenticatorRequest {
+  string id = 1;
+}
+
+message RemoveAuthenticatorReply {
+  bool success = 1;
+}
+
+message AddNewAuthenticatorAppRequest {
+  string name = 1;
+  string sharedSecret = 2;
+  string currentCode = 3;
+}
+
+message AddNewAuthenticatorAppReply {
+  bool success = 1;
+}

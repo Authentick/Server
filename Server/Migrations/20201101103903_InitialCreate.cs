@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Net;
 using Microsoft.EntityFrameworkCore.Migrations;
+using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace AuthServer.Server.Migrations
 {
-    public partial class CreateIdentitySchema : Migration
+    public partial class InitialCreate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -153,6 +155,47 @@ namespace AuthServer.Server.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "AuthSessions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    CreationTime = table.Column<Instant>(type: "timestamp", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ExpiredTime = table.Column<Instant>(type: "timestamp", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AuthSessions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AuthSessions_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AuthSessionUsages",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    SessionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastActive = table.Column<Instant>(type: "timestamp", nullable: false),
+                    IpAddress = table.Column<IPAddress>(type: "inet", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AuthSessionUsages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AuthSessionUsages_AuthSessions_SessionId",
+                        column: x => x.SessionId,
+                        principalTable: "AuthSessions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -189,6 +232,16 @@ namespace AuthServer.Server.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AuthSessions_UserId",
+                table: "AuthSessions",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AuthSessionUsages_SessionId",
+                table: "AuthSessionUsages",
+                column: "SessionId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -209,7 +262,13 @@ namespace AuthServer.Server.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "AuthSessionUsages");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "AuthSessions");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
