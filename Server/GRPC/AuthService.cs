@@ -38,15 +38,21 @@ namespace AuthServer.Server.GRPC
                 {
                     return new LoginReply
                     {
-                        Success = true
+                        State = LoginStateEnum.Success
+                    };
+                }
+                else if (result.RequiresTwoFactor)
+                {
+                    return new LoginReply
+                    {
+                        State = LoginStateEnum.TwoFactorRequired
                     };
                 }
             }
 
             return new LoginReply
             {
-                Success = false,
-                Message = "Login failed"
+                State = LoginStateEnum.Failed
             };
         }
 

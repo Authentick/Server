@@ -130,6 +130,10 @@ namespace AuthServer.Server
 
             using var authDbContext = serviceScope.ServiceProvider.GetService<AuthDbContext>();
 
+            if(authDbContext == null) {
+                throw new Exception("AuthDbContext is null");
+            }
+
             authDbContext.Database.Migrate();
         }
     }

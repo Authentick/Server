@@ -23,8 +23,13 @@ message LoginRequest {
 }
 
 message LoginReply {
-  bool success = 1;
-  google.protobuf.StringValue message = 2;
+  LoginStateEnum state = 1;
+}
+
+enum LoginStateEnum {
+  failed = 0;
+  success = 1;
+  twoFactorRequired = 2;
 }
 
 message RegisterRequest {

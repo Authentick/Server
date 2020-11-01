@@ -8,10 +8,6 @@
 
 <div class="h-100">
     <h1>Register</h1>
-    @if (!string.IsNullOrEmpty(_failReason))
-    {
-        <text>@_failReason</text>
-    }
     <form class="d-flex flex-column justify-content-start h-100" @onsubmit="@SubmitForm" method="post">
         <div class="pt-3">
             <label for="email">Email</label>
@@ -30,9 +26,9 @@
 </div>
 
 @code {
-    private string Email;
-    private string Password;
-    private string _failReason;
+    #nullable enable
+    private string? Email;
+    private string? Password;
 
     private async Task SubmitForm()
     {

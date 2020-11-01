@@ -3,6 +3,7 @@
 @layout AuthBase
 
 @inject AuthServer.Shared.Auth.AuthClient AuthClient
+@inject NavigationManager NavigationManager
 
 @using AuthServer.Shared
 
@@ -31,9 +32,10 @@
 </div>
 
 @code {
-    private string Email;
-    private string Password;
-    private string _failReason;
+    #nullable enable
+    private string? Email;
+    private string? Password;
+    private string? _failReason;
 
     private async Task SubmitForm()
     {
@@ -44,8 +46,16 @@
 
         LoginReply reply = await AuthClient.LoginAsync(request);
 
-        if(reply.Message != null) {
-            _failReason = reply.Message;
+        switch(reply.State) {
+            case LoginStateEnum.Failed:
+                _failReason = "Login failed.";
+                break;
+            case LoginStateEnum.TwoFactorRequired:
+                NavigationManager.NavigateTo("/login/mfa");
+                break;
+            case LoginStateEnum.Success:
+                NavigationManager.NavigateTo("/");
+                break;
         }
     }
 }
