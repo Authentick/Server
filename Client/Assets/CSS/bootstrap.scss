@@ -1,12 +1,14 @@
 @use "variables.scss";
+@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap');
 
 $theme-colors: (
   "primary": variables.$main-theme-color,
-  "secondary": #f8f9fa,
+  "secondary": variables.$secondary-theme-color,
   "transparent-light": variables.$transparent-light-color, 
+  "white": #ffffff
 );
 
 $body-bg: variables.$main-background-color;
-$font-family-sans-serif: 'Open Sans', sans-serif;
+$font-family-sans-serif: 'Rubik', sans-serif;
 
 @import "../../node_modules/bootstrap/scss/bootstrap";
