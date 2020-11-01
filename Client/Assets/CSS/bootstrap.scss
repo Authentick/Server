@@ -1,15 +1,14 @@
-@use "variables.scss";
 @import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Icons&display=swap');
 
 $theme-colors: (
-  "primary": variables.$main-theme-color,
-  "secondary": variables.$secondary-theme-color,
-  "transparent-light": variables.$transparent-light-color, 
+  "primary": $main-theme-color,
+  "secondary": $secondary-theme-color,
+  "transparent-light": $transparent-light-color, 
   "white": #ffffff
 );
 
-$body-bg: variables.$main-background-color;
+$body-bg: $main-background-color;
 $font-family-sans-serif: 'Rubik', sans-serif;
 
 @import "../../node_modules/bootstrap/scss/bootstrap";
