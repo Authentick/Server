@@ -17,4 +17,9 @@
         color: white;
         cursor: pointer;
     }
+
+    &__menu-item:hover {
+        font-weight: 600;
+        background: darken($secondary-theme-color, 20%);
+    }
 }
