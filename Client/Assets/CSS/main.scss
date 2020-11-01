@@ -1,4 +1,6 @@
-@use "bootstrap.scss";
-@use "site.scss";
-@use "loggedin-base.scss";
-@use "mixins.scss";
+@import "bootstrap.scss";
+@import "variables.scss";
+@import "site.scss";
+@import "loggedin-base.scss";
+@import "mixins.scss";
+@import "avatar.scss";
