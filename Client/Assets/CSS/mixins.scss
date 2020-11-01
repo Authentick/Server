@@ -19,3 +19,24 @@
   .md-icon-42 {
     @include md-icon-size(42px);
   }
+
+  @mixin font-size ($size: 1rem) {
+    font-size: $size;
+  }
+
+  .text-xl {
+    @include font-size(2rem)
+  }
+
+  .text-lg {
+    @include font-size(1.5rem)
+  }
+
+  .text-md {
+    @include font-size(1rem)
+  }
+
+  .text-sm {
+    @include font-size(0.8rem)
+  }
+  
