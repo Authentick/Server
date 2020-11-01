@@ -84,6 +84,25 @@ namespace AuthServer.Server.GRPC
             return new RegisterReply { Success = false };
         }
 
+        public override async Task<VerifyAuthenticatorReply> VerifyAuthenticatorToken(VerifyAuthenticatorTokenRequest request, ServerCallContext context)
+        {
+            AppUser? user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+
+            if (user == null)
+            {
+                return new VerifyAuthenticatorReply { Success = false };
+            }
+
+            SignInResult result = await _signInManager.TwoFactorAuthenticatorSignInAsync(request.Token, false, false);
+
+            if (result.Succeeded)
+            {
+                return new VerifyAuthenticatorReply { Success = true };
+            }
+
+            return new VerifyAuthenticatorReply { Success = false };
+        }
+
         public override async Task<VerifyEmailReply> VerifyEmail(VerifyEmailRequest request, ServerCallContext context)
         {
             AppUser user = await _userManager.FindByIdAsync(request.UserId);

@@ -10,6 +10,7 @@ service Auth {
   rpc Login (LoginRequest) returns (LoginReply);
   rpc Register (RegisterRequest) returns (RegisterReply);
   rpc VerifyEmail (VerifyEmailRequest) returns (VerifyEmailReply);
+  rpc VerifyAuthenticatorToken (VerifyAuthenticatorTokenRequest) returns (VerifyAuthenticatorReply);
 }
 
 message WhoAmIReply {
@@ -47,5 +48,13 @@ message VerifyEmailRequest {
 }
 
 message VerifyEmailReply {
+  bool success = 1;
+}
+
+message VerifyAuthenticatorTokenRequest {
+  string token = 1;
+}
+
+message VerifyAuthenticatorReply {
   bool success = 1;
 }
