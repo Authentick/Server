@@ -7,5 +7,14 @@
         width: 240px;
         background: $secondary-theme-color;
     }
-    
+
+    &__icon {
+        color: $secondary-theme-color;
+}
+
+    &__icon:hover {
+            border-right: 3px solid white;
+            color: white;
+            cursor: pointer;
+    }
 }
