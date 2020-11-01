@@ -20,6 +20,7 @@
 
     &__menu-item:hover {
         font-weight: 600;
-        background: darken($secondary-theme-color, 20%);
+        background: darken($secondary-theme-color, 5%);
+        cursor: pointer;
     }
 }
