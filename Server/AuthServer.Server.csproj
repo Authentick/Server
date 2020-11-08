@@ -35,9 +35,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Watch Include="..\**\*.razor" />
-    <Watch Include="..\**\*.proto" />
-    <Watch Include="..\**\*.cs" />
+    <Watch Include="../**/*.razor" />
+    <Watch Include="../**/*.proto" />
+    <Watch Include="../**/*.cs" />
   </ItemGroup>
 
 
