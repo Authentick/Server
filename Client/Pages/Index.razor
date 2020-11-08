@@ -1,27 +1,10 @@
 ﻿@page "/"
 
-<button @onclick="LogUsername">Log username</button>
-
-<p>@_authMessage</p>
+@inject NavigationManager NavigationManager
 
 @code {
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationStateTask { get; set; }
-
-    private string _authMessage;
-
-    private async Task LogUsername()
+    protected override void OnInitialized()
     {
-        var authState = await authenticationStateTask;
-        var user = authState.User;
-
-        if (user.Identity.IsAuthenticated)
-        {
-            _authMessage = $"{user.Identity.Name} is authenticated.";
-        }
-        else
-        {
-            _authMessage = "The user is NOT authenticated.";
-        }
+        NavigationManager.NavigateTo("apps");
     }
 }
