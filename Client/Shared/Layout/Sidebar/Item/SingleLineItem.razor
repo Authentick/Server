@@ -1,0 +1,38 @@
+@inject NavigationManager NavigationManager 
+
+<a href="@Uri" class="py-2 sidebar__menu-item px-3 @(_isActive ? "active" : "")">
+    @Name
+</a>
+
+@code {
+    #nullable enable
+
+    [Parameter]
+    public string? Uri { get; set; }
+    [Parameter]
+    public string? Name { get; set; }
+    private bool _isActive;
+
+    protected override void OnInitialized()
+    {
+        NavigationManager.LocationChanged += HandleLocationChanged;
+        HandleLocationChanged(null, null);
+    }
+
+    private void HandleLocationChanged(object? sender, LocationChangedEventArgs? e)
+    {
+        string baseRelativePath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri).ToString();
+        if(Uri != null ) {
+            bool newIsActiveState = baseRelativePath.StartsWith(Uri);
+            if(newIsActiveState != _isActive) {
+                _isActive = newIsActiveState;
+                StateHasChanged();
+            }
+        }
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= HandleLocationChanged;
+    }
+}

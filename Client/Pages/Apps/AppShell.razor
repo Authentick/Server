@@ -1,0 +1,22 @@
+@layout MainLayout
+
+@inherits OwningComponentBase
+
+@using AuthServer.Client.Shared.Layout
+
+<ContentWithSidebar>
+    <Sidebar>
+        <AppSidebar />
+    </Sidebar>
+
+    <Content>
+        <div class="p-3">
+            @Body
+        </div>
+    </Content>
+</ContentWithSidebar>
+
+@code {
+    [Parameter]
+    public RenderFragment Body { get; set; }
+}

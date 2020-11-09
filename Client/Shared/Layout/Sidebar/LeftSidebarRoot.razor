@@ -1,0 +1,14 @@
+<div class="sidebar__second d-flex flex-column text-black py-3">
+    <span class="text-lg pb-2 font-weight-bold px-3">@Header</span>
+    @ChildContent
+</div>
+
+@code {
+    #nullable enable
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public string? Header { get; set; }
+}
