@@ -23,7 +23,7 @@
     {
         string baseRelativePath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri).ToString();
         if(Uri != null ) {
-            bool newIsActiveState = baseRelativePath.StartsWith(Uri);
+            bool newIsActiveState = baseRelativePath.Equals(Uri);
             if(newIsActiveState != _isActive) {
                 _isActive = newIsActiveState;
                 StateHasChanged();
