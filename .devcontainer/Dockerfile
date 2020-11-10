@@ -22,8 +22,8 @@ RUN apt-get install -y zsh
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
 # .NET
-RUN dotnet tool install --global dotnet-ef --version 5.0.0-rc.2.20475.6
-RUN dotnet tool install --global dotnet-aspnet-codegenerator --version 5.0.0-rc.2.20516.1
+RUN dotnet tool install --global dotnet-ef --version 5.0.0
+RUN dotnet tool install --global dotnet-aspnet-codegenerator --version 5.0.0
 RUN echo "export PATH=\"$PATH:/root/.dotnet/tools\"" >> ~/.bash_profile
 
 # Networking tools
