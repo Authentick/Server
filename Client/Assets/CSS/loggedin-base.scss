@@ -1,63 +1,64 @@
 .sidebar {
+  &__first {
+    width: 100%;
+  }
+
+  &__second {
+    width: 240px;
+    background: $secondary-theme-color;
+    border-right: 1px solid darken($secondary-theme-color, 5%);
+  }
+
+  &__icon {
+    color: $secondary-theme-color;
+    font-size: 12px;
+
+    &:hover {
+      border-right: 0;
+      color: white;
+      text-decoration: none;
+    }
+
+    &.active {
+      border-right: 0;
+      color: white;
+      text-decoration: none;
+    }
+  }
+
+  &__menu-item {
+    color: black;
+    text-decoration: none;
+
+    &:hover {
+      font-weight: 600;
+      background: darken($secondary-theme-color, 5%);
+      text-decoration: none;
+    }
+
+    &.active {
+      font-weight: 600;
+      background: darken($secondary-theme-color, 5%);
+      text-decoration: none;
+    }
+  }
+
+  @include media-breakpoint-up(lg) {
     &__first {
-        width: 100%;
+      width: 90px;
     }
 
-    &__second {
-        width: 240px;
-        background: $secondary-theme-color;
-        border-right: 1px solid darken($secondary-theme-color, 5%);
+    &__icon:hover {
+      border-right: 3px solid white;
     }
 
-    &__icon {
-        color: $secondary-theme-color;
-        font-size: 12px;
-
-        &:hover {
-            border-right: 0;
-            color: white;
-            text-decoration: none;
-        }
-
-        &.active {
-            border-right: 0;
-            color: white;
-            text-decoration: none;
-        }
+    &__icon:active {
+      border-right: 3px solid white;
     }
-
-    &__menu-item {
-        color: black;
-        text-decoration: none;
-
-        &:hover {
-            font-weight: 600;
-            background: darken($secondary-theme-color, 5%);
-            text-decoration: none;
-        }
-
-        &.active {
-            font-weight: 600;
-            background: darken($secondary-theme-color, 5%);
-            text-decoration: none;
-        }
-    }
-
-    @include media-breakpoint-up(lg) {
-        &__first {
-            width: 90px;
-        }
-
-        &__icon:hover {
-            border-right: 3px solid white;
-        }
-        &__icon:active {
-            border-right: 3px solid white;
-        }
-    }  
+  }
 }
 
 .content {
-    overflow: auto;
-    max-height: 100vh;
+  overflow: auto;
+  max-height: 100vh;
 }
