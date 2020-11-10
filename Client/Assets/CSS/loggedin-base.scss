@@ -1,6 +1,6 @@
 .sidebar {
     &__first {
-        width: 70px;
+        width: 100%;
     }
 
     &__second {
@@ -14,14 +14,15 @@
         font-size: 12px;
 
         &:hover {
-            border-right: 3px solid white;
+            border-right: 0;
             color: white;
             text-decoration: none;
         }
 
         &.active {
-            border-right: 3px solid white;
+            border-right: 0;
             color: white;
+            text-decoration: none;
         }
     }
 
@@ -41,4 +42,22 @@
             text-decoration: none;
         }
     }
+
+    @media (min-width: 992px) {
+        &__first {
+            width: 90px;
+        }
+
+        &__icon:hover {
+            border-right: 3px solid white;
+        }
+        &__icon:active {
+            border-right: 3px solid white;
+        }
+    }  
+}
+
+.content {
+    overflow: auto;
+    max-height: 100vh;
 }

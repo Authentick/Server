@@ -1,6 +1,11 @@
 .logo-card {
-    border: 3px solid $secondary-theme-color;
-    border-radius: 4px;
+    border: 1px solid $light-gray;
+    border-radius: 16px;
     width: 320px;
     cursor: pointer;
+}
+
+.logo-card:hover {
+    border-color: $secondary-theme-color;
+    background-color: $secondary-theme-color;
 }
