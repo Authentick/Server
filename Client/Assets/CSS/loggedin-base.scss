@@ -43,7 +43,7 @@
         }
     }
 
-    @media (min-width: 992px) {
+    @include media-breakpoint-up(lg) {
         &__first {
             width: 90px;
         }
