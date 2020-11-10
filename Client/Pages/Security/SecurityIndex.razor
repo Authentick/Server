@@ -1,3 +1,99 @@
 @page "/security/"
 
 @layout SecurityShell
+
+<span class="text-lg font-weight-bold">Change password</span>
+
+<form class="mb-4">
+  <div class="form-group col-12 col-md-6 p-0">
+    <input type="password" class="form-control" id="newpassword" placeholder="New password">
+  </div>
+  <div class="form-group col-12 col-md-6 p-0">
+    <input type="password" class="form-control" id="confimpassword" placeholder="Confirm new password">
+  </div>
+  <button type="submit" class="btn btn-primary">Update password</button>
+</form>
+
+<span class="text-lg font-weight-bold">Two-factor authentication</span>
+<div class="d-flex flex-lg-row flex-column justify-content-between">
+    <div class="d-flex flex-column pr-4">
+        <span class="text-md font-weight-bold">Authentication app</span>
+        <p class="text-sm">Use an application on your phone to get two-factor authentication codes when prompted.</p>
+    </div>
+    <a class="btn btn-primary mb-lg-0 mb-3">Add a new app</a>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-hover table-bordered mb-4">
+    <thead class="bg-primary text-white"
+      <tr>
+        <th scope="col" class="border-0">Name</th>
+        <th scope="col" class="border-0">Added</th>
+        <th scope="col" class="border-0">Last used</th>
+        <th scope="col" class="border-0">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Android phone</th>
+        <td>29.12.2015 at 4:12 AM</td>
+        <td>29.12.2015 at 4:12 AM</td>
+        <td><a href="#">Remove</a></td>
+      </tr>
+      <tr>
+        <th scope="row">Android phone</th>
+        <td>29.12.2015 at 4:12 AM</td>
+        <td>29.12.2015 at 4:12 AM</td>
+        <td><a href="#">Remove</a></td>
+      </tr>
+      <tr>
+        <th scope="row">Android phone</th>
+        <td>29.12.2015 at 4:12 AM</td>
+        <td>29.12.2015 at 4:12 AM</td>
+        <td><a href="#">Remove</a></td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="d-flex flex-column flex-lg-row justify-content-between">
+    <div class="d-flex flex-column pr-4">
+        <span class="text-md font-weight-bold">Security keys</span>
+        <p class="text-sm">Security keys can be used as your second factor of authentication instead of a verification code.</p>
+    </div>
+    <a class="btn btn-primary mb-lg-0 mb-3">Add a new key</a>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-hover table-bordered mb-4">
+    <thead class="bg-primary text-white"
+      <tr>
+        <th scope="col" class="border-0">Name</th>
+        <th scope="col" class="border-0">Added</th>
+        <th scope="col" class="border-0">Last used</th>
+        <th scope="col" class="border-0">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">Android phone</th>
+        <td>29.12.2015 at 4:12 AM</td>
+        <td>29.12.2015 at 4:12 AM</td>
+        <td><a href="#">Remove</a></td>
+      </tr>
+      <tr>
+        <th scope="row">Android phone</th>
+        <td>29.12.2015 at 4:12 AM</td>
+        <td>29.12.2015 at 4:12 AM</td>
+        <td><a href="#">Remove</a></td>
+      </tr>
+      <tr>
+        <th scope="row">Android phone</th>
+        <td>29.12.2015 at 4:12 AM</td>
+        <td>29.12.2015 at 4:12 AM</td>
+        <td><a href="#">Remove</a></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
