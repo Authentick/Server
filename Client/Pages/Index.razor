@@ -3,8 +3,21 @@
 @inject NavigationManager NavigationManager
 
 @code {
-    protected override void OnInitialized()
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; } = null!;
+
+    protected override async Task OnInitializedAsync()
     {
-        NavigationManager.NavigateTo("apps");
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+
+        if ((user.Identity != null) && user.Identity.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("apps");
+        }
+        else
+        {
+            NavigationManager.NavigateTo("login");
+        }
     }
 }

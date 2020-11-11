@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -18,13 +19,19 @@ namespace AuthServer.Client.Util
         {
             var identityResult = await _authClient.WhoAmIAsync(new Google.Protobuf.WellKnownTypes.Empty());
 
-            var identity = new ClaimsIdentity(new[]
+            List<Claim> claims = new List<Claim>();
+            if (identityResult.IsAuthenticated)
             {
-                new Claim(ClaimTypes.Name, identityResult.UserId),
-            }, "Fake authentication type");
+                claims.Add(new Claim(ClaimTypes.Name, identityResult.UserId));
+            }
+
+            ClaimsIdentity identity = new ClaimsIdentity();
+            if (claims.Count > 0)
+            {
+                identity = new ClaimsIdentity(claims, "Gatekeeper Authentication");
+            }
 
             var user = new ClaimsPrincipal(identity);
-
             return new AuthenticationState(user);
         }
     }
