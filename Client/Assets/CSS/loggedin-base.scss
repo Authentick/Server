@@ -6,7 +6,7 @@
   &__second {
     width: 240px;
     background: $secondary-theme-color;
-    border-right: 1px solid darken($secondary-theme-color, 5%);
+    border-right: 1px solid $secondary-theme-dark-color;
   }
 
   &__icon {
@@ -32,13 +32,13 @@
 
     &:hover {
       font-weight: 600;
-      background: darken($secondary-theme-color, 5%);
+      background: $secondary-theme-dark-color;
       text-decoration: none;
     }
 
     &.active {
       font-weight: 600;
-      background: darken($secondary-theme-color, 5%);
+      background: $secondary-theme-dark-color;
       text-decoration: none;
     }
   }
