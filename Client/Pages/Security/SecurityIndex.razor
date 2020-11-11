@@ -3,14 +3,21 @@
 
 @layout SecurityShell
 
+@using AuthServer.Shared.Security
+
+@inject AuthServer.Shared.Security.Settings.SettingsClient SettingsClient
+
 <h2>Change password</h2>
 
-<form class="mb-4 pb-4">
+<form class="mb-4 pb-4" @onsubmit="@SubmitChangePasswordForm">
   <div class="form-group col-12 col-md-6 p-0">
-    <input type="password" class="form-control bg-secondary" id="newpassword" placeholder="New password">
+    <input type="password" class="form-control bg-secondary" @bind="@CurrentPassword" placeholder="Current password">
   </div>
   <div class="form-group col-12 col-md-6 p-0">
-    <input type="password" class="form-control bg-secondary" id="confimpassword" placeholder="Confirm new password">
+    <input type="password" class="form-control bg-secondary" @bind="@NewPassword" placeholder="New password">
+  </div>
+  <div class="form-group col-12 col-md-6 p-0">
+    <input type="password" class="form-control bg-secondary" @bind="@ConfirmNewPassword" placeholder="Confirm new password">
   </div>
   <button type="submit" class="btn btn-secondary-dark">Update password</button>
 </form>
@@ -98,3 +105,24 @@
     </tbody>
   </table>
 </div>
+
+@code {
+    #nullable enable
+    private string? CurrentPassword;
+    private string? NewPassword;
+    private string? ConfirmNewPassword;
+
+    private async Task SubmitChangePasswordForm() 
+    {
+      if (NewPassword != ConfirmNewPassword) {
+        return;
+      }
+
+      ChangePasswordRequest request = new ChangePasswordRequest{
+        CurrentPassword = CurrentPassword,
+        NewPassword = NewPassword
+      };
+      
+      await SettingsClient.ChangePasswordAsync(request);
+    }
+}
