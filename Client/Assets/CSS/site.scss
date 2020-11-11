@@ -23,7 +23,7 @@ body {
 }
 
 .auth-base-root {
-  background-image: url('/img/unsplash/background.jpg');
+  background-color: $secondary-theme-color;
   background-size: cover;
 
   .authentication-card {
@@ -31,7 +31,6 @@ body {
     display: flex;
     background-color: white;
     border-radius: 4px;
-    box-shadow: $primary-shadow;
     height: 420px;
     width: 720px;
     font-size: 14px;
