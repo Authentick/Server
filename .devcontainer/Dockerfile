@@ -29,6 +29,9 @@ RUN echo "export PATH=\"$PATH:/root/.dotnet/tools\"" >> ~/.bash_profile
 # Networking tools
 RUN apt-get install -y iputils-ping dnsutils telnet netcat
 
+# Standard tools
+RUN apt-get install -y procps lsof
+
 # Docker
 RUN apt-get -y install \
     apt-transport-https \
