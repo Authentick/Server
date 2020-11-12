@@ -71,8 +71,12 @@ namespace AuthServer.Server
             services.AddHangfire(config =>
                 config.UsePostgreSqlStorage(Configuration.GetConnectionString("HangfireDb")));
 
+            // Miniprofiler
+            services.AddMiniProfiler()
+                .AddEntityFramework();
+
             // Reverse Proxy
-            services.AddReverseProxy().LoadFromConfig(Configuration.GetSection("ReverseProxy")); 
+            services.AddReverseProxy().LoadFromConfig(Configuration.GetSection("ReverseProxy"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -103,6 +107,9 @@ namespace AuthServer.Server
             app.UseHangfireServer();
             app.UseHangfireDashboard();
 
+            // MiniProfiler
+            app.UseMiniProfiler();
+
             // GRPC
             app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true });
 
@@ -118,7 +125,7 @@ namespace AuthServer.Server
                 endpoints.MapGrpcService<AuthService>();
                 endpoints.MapGrpcService<SessionsService>();
                 endpoints.MapGrpcService<SettingsService>();
-                endpoints.MapFallbackToFile("index.html");
+                endpoints.MapFallbackToPage("/_Host");
             });
         }
 
@@ -130,7 +137,8 @@ namespace AuthServer.Server
 
             using var authDbContext = serviceScope.ServiceProvider.GetService<AuthDbContext>();
 
-            if(authDbContext == null) {
+            if (authDbContext == null)
+            {
                 throw new Exception("AuthDbContext is null");
             }
 
