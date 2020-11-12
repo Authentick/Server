@@ -16,6 +16,7 @@ using AuthServer.Server.Services;
 using AuthServer.Server.Services.Email;
 using AuthServer.Server.GRPC.Security;
 using AuthServer.Server.Services.Authentication;
+using AuthServer.Server.Services.Authentication.Session;
 
 namespace AuthServer.Server
 {
@@ -65,6 +66,9 @@ namespace AuthServer.Server
 
             // Email
             services.AddScoped<IEmailSender, SmtpEmailSender>();
+
+            // Authentication
+            services.AddScoped<SessionManager>();
 
             // Hangfire
             SqlMapper.AddTypeHandler(new NodaDateTimeHandler());
