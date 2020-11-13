@@ -67,8 +67,14 @@ namespace AuthServer.Server.Services.Authentication.Session
         public void MarkSessionLastUsedNow(Guid sessionId)
         {
             AuthSession session = _authDbContext.AuthSessions.Single(s => s.Id == sessionId);
-            session.LastUsedTime = SystemClock.Instance.GetCurrentInstant();
-            _authDbContext.SaveChanges();
+
+            Duration duration = Duration.FromMinutes(1);
+
+            if ((SystemClock.Instance.GetCurrentInstant().Minus(duration)) > session.LastUsedTime)
+            {
+                session.LastUsedTime = SystemClock.Instance.GetCurrentInstant();
+                _authDbContext.SaveChanges();
+            }
         }
     }
 }
