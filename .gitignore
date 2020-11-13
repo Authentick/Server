@@ -40,4 +40,4 @@ Client/node_modules/
 Client/wwwroot/css/
 
 # Code coverage
-Server.Tests/TestResults/
+TestResults/
