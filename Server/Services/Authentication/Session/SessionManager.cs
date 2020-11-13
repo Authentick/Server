@@ -17,7 +17,8 @@ namespace AuthServer.Server.Services.Authentication.Session
             _authDbContext = authDbContext;
         }
 
-        public Guid GetCurrentSessionId(ClaimsPrincipal principal) {
+        public Guid GetCurrentSessionId(ClaimsPrincipal principal)
+        {
             return new Guid(principal.Claims.Single(u => u.Type == "cookie_identifier").Value);
         }
 
