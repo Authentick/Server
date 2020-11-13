@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using AuthServer.Server.Models;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
@@ -16,11 +17,15 @@ namespace AuthServer.Server.Services.Authentication.Session
             _authDbContext = authDbContext;
         }
 
-        public bool IsSessionActive(Guid sessionId)
+        public Guid GetCurrentSessionId(ClaimsPrincipal principal) {
+            return new Guid(principal.Claims.Single(u => u.Type == "cookie_identifier").Value);
+        }
+
+        public bool IsSessionActive(AppUser user, Guid sessionId)
         {
             AuthSession? session = _authDbContext.AuthSessions
                 .AsNoTracking()
-                .SingleOrDefault(s => s.Id == sessionId && s.ExpiredTime == null);
+                .SingleOrDefault(s => s.User == user && s.Id == sessionId && s.ExpiredTime == null);
 
             return session != null;
         }
@@ -29,7 +34,6 @@ namespace AuthServer.Server.Services.Authentication.Session
         {
             AuthSession session = _authDbContext.AuthSessions
                 .Single(s => s.User == user && s.Id == sessionId && s.ExpiredTime == null);
-
             session.ExpiredTime = SystemClock.Instance.GetCurrentInstant();
 
             _authDbContext.SaveChanges();
