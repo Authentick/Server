@@ -31,6 +31,7 @@ namespace AuthServer.Server.GRPC
 
             if (user != null)
             {
+                
                 Microsoft.AspNetCore.Identity.SignInResult result =
                     await _signInManager.PasswordSignInAsync(user, request.Password, true, false);
 
