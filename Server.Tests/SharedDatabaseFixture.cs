@@ -45,8 +45,9 @@ namespace AuthServer.Server.Tests
                         context.Database.EnsureDeleted();
                         context.Database.EnsureCreated();
 
-                        AppUser user = new AppUser { UserName = "Test User", Email = "test@example.com" };
-                        context.Add(user);
+                        AppUser user1 = new AppUser { UserName = "Test User 1", Email = "test1@example.com" };
+                        AppUser user2 = new AppUser { UserName = "Test User 2", Email = "test2@example.com" };
+                        context.AddRange(user1, user2);
 
                         context.SaveChanges();
                     }
