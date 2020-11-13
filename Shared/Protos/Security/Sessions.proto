@@ -21,7 +21,8 @@ message Session {
   google.protobuf.Timestamp last_active = 3;
   string last_location = 4;
   repeated string ip_addresses  = 5;
-  string signed_in = 6;
+  google.protobuf.Timestamp signed_in = 6;
+  google.protobuf.Timestamp invalidated_at = 7;
 }
 
 message InvalidateSessionRequest {

@@ -45,11 +45,17 @@ namespace AuthServer.Server.GRPC.Security
                 Session replySession = new Session
                 {
                     Id = session.Id.ToString(),
-                    LastActive = NodaTime.Serialization.Protobuf.NodaExtensions.ToTimestamp(SystemClock.Instance.GetCurrentInstant()),
+                    LastActive = NodaTime.Serialization.Protobuf.NodaExtensions.ToTimestamp(session.LastUsedTime),
                     LastLocation = "TODO",
-                    Name = "TODO",
-                    SignedIn = session.CreationTime.ToString()
+                    Name = session.Name,
+                    SignedIn = NodaTime.Serialization.Protobuf.NodaExtensions.ToTimestamp(session.CreationTime),
                 };
+
+                Instant? expiredTime = session.ExpiredTime;
+                if (expiredTime != null)
+                {
+                    replySession.InvalidatedAt = NodaTime.Serialization.Protobuf.NodaExtensions.ToTimestamp((Instant)expiredTime);
+                }
 
                 reply.Sessions.Add(replySession);
             }

@@ -28,7 +28,7 @@
           <tr>
             <td>@session.Name</td>
             <td>@session.SignedIn</td>
-            <td>TODO</td>
+            <td>@session.LastActive</td>
             <td>
               <button @onclick="@(async () => await InvalidateSession(session))"
                 class="btn btn-secondary-dark">Invalidate</button>
@@ -51,7 +51,7 @@
           <th scope="col" class="border-0">Name</th>
           <th scope="col" class="border-0">Added</th>
           <th scope="col" class="border-0">Last used</th>
-          <th scope="col" class="border-0">Actions</th>
+          <th scope="col" class="border-0">Invalidated at</th>
         </tr>
       </thead>
       <tbody>
@@ -61,8 +61,8 @@
           <tr>
             <td>@session.Name</td>
             <td>@session.SignedIn</td>
-            <td>TODO</td>
-            <td><a href="#" class="btn btn-secondary-dark">Remove</a></td>
+            <td>@session.LastActive</td>
+            <td>@session.InvalidatedAt</td>
           </tr>
         }
       </tbody>

@@ -63,5 +63,12 @@ namespace AuthServer.Server.Services.Authentication.Session
 
             return sessions;
         }
+
+        public void MarkSessionLastUsedNow(Guid sessionId)
+        {
+            AuthSession session = _authDbContext.AuthSessions.Single(s => s.Id == sessionId);
+            session.LastUsedTime = SystemClock.Instance.GetCurrentInstant();
+            _authDbContext.SaveChanges();
+        }
     }
 }
