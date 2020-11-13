@@ -8,6 +8,7 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using NodaTime;
 
 namespace AuthServer.Server.GRPC.Security
 {
@@ -44,7 +45,7 @@ namespace AuthServer.Server.GRPC.Security
                 Session replySession = new Session
                 {
                     Id = session.Id.ToString(),
-                    LastActive = "TODO",
+                    LastActive = NodaTime.Serialization.Protobuf.NodaExtensions.ToTimestamp(SystemClock.Instance.GetCurrentInstant()),
                     LastLocation = "TODO",
                     Name = "TODO",
                     SignedIn = session.CreationTime.ToString()
