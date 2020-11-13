@@ -7,27 +7,25 @@
 
 @using AuthServer.Shared
 
-<div class="h-100">
-    <h1>Authenticate</h1>
+<div class="h-100 pt-0 pt-md-4">
+    <h1>Welcome back!</h1>
     @if (!string.IsNullOrEmpty(_failReason))
     {
         <text>@_failReason</text>
     }
-    <form class="d-flex flex-column justify-content-start h-100" @onsubmit="@SubmitForm" method="post">
+    <form class="d-flex flex-column justify-content-start h-100 col-12 col-md-8 pl-0" @onsubmit="@SubmitForm" method="post">
         <div class="pt-3">
-            <label for="email">Email</label>
-            <input type="email" class="form-control w-100 mt-2" required name="email" @bind="@Email" />
+            <input type="email" class="form-control w-100 mt-2" required name="email" @bind="@Email" placeholder="Username"/>
         </div>
 
         <div class="pt-3">
             <div>
-                <label for="password">Password</label>
                 <a href="reset" class="float-right">Forgot password?</a>
             </div>
-            <input type="password" class="form-control w-100 mt-2" required name="password" @bind="@Password" />
+            <input type="password" class="form-control w-100 mt-2" required name="password" @bind="@Password" placeholder="Password"/>
         </div>
 
-        <button type="submit" class="btn btn-success  mt-3">Log in</button>
+        <button type="submit" class="btn btn-success mt-3">Log in</button>
     </form>
 </div>
 
