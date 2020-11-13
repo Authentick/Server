@@ -1,7 +1,7 @@
 version: '3'
 services:
   authserverdev:
-      image: ghcr.io/lukasreschke/authserver-dev:374a1c27ab6b87d61c526b492eff29da40c486a5
+      image: ghcr.io/lukasreschke/authserver-dev:d689b581da9a9c2314bbc96b31c1b428cbb6ede9
       volumes:
         - .:/workspace:cached
         - /var/run/docker.sock:/var/run/docker-host.sock
