@@ -32,7 +32,7 @@ namespace AuthServer.Server.GRPC.Security
             Guid sessionId = new Guid(request.Id);
             _sessionManager.ExpireSession(user, sessionId);
 
-            return new InvalidateSessionReply { Success = 1 };
+            return new InvalidateSessionReply { Success = true };
         }
 
         private SessionListReply FormatSessionListReply(List<AuthSession> sessions)
