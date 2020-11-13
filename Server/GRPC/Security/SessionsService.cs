@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
@@ -7,6 +8,7 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using NodaTime;
 
 namespace AuthServer.Server.GRPC.Security
 {
@@ -25,9 +27,13 @@ namespace AuthServer.Server.GRPC.Security
             _sessionManager = sessionManager;
         }
 
-        public override Task<InvalidateSessionReply> InvalidateSession(InvalidateSessionRequest request, ServerCallContext context)
+        public override async Task<InvalidateSessionReply> InvalidateSession(InvalidateSessionRequest request, ServerCallContext context)
         {
-            return base.InvalidateSession(request, context);
+            AppUser user = await _userManager.GetUserAsync(context.GetHttpContext().User);
+            Guid sessionId = new Guid(request.Id);
+            _sessionManager.ExpireSession(user, sessionId);
+
+            return new InvalidateSessionReply { Success = true };
         }
 
         private SessionListReply FormatSessionListReply(List<AuthSession> sessions)
@@ -39,13 +45,19 @@ namespace AuthServer.Server.GRPC.Security
                 Session replySession = new Session
                 {
                     Id = session.Id.ToString(),
-                    LastActive = "TODO",
+                    LastActive = NodaTime.Serialization.Protobuf.NodaExtensions.ToTimestamp(session.LastUsedTime),
                     LastLocation = "TODO",
-                    Name = "TODO",
-                    SignedIn = session.CreationTime.ToString()
+                    Name = session.Name,
+                    SignedIn = NodaTime.Serialization.Protobuf.NodaExtensions.ToTimestamp(session.CreationTime),
                 };
 
-                reply.Session.Add(replySession);
+                Instant? expiredTime = session.ExpiredTime;
+                if (expiredTime != null)
+                {
+                    replySession.InvalidatedAt = NodaTime.Serialization.Protobuf.NodaExtensions.ToTimestamp((Instant)expiredTime);
+                }
+
+                reply.Sessions.Add(replySession);
             }
 
             return reply;
