@@ -21,11 +21,13 @@ jobs:
       run: dotnet restore Server/AuthServer.Server.csproj 
     - name: Build
       run: dotnet build --configuration Release Server/AuthServer.Server.csproj
-    - name: Test
-      run: dotnet test Server.Tests --collect:"XPlat Code Coverage" --settings Server.Tests/coverlet.runsettings
+    - name: Test Server
+      run: dotnet test Server.Tests --collect:"XPlat Code Coverage" -r TestResults/ --settings Server.Tests/coverlet.runsettings
+    - name: Test Client
+      run: dotnet test Client.Tests --collect:"XPlat Code Coverage" -r TestResults/
     - uses: codecov/codecov-action@v1
       with:
-        directory: Server.Tests/TestResults/
+        directory: TestResults/
         fail_ci_if_error: true
         verbose: true
 
