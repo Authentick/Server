@@ -25,10 +25,10 @@ namespace AuthServer.Server.Services.Authentication.Session
             return session != null;
         }
 
-        public void ExpireSession(Guid sessionId)
+        public void ExpireSession(AppUser user, Guid sessionId)
         {
             AuthSession session = _authDbContext.AuthSessions
-                .Single(s => s.Id == sessionId && s.ExpiredTime == null);
+                .Single(s => s.User == user && s.Id == sessionId && s.ExpiredTime == null);
 
             session.ExpiredTime = SystemClock.Instance.GetCurrentInstant();
 

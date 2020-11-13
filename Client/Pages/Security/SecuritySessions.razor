@@ -29,7 +29,10 @@
             <td>@session.Name</td>
             <td>@session.SignedIn</td>
             <td>TODO</td>
-            <td><a href="#" class="btn btn-secondary-dark">Remove</a></td>
+            <td>
+              <button @onclick="@(async () => await InvalidateSession(session))"
+                class="btn btn-secondary-dark">Invalidate</button>
+            </td>
           </tr>
         }
       </tbody>
@@ -74,6 +77,18 @@
   private SessionListReply? ExpiredSessionListReply;
 
   protected override async Task OnInitializedAsync()
+  {
+    await FetchSessionList();
+  }
+
+  private async Task InvalidateSession(Session session)
+  {
+    InvalidateSessionRequest request = new InvalidateSessionRequest { Id = session.Id };
+    await SessionsClient.InvalidateSessionAsync(request);
+    await FetchSessionList();
+  }
+
+  private async Task FetchSessionList()
   {
     SessionListReply = await SessionsClient.ListActiveSessionsAsync(new Google.Protobuf.WellKnownTypes.Empty());
     ExpiredSessionListReply = await SessionsClient.ListInactiveSessionsAsync(new Google.Protobuf.WellKnownTypes.Empty());

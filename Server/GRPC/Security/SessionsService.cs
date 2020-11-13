@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
@@ -25,9 +26,13 @@ namespace AuthServer.Server.GRPC.Security
             _sessionManager = sessionManager;
         }
 
-        public override Task<InvalidateSessionReply> InvalidateSession(InvalidateSessionRequest request, ServerCallContext context)
+        public override async Task<InvalidateSessionReply> InvalidateSession(InvalidateSessionRequest request, ServerCallContext context)
         {
-            return base.InvalidateSession(request, context);
+            AppUser user = await _userManager.GetUserAsync(context.GetHttpContext().User);
+            Guid sessionId = new Guid(request.Id);
+            _sessionManager.ExpireSession(user, sessionId);
+
+            return new InvalidateSessionReply { Success = 1 };
         }
 
         private SessionListReply FormatSessionListReply(List<AuthSession> sessions)
