@@ -90,7 +90,12 @@
 
   private async Task FetchSessionList()
   {
-    SessionListReply = await SessionsClient.ListActiveSessionsAsync(new Google.Protobuf.WellKnownTypes.Empty());
-    ExpiredSessionListReply = await SessionsClient.ListInactiveSessionsAsync(new Google.Protobuf.WellKnownTypes.Empty());
+    Grpc.Core.AsyncUnaryCall<SessionListReply> SessionListReplyTask =  SessionsClient.ListActiveSessionsAsync(new Google.Protobuf.WellKnownTypes.Empty());
+    Grpc.Core.AsyncUnaryCall<SessionListReply> ExpiredSessionListReplyTask = SessionsClient.ListInactiveSessionsAsync(new Google.Protobuf.WellKnownTypes.Empty());
+    
+    await Task.WhenAll(SessionListReplyTask.ResponseAsync, ExpiredSessionListReplyTask.ResponseAsync);
+
+    SessionListReply = await SessionListReplyTask.ResponseAsync;
+    ExpiredSessionListReply = await ExpiredSessionListReplyTask.ResponseAsync;
   }
 }
