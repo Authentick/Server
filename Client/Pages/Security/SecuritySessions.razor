@@ -23,7 +23,7 @@
       </thead>
       <tbody>
 
-        @foreach (Session session in SessionListReply.Session)
+        @foreach (Session session in SessionListReply.Sessions)
         {
           <tr>
             <td>@session.Name</td>
@@ -56,7 +56,7 @@
       </thead>
       <tbody>
 
-        @foreach (Session session in ExpiredSessionListReply.Session)
+        @foreach (Session session in ExpiredSessionListReply.Sessions)
         {
           <tr>
             <td>@session.Name</td>

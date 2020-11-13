@@ -51,7 +51,7 @@ namespace AuthServer.Server.GRPC.Security
                     SignedIn = session.CreationTime.ToString()
                 };
 
-                reply.Session.Add(replySession);
+                reply.Sessions.Add(replySession);
             }
 
             return reply;
