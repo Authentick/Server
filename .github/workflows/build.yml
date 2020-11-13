@@ -28,7 +28,7 @@ jobs:
       postgres:
         image: postgres
         ports:
-          - 6379:6379
+          - 5432:5432
         env:
           POSTGRES_PASSWORD: example
         options: >-
