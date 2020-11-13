@@ -7,34 +7,16 @@
 <div class="d-flex justify-content-center h-100 align-items-center auth-base-root">
     <div class="authentication-card d-flex flex-column-reverse flex-md-row justify-content-between">
         <div class="left-side">
-            <div class="p-2 d-flex flex-column align-items-center justify-content-center">
-                <img src="/img/logo.svg" style="width: 50%" />
-
-                <span class="text-center px-5 text-white-50">
-                    <p>Securely authenticate and authorize access to your internal resources.</p>
-                </span>
-
-                <div class="text-center pt-2">
-                    @if(_uri == "/login") {
-                        <p>Don't have an account?</p>
-                        <p>
-                            <a href="/register">Get started!</a>
-                        </p>
-                    } else if (_uri == "/register") {
-                        <p>Already have an account?</p>
-                        <p>
-                            <a href="/login">Login</a>
-                        </p>
-                    }
-                </div>
-
-                <p class="text-xs text-center pt-5">
-                    Read our <a href="#">terms</a> and <a href="">conditions</a>.
-                </p>
+            <div class="h-100 p-4 d-flex flex-column align-items-center justify-content-between">
+                <img class="authentication-card__logo p-4 d-md-flex d-none" src="/img/logo-long.svg" />
+                <a href="#" class="text-white text-md text-center">Terms &amp; conditions</a>
             </div>
         </div>
-        <div class="right-side p-4 w-100">
+        <div class="right-side p-4 w-100 h-100">
             @Body
+        </div>
+        <div class="bg-primary d-flex d-md-none justify-content-center">
+             <img class="authentication-card__logo p-4 d-flex" src="/img/logo-long.svg" />
         </div>
     </div>
 </div>
