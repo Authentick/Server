@@ -16,13 +16,32 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.100-rc.2.20479.15
+        dotnet-version: 5.0.100
     - name: Install dependencies
       run: dotnet restore Server/AuthServer.Server.csproj 
     - name: Build
       run: dotnet build --configuration Release Server/AuthServer.Server.csproj
+    - name: Test
+      run: dotnet test Server.Tests --collect:"XPlat Code Coverage"
+    - uses: codecov/codecov-action@v1
+      with:
+        directory: Server.Tests/TestResults/
+        fail_ci_if_error: true
+        verbose: true
 
-      
+    services:
+      postgres:
+        image: postgres
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_PASSWORD: example
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
   gulp:
 
     runs-on: [ubuntu-latest]

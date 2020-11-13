@@ -38,3 +38,6 @@ Client/node_modules/
 
 # Generated CSS
 Client/wwwroot/css/
+
+# Code coverage
+Server.Tests/TestResults/
