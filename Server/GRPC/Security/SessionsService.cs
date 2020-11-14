@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using AuthServer.Server.Services.Authentication.Session;
+using AuthServer.Server.Services.User;
 using AuthServer.Shared.Security;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
@@ -15,11 +16,11 @@ namespace AuthServer.Server.GRPC.Security
     [Authorize]
     public class SessionsService : AuthServer.Shared.Security.Sessions.SessionsBase
     {
-        private readonly UserManager<AppUser> _userManager;
+        private readonly UserManager _userManager;
         private readonly SessionManager _sessionManager;
 
         public SessionsService(
-            UserManager<AppUser> userManager,
+            UserManager userManager,
             SessionManager sessionManager
             )
         {

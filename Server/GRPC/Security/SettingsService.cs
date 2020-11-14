@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
+using AuthServer.Server.Services.User;
 using AuthServer.Shared.Security;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
@@ -11,9 +12,9 @@ namespace AuthServer.Server.GRPC.Security
     [Authorize]
     public class SettingsService : AuthServer.Shared.Security.Settings.SettingsBase
     {
-        private readonly UserManager<AppUser> _userManager;
+        private readonly UserManager _userManager;
 
-        public SettingsService(UserManager<AppUser> userManager)
+        public SettingsService(UserManager userManager)
         {
             _userManager = userManager;
         }

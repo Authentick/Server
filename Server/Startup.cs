@@ -17,6 +17,8 @@ using AuthServer.Server.Services.Email;
 using AuthServer.Server.GRPC.Security;
 using AuthServer.Server.Services.Authentication;
 using AuthServer.Server.Services.Authentication.Session;
+using AuthServer.Server.Services.User;
+using AuthServer.Server.GRPC.Admin;
 
 namespace AuthServer.Server
 {
@@ -66,6 +68,9 @@ namespace AuthServer.Server
 
             // Email
             services.AddScoped<IEmailSender, SmtpEmailSender>();
+
+            // User
+            services.AddScoped<UserManager>();
 
             // Authentication
             services.AddScoped<SessionManager>();
@@ -129,6 +134,7 @@ namespace AuthServer.Server
                 endpoints.MapGrpcService<AuthService>();
                 endpoints.MapGrpcService<SessionsService>();
                 endpoints.MapGrpcService<SettingsService>();
+                endpoints.MapGrpcService<UsersService>();
                 endpoints.MapFallbackToPage("/_Host");
             });
         }

@@ -2,6 +2,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using AuthServer.Server.Services.Email;
+using AuthServer.Server.Services.User;
 using AuthServer.Shared;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
@@ -13,11 +14,11 @@ namespace AuthServer.Server.GRPC
 {
     public class AuthService : AuthServer.Shared.Auth.AuthBase
     {
-        private readonly UserManager<AppUser> _userManager;
+        private readonly UserManager _userManager;
         private readonly SignInManager<AppUser> _signInManager;
 
         public AuthService(
-            UserManager<AppUser> userManager,
+            UserManager userManager,
             SignInManager<AppUser> signInManager
             )
         {

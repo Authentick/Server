@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Grpc.Net.Client;
 using Grpc.Net.Client.Web;
-using System.Collections.Generic;
 
 namespace AuthServer.Client
 {
@@ -24,6 +23,7 @@ namespace AuthServer.Client
             builder.Services.AddScoped(services => { return new AuthServer.Shared.Auth.AuthClient(GetGrpcChannel(services)); });
             builder.Services.AddScoped(services => { return new AuthServer.Shared.Security.Settings.SettingsClient(GetGrpcChannel(services)); });
             builder.Services.AddScoped(services => { return new AuthServer.Shared.Security.Sessions.SessionsClient(GetGrpcChannel(services)); });
+            builder.Services.AddScoped(services => { return new AuthServer.Shared.Admin.Users.UsersClient(GetGrpcChannel(services)); });
 
             builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
 
