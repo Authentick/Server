@@ -6,7 +6,17 @@ updates:
     interval: daily
   open-pull-requests-limit: 10
 - package-ecosystem: nuget
-  directory: "/"
-  schedule:
-    interval: daily
-  open-pull-requests-limit: 10
+  directory: "/Server"
+  schedule:	
+    interval: daily	
+  open-pull-requests-limit: 10	
+- package-ecosystem: nuget	
+  directory: "/Client.Tests"	
+  schedule:	
+    interval: daily	
+  open-pull-requests-limit: 10	
+- package-ecosystem: nuget	
+  directory: "/Server.Tests"
+  schedule:	
+    interval: daily	
+  open-pull-requests-limit: 10	
