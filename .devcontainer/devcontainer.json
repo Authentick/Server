@@ -22,5 +22,6 @@
 		"ms-dotnettools.dotnet-interactive-vscode",
 		"ms-azuretools.vscode-docker",
 		"stylelint.vscode-stylelint"
-	]
+	],
+	"postCreateCommand": ".devcontainer/setup.sh"
 }
