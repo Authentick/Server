@@ -3,8 +3,8 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using AuthServer.Server.Services.Authentication.Session;
+using AuthServer.Server.Services.User;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Identity;
 using NodaTime;
 
 namespace AuthServer.Server.Services.Authentication
@@ -12,12 +12,12 @@ namespace AuthServer.Server.Services.Authentication
     public class CookieAuthenticationEventListener : CookieAuthenticationEvents
     {
         private readonly AuthDbContext _authDbContext;
-        private readonly UserManager<AppUser> _userManager;
+        private readonly UserManager _userManager;
         private readonly SessionManager _sessionManager;
 
         public CookieAuthenticationEventListener(
             AuthDbContext authDbContext,
-            UserManager<AppUser> userManager,
+            UserManager userManager,
             SessionManager sessionManager
         )
         {

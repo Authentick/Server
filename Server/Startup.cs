@@ -17,6 +17,7 @@ using AuthServer.Server.Services.Email;
 using AuthServer.Server.GRPC.Security;
 using AuthServer.Server.Services.Authentication;
 using AuthServer.Server.Services.Authentication.Session;
+using AuthServer.Server.Services.User;
 
 namespace AuthServer.Server
 {
@@ -66,6 +67,9 @@ namespace AuthServer.Server
 
             // Email
             services.AddScoped<IEmailSender, SmtpEmailSender>();
+
+            // User
+            services.AddScoped<UserManager>();
 
             // Authentication
             services.AddScoped<SessionManager>();
