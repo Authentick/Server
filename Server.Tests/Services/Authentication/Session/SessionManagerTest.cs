@@ -7,9 +7,9 @@ using Xunit;
 
 namespace AuthServer.Server.Tests.Services.Authentication.Session
 {
-    public class SharedDatabaseTest : IClassFixture<SharedDatabaseFixture>
+    public class SessionManagerTest : IClassFixture<SharedDatabaseFixture>
     {
-        public SharedDatabaseTest(SharedDatabaseFixture fixture)
+        public SessionManagerTest(SharedDatabaseFixture fixture)
         {
             Fixture = fixture;
         }

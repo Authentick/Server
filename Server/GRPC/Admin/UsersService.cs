@@ -1,5 +1,6 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using AuthServer.Server.Services.Authentication.Session;
+using AuthServer.Server.Models;
 using AuthServer.Server.Services.User;
 using AuthServer.Shared.Admin;
 using Google.Protobuf.WellKnownTypes;
@@ -12,20 +13,27 @@ namespace AuthServer.Server.GRPC.Admin
     public class UsersService : AuthServer.Shared.Admin.Users.UsersBase
     {
         private readonly UserManager _userManager;
-        private readonly SessionManager _sessionManager;
 
         public UsersService(
-            UserManager userManager,
-            SessionManager sessionManager
+            UserManager userManager
             )
         {
             _userManager = userManager;
-            _sessionManager = sessionManager;
         }
 
         public override Task<UserListReply> ListUsers(Empty request, ServerCallContext context)
         {
-            return base.ListUsers(request, context);
+            IEnumerable<AppUser> users = _userManager.GetAllUsers();
+
+            UserListReply reply = new UserListReply { };
+
+            foreach (AppUser user in users)
+            {
+                User userElement = new User { Id = user.Id.ToString(), Name = user.UserName };
+                reply.Users.Add(userElement);
+            }
+
+            return Task.FromResult(reply);
         }
     }
 }

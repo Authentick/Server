@@ -28,7 +28,7 @@ namespace AuthServer.Server.Services.User
             _authDbContext = authDbContext;
         }
 
-        public IEnumerable<AppUser> GetAllUsers()
+        public virtual IEnumerable<AppUser> GetAllUsers()
         {
             List<AppUser> users = _authDbContext.Users.ToList();
 

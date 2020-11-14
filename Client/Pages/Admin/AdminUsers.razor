@@ -2,3 +2,42 @@
 @attribute [Authorize]
 
 @layout AdminShell
+
+@using AuthServer.Shared.Admin
+
+@inject AuthServer.Shared.Admin.Users.UsersClient UsersClient
+
+<h2>Users</h2>
+
+@if (UserListReply != null)
+{
+    <div class="table-responsive mb-2">
+        <table class="table table-hover table-bordered mb-4 table-secondary table-striped">
+            <thead class="bg-secondary-dark">
+                <tr>
+                    <th scope="col" class="border-0">Name</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (User user in UserListReply.Users)
+                {
+                    <tr>
+                        <td>@user.Name</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    #nullable enable
+
+    private UserListReply? UserListReply;
+
+    protected override async Task OnInitializedAsync()
+    {
+        UserListReply = await UsersClient.ListUsersAsync(new Google.Protobuf.WellKnownTypes.Empty());
+    }
+}
