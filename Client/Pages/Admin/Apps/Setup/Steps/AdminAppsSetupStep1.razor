@@ -1,0 +1,62 @@
+<h4>Choose Authorization Services</h4>
+
+<form @onsubmit="@SubmitForm">
+    <p>Choose how your users should authenticate towards your custom app.</p>
+    <input type="checkbox" name="iap_auth" @bind="@IAP_Auth">
+    <label for="iap_auth">Identity Aware Proxy (Recommended)<br/>Use Gatekeeper as a Reverse Proxy. No traffic will be forwarded unless the user passes the authorization check.</label>
+    <br />
+    <input type="checkbox" name="oidc_auth" @bind="@OIDC_Auth">
+    <label for="oidc_auth">OIDC (Recommended)<br/>Use OpenID connect.<br/> Note: Can be combined with Identity Aware Proxy for additional security.</label>
+    <br />
+    <input type="checkbox" name="ldap_auth" @bind="@LDAP_Auth">
+    <label for="ldap_auth">LDAP<br/>Uses an application specific password created by Gatekeeper.<br/>Note: Use only if your application doesn’t support Identity Aware Proxy or OIDC.</label>
+
+    <h4>Choose Identity Services</h4>
+    <input type="checkbox" name="scim_directory" @bind="@SCIM_Directory">
+    <label for="scim_directory">SCIM (Recommended)<br/>Lorem Ipsum Doloret Sit Amet Lorem Ipsum Doloret Sit Amet Lorem Ipsum Doloret Sit Amet Lorem Ipsum Doloret Sit Amet.</label>
+    <br />
+    <input type="checkbox" name="ldap_directory" @bind="@LDAP_Directory">
+    <label for="ldap_directory">LDAP<br/>Lorem Ipsum Doloret Sit Amet Lorem Ipsum Doloret Sit Amet Lorem Ipsum Doloret Sit Amet Lorem Ipsum Doloret Sit Amet Lorem Ipsum Doloret Sit Amet .</label>
+
+    <br />
+
+    <button type="submit">Next</button>
+</form>
+
+@code {
+    [Parameter] public EventCallback<AuthIdentityChoiceStep> OnNextStep { get; set; }
+
+    private bool IAP_Auth;
+    private bool OIDC_Auth;
+    private bool LDAP_Auth;
+    private bool SCIM_Directory;
+    private bool LDAP_Directory;
+
+    public async Task SubmitForm() {
+        List<AuthIdentityChoiceStep.AuthServiceEnum> authServices = new List<AuthIdentityChoiceStep.AuthServiceEnum>();
+        if(IAP_Auth) {
+            authServices.Add(AuthIdentityChoiceStep.AuthServiceEnum.IdentityAwareProxy);
+        }
+        if (OIDC_Auth) {
+            authServices.Add(AuthIdentityChoiceStep.AuthServiceEnum.OIDC);
+        }
+        if (LDAP_Auth) {
+            authServices.Add(AuthIdentityChoiceStep.AuthServiceEnum.LDAP);
+        }
+
+        List<AuthIdentityChoiceStep.IdentityServiceEnum> identityServices = new List<AuthIdentityChoiceStep.IdentityServiceEnum>();
+        if(SCIM_Directory) {
+            identityServices.Add(AuthIdentityChoiceStep.IdentityServiceEnum.SCIM);
+        }
+        if(LDAP_Directory) {
+            identityServices.Add(AuthIdentityChoiceStep.IdentityServiceEnum.LDAP);
+        }
+
+        AuthIdentityChoiceStep step = new AuthIdentityChoiceStep {
+            AuthServices = authServices,
+            IdentityServices = identityServices,
+        };
+
+        await OnNextStep.InvokeAsync(step);
+    }
+}

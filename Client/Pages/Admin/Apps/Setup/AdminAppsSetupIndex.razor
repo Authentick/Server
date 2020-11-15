@@ -1,0 +1,22 @@
+@page "/admin/apps/setup/custom"
+@attribute [Authorize]
+
+@layout AdminShell
+
+@using AuthServer.Client.Pages.Admin.Apps.Setup.Steps
+
+<h2>Setup custom app</h2>
+
+@switch(currentStep) {
+    case 1:
+        <AdminAppsSetupStep1 />
+        break;
+    case 2:
+        <AdminAppsSetupStep2 />
+        break;
+}
+
+
+@code {
+    private int currentStep = 1;
+}

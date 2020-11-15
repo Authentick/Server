@@ -1,4 +1,10 @@
-@page "/admin/"
-@attribute [Authorize]
+@page "/admin"
 
-@layout AdminShell
+@inject NavigationManager NavigationManager
+
+@code {
+    protected override void OnInitialized()
+    {
+        NavigationManager.NavigateTo("admin/apps");
+    }
+}

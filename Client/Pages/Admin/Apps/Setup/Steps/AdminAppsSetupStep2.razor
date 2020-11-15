@@ -1,0 +1,23 @@
+<h4>Configure Settings</h4>
+
+<form @onsubmit="@SubmitForm">
+    LDAP Allowed IPs: <input type="text" @bind="@CidrRange">
+
+    <button type="submit">Finalize</button>
+</form>
+
+@code {
+    #nullable enable
+
+    [Parameter] public EventCallback<string> OnNextStep { get; set; }
+
+    private string? CidrRange;
+
+    public async Task SubmitForm()
+    {
+        if (CidrRange != null)
+        {
+            await OnNextStep.InvokeAsync(CidrRange);
+        }
+    }
+}
