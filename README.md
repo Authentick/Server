@@ -21,6 +21,11 @@ Gatekeeper allows you to create users, grant them access to other services, and 
 
 Gatekeeper is currently under development and we advise against any production usage. Gatekeeper can currently only be installed from source.
 
+## Setup Development Environment
+
+You can get a development environment setup in a few minutes using Visual Studio Code Containers (locally) or GitHub Codespaces (cloud). 
+
+Detailed steps are described in our [CONTRIBUTING.md](https://github.com/GetGatekeeper/Server/blob/main/CONTRIBUTING.md).
 
 ## License
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FGetGatekeeper%2FServer.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FGetGatekeeper%2FServer?ref=badge_large)
