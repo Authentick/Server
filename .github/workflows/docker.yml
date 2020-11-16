@@ -15,6 +15,13 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v2
+     -
+        name: Docker meta
+        id: docker_meta
+        uses: crazy-max/ghaction-docker-meta@v1.7.0
+        with:
+          images: ghcr.io/lukasreschke/authserver-dev
+          tag-sha: true
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -36,6 +43,5 @@ jobs:
           file: ./devcontainer/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: |
-            ghcr.io/lukasreschke/authserver-dev:latest
-            ghcr.io/lukasreschke/authserver-dev:${GITHUB_SHA}
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
