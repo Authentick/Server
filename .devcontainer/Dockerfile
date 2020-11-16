@@ -19,10 +19,10 @@ RUN apt-get update && apt-get install -y \
        ca-certificates \
        curl \
        gnupg-agent \
-       software-properties-common \ 
+       software-properties-common \
        htop \
     && curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - \
-    && if [ $(uname -m) == 'x86_64' ]; then \
+    && if [ "$(uname -m)" = 'x86_64' ]; then \
         add-apt-repository \
         "deb [arch=amd64] https://download.docker.com/linux/debian \
         $(lsb_release -cs) \
