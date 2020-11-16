@@ -26,12 +26,12 @@ RUN apt-get update && apt-get install -y \
         add-apt-repository \
         "deb [arch=amd64] https://download.docker.com/linux/debian \
         $(lsb_release -cs) \
-        stable" \
+        stable"; \
        else \
         add-apt-repository \
         "deb [arch=arm64] https://download.docker.com/linux/debian \
         $(lsb_release -cs) \
-        stable" \
+        stable"; \
        fi \
     && apt-get update \
     && apt-get install -y docker-ce docker-ce-cli containerd.io \
