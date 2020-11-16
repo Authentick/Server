@@ -6,7 +6,6 @@ RUN apt-get update && apt-get install -y \
     && echo "deb https://deb.nodesource.com/node_13.x buster main" | tee /etc/apt/sources.list.d/nodesource.list \
     && echo "deb-src https://deb.nodesource.com/node_13.x buster main" | tee -a /etc/apt/sources.list.d/nodesource.list \
     && apt-get update && apt-get install -y \
-       gnupg \
        vim \
        nodejs \
        zsh \
