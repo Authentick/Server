@@ -1,26 +1,31 @@
-<h4>Choose Authorization Services</h4>
+<h4 class="text-lg">Choose Authorization Services</h4>
 
 <form @onsubmit="@SubmitForm">
     <p>Choose how your users should authenticate towards your custom app.</p>
-    <input type="checkbox" name="iap_auth" @bind="@IAP_Auth">
-    <label for="iap_auth">Identity Aware Proxy (Recommended)<br/>Use Gatekeeper as a Reverse Proxy. No traffic will be forwarded unless the user passes the authorization check.</label>
-    <br />
-    <input type="checkbox" name="oidc_auth" @bind="@OIDC_Auth">
-    <label for="oidc_auth">OIDC (Recommended)<br/>Use OpenID connect.<br/> Note: Can be combined with Identity Aware Proxy for additional security.</label>
-    <br />
-    <input type="checkbox" name="ldap_auth" @bind="@LDAP_Auth">
-    <label for="ldap_auth">LDAP<br/>Uses an application specific password created by Gatekeeper.<br/>Note: Use only if your application doesn’t support Identity Aware Proxy or OIDC.</label>
+    <div class="form-check">
+        <input type="checkbox" name="iap_auth" class="form-check-input" @bind="@IAP_Auth">
+        <label for="iap_auth" class="form-check-label">Identity Aware Proxy (Recommended)<br/>Use Gatekeeper as a Reverse Proxy. No traffic will be forwarded unless the user passes the authorization check.</label>
+    </div>
+    <div class="form-check">
+        <input type="checkbox" name="oidc_auth" class="form-check-input" @bind="@OIDC_Auth">
+        <label for="oidc_auth" class="form-check-label">OIDC (Recommended)<br/>Use OpenID connect.<br/> Note: Can be combined with Identity Aware Proxy for additional security.</label>
+    </div>
+    <div class="form-check">
+        <input type="checkbox" name="ldap_auth" class="form-check-input" @bind="@LDAP_Auth">
+        <label for="ldap_auth" class="form-check-label">LDAP<br/>Uses an application specific password created by Gatekeeper.<br/>Note: Use only if your application doesn’t support Identity Aware Proxy or OIDC.</label>
+    </div>
+    
+    <h4 class="text-lg pt-2">Choose Identity Services</h4>
+      <div class="form-check">
+          <input type="checkbox" name="scim_directory" class="form-check-input" @bind="@SCIM_Directory">
+          <label for="scim_directory" class="form-check-label">SCIM (Recommended)<br/>Lorem Ipsum Doloret Sit Amet Lorem Ipsum Doloret Sit Amet Lorem Ipsum Doloret Sit Amet Lorem Ipsum Doloret Sit Amet.</label>
+      </div>
+      <div class="form-check">
+          <input type="checkbox" name="ldap_directory" class="form-check-input" @bind="@LDAP_Directory">
+          <label for="ldap_directory" class="form-check-label">LDAP<br/>Lorem Ipsum Doloret Sit Amet Lorem Ipsum Doloret Sit Amet Lorem Ipsum Doloret Sit Amet Lorem Ipsum Doloret Sit Amet Lorem Ipsum Doloret Sit Amet .</label>
+      </div>
 
-    <h4>Choose Identity Services</h4>
-    <input type="checkbox" name="scim_directory" @bind="@SCIM_Directory">
-    <label for="scim_directory">SCIM (Recommended)<br/>Lorem Ipsum Doloret Sit Amet Lorem Ipsum Doloret Sit Amet Lorem Ipsum Doloret Sit Amet Lorem Ipsum Doloret Sit Amet.</label>
-    <br />
-    <input type="checkbox" name="ldap_directory" @bind="@LDAP_Directory">
-    <label for="ldap_directory">LDAP<br/>Lorem Ipsum Doloret Sit Amet Lorem Ipsum Doloret Sit Amet Lorem Ipsum Doloret Sit Amet Lorem Ipsum Doloret Sit Amet Lorem Ipsum Doloret Sit Amet .</label>
-
-    <br />
-
-    <button type="submit">Next</button>
+    <button type="submit" class="btn btn-secondary-dark mt-4">Next</button>
 </form>
 
 @code {
