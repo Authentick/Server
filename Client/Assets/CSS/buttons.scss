@@ -1,3 +1,11 @@
 .btn {
   height: 40px;
 }
+
+.btn-sm-100 {
+  width: 100%;
+
+  @include media-breakpoint-up(md) {
+    width: auto;
+  }
+}
