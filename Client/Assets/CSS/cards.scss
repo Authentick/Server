@@ -9,3 +9,16 @@
   border-color: $secondary-theme-color;
   background-color: $secondary-theme-color;
 }
+
+.alert-card {
+  background-color: $light-gray;
+  border-left: 6px solid;
+
+  &__red {
+    border-color: $watermelon;
+  }
+
+  &__green {
+    border-color: $green;
+  }
+}
