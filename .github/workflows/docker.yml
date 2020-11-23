@@ -18,7 +18,7 @@ jobs:
       -
         name: Docker meta
         id: docker_meta
-        uses: crazy-max/ghaction-docker-meta@v1.8.2
+        uses: crazy-max/ghaction-docker-meta@v1.8.4
         with:
           images: ghcr.io/lukasreschke/authserver-dev
           tag-sha: true
