@@ -33,7 +33,8 @@ namespace AuthServer.Server.Tests.GRPC.Admin
                 {
                     AppsService appsService = new AppsService(context);
 
-                    AddNewAppRequest request= new AddNewAppRequest{
+                    AddNewAppRequest request = new AddNewAppRequest
+                    {
                         Name = "My App",
                         HasLdapAuth = true,
                         HasLdapDirectory = true,
@@ -52,7 +53,8 @@ namespace AuthServer.Server.Tests.GRPC.Admin
             {
                 using (var context = Fixture.CreateContext(transaction))
                 {
-                    AuthApp app = new AuthApp{
+                    AuthApp app = new AuthApp
+                    {
                         Name = "My App",
                     };
                     context.AuthApp.Add(app);
@@ -60,13 +62,15 @@ namespace AuthServer.Server.Tests.GRPC.Admin
 
                     AppsService appsService = new AppsService(context);
 
-                    AppDetailRequest request= new AppDetailRequest{
+                    AppDetailRequest request = new AppDetailRequest
+                    {
                         Id = app.Id.ToString(),
                     };
 
-                    AppDetailReply expected = new AppDetailReply{
+                    AppDetailReply expected = new AppDetailReply
+                    {
                         Id = app.Id.ToString(),
-                        Name ="My App",
+                        Name = "My App",
                         LdapBindCredentials = "",
                         LdapDn = "",
                     };
@@ -84,7 +88,8 @@ namespace AuthServer.Server.Tests.GRPC.Admin
             {
                 using (var context = Fixture.CreateContext(transaction))
                 {
-                    AuthApp app = new AuthApp{
+                    AuthApp app = new AuthApp
+                    {
                         Name = "My App",
                     };
                     context.AuthApp.Add(app);
@@ -93,7 +98,8 @@ namespace AuthServer.Server.Tests.GRPC.Admin
                     AppsService appsService = new AppsService(context);
 
                     AppListReply expected = new AppListReply();
-                    expected.Apps.Add(new AppListEntry{
+                    expected.Apps.Add(new AppListEntry
+                    {
                         Id = app.Id.ToString(),
                         Name = "My App",
                     });
