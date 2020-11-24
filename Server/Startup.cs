@@ -135,6 +135,7 @@ namespace AuthServer.Server
                 endpoints.MapGrpcService<SessionsService>();
                 endpoints.MapGrpcService<SettingsService>();
                 endpoints.MapGrpcService<UsersService>();
+                endpoints.MapGrpcService<AppsService>();
                 endpoints.MapFallbackToPage("/_Host");
             });
         }
