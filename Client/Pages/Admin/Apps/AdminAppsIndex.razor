@@ -3,8 +3,27 @@
 
 @layout AdminShell
 
+@using AuthServer.Shared.Admin
+
+@inject AuthServer.Shared.Admin.Apps.AppsClient AppsClient
+
 <h2 class="text-lg">Installed apps</h2>
+
+@if(appsReply != null) {
+    foreach(AppListEntry entry in appsReply.Apps) {
+        <div>@entry.Name</div>
+    }
+}
 
 <h2 class="text-lg">Setup new app</h2>
 
 <a class="btn btn-secondary-dark" href="admin/apps/setup/custom">Custom setup</a>
+
+@code {
+    private AppListReply? appsReply;
+
+    protected override async Task OnInitializedAsync()
+    {
+        appsReply = await AppsClient.ListAppsAsync(new Google.Protobuf.WellKnownTypes.Empty());
+    }
+}

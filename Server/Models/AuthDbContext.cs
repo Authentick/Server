@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Net;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +12,26 @@ namespace AuthServer.Server.Models
         public AuthDbContext(DbContextOptions<AuthDbContext> options) : base(options) { }
 
         public DbSet<AuthSession> AuthSessions { get; set; } = null!;
+        public DbSet<AuthApp> AuthApp { get; set; } = null!;
+        public DbSet<LdapAppSettings> LdapAppSettings { get; set; } = null!;
+    }
+
+    public class AuthApp
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = null!;
+        public LdapAppSettings? LdapAppSettings { get; set; }
+    }
+
+    public class LdapAppSettings
+    {
+        public Guid Id { get; set; }
+        public Guid AuthAppId { get; set; }
+        public AuthApp AuthApp { get; set; } = null!;
+        public string BindUser { get; set; } = null!;
+        public string BaseDn { get; set; } = null!;
+        public bool UseForAuthentication { get; set; }
+        public bool UseForIdentity { get; set; }
     }
 
     public class AuthSession

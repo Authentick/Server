@@ -1,7 +1,16 @@
+@using AuthServer.Shared.Admin
+
+@inject NavigationManager NavigationManager
+@inject AuthServer.Shared.Admin.Apps.AppsClient AppsClient
+
 <h4>Configure Settings</h4>
 
 <form @onsubmit="@SubmitForm">
-    LDAP Allowed IPs: <input type="text" @bind="@CidrRange">
+
+    <div class="form-check">
+        <input type="text" name="app_name" class="form-check-input" @bind="AppName" />
+        <label for="app_name" class="form-check-label">Name</label>
+    </div>
 
     <button type="submit">Finalize</button>
 </form>
@@ -9,15 +18,22 @@
 @code {
     #nullable enable
 
-    [Parameter] public EventCallback<string> OnNextStep { get; set; }
-
-    private string? CidrRange;
+    private string? AppName;
 
     public async Task SubmitForm()
     {
-        if (CidrRange != null)
+
+        AddNewAppRequest request = new AddNewAppRequest
         {
-            await OnNextStep.InvokeAsync(CidrRange);
+            HasLdapAuth = true,
+            HasLdapDirectory = true,
+            Name = AppName
+        };
+
+        AddNewAppReply reply = await AppsClient.AddNewAppAsync(request);
+        if (reply.Success == true)
+        {
+            NavigationManager.NavigateTo("admin/apps");
         }
     }
 }

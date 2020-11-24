@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <Protobuf Include="Protos\Auth.proto" />
+    <Protobuf Include="Protos\Admin\apps.proto" />
     <Protobuf Include="Protos\Admin\users.proto" />
     <Protobuf Include="Protos\Security\Settings.proto" />
     <Protobuf Include="Protos\Security\Sessions.proto" />
