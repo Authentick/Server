@@ -11,7 +11,7 @@
 
 @if(appsReply != null) {
     foreach(AppListEntry entry in appsReply.Apps) {
-        <div>@entry.Name</div>
+        <div><a href="/admin/apps/details/@entry.Id">@entry.Name</a></div>
     }
 }
 
