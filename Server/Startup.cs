@@ -19,6 +19,7 @@ using AuthServer.Server.Services.Authentication;
 using AuthServer.Server.Services.Authentication.Session;
 using AuthServer.Server.Services.User;
 using AuthServer.Server.GRPC.Admin;
+using AuthServer.Server.Services.Ldap;
 
 namespace AuthServer.Server
 {
@@ -74,6 +75,10 @@ namespace AuthServer.Server
 
             // Authentication
             services.AddScoped<SessionManager>();
+
+            // LDAP
+            services.AddScoped<LdapEventListener>();
+            services.AddHostedService<LdapServerListener>();
 
             // Hangfire
             SqlMapper.AddTypeHandler(new NodaDateTimeHandler());

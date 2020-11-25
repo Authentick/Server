@@ -9,8 +9,14 @@
 
 @if(appDetailReply != null) {
     <div>
-        @appDetailReply.Name
-        @appDetailReply.LdapBindCredentials
+        <h1>Configure @appDetailReply.Name</h1>
+        
+        <p>Your LDAP bind credentials:</p>
+        <p>@appDetailReply.LdapBindCredentials</p>
+
+        <p>Your LDAP Base DN:</p>
+        <p>@appDetailReply.LdapDn</p>
+
     </div>
 }
 
