@@ -48,26 +48,7 @@ namespace AuthServer.Server.Services.Ldap
 
         private Expression BuildWithBaseFilter(Expression filterExpr, Expression itemExpr)
         {
-            if (_searchEvent.BaseObject == "")
-            {
-                return filterExpr;
-            }
-            else if (_searchEvent.BaseObject.StartsWith("dc="))
-            {
-                MemberExpression cnExpr = Expression.Property(itemExpr, "Cn");
-                MethodCallExpression valueExprEndsWith = Expression.Call(cnExpr, typeof(string).GetMethod("EndsWith", new Type[] { typeof(string) }), Expression.Constant(_searchEvent.BaseObject));
-
-                return Expression.And(valueExprEndsWith, filterExpr);
-            }
-            else
-            {
-                MemberExpression left = Expression.Property(itemExpr, "Cn");
-                ConstantExpression right = Expression.Constant(_searchEvent.BaseObject);
-                BinaryExpression equalExpr = Expression.Equal(left, right);
-
-                return Expression.And(equalExpr, filterExpr);
-            }
-
+            return filterExpr;
         }
 
         private Expression BuildOrFilter(OrFilter filter, Expression itemExpression)
@@ -114,10 +95,12 @@ namespace AuthServer.Server.Services.Ldap
 
         private Expression BuildPresentFilter(PresentFilter filter, Expression itemExpression)
         {
-            Expression attributeExpr = Expression.Property(itemExpression, "Attributes");
-            Expression attributeContainsKey = Expression.Call(attributeExpr, typeof(Dictionary<string, List<string>>).GetMethod("ContainsKey", new Type[] { typeof(string) }), Expression.Constant(filter.Value.ToLower()));
+            // Currently returns true for anything
 
-            return attributeContainsKey;
+            Expression left = Expression.Constant(1);
+            Expression right = Expression.Constant(1);
+
+            return Expression.Equal(left, right);
         }
 
         private Expression BuildSubstringFilter(SubstringFilter filter, Expression itemExpression)
