@@ -21,6 +21,7 @@ namespace AuthServer.Server.Models
         public Guid Id { get; set; }
         public string Name { get; set; } = null!;
         public LdapAppSettings? LdapAppSettings { get; set; }
+        public ICollection<UserGroup> UserGroups { get; set; } = null!;
     }
 
     public class LdapAppSettings
@@ -44,8 +45,17 @@ namespace AuthServer.Server.Models
         public Instant? ExpiredTime { get; set; }
     }
 
+    public class UserGroup
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = null!;
+        public ICollection<AppUser> Members { get; set; } = null!;
+        public ICollection<AuthApp> AuthApps { get; set; } = null!;
+    }
+
     public class AppUser : IdentityUser<Guid>
     {
         public ICollection<AuthSession> Sessions { get; set; } = null!;
+        public ICollection<UserGroup> Groups { get; set; } = null!;
     }
 }
