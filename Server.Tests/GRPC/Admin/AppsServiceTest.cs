@@ -40,7 +40,7 @@ namespace AuthServer.Server.Tests.GRPC.Admin
                         HasLdapDirectory = true,
                     };
 
-                    AddNewAppReply actualReply = await appsService.AddNewApp(request, TestServerCallContext.Create("fooMethod", null, DateTime.UtcNow.AddHours(1), new Metadata(), CancellationToken.None, "127.0.0.1", null, null, (metadata) => TaskUtils.CompletedTask, () => new WriteOptions(), (writeOptions) => { }));
+                    AddNewAppReply actualReply = await appsService.AddNewApp(request, TestServerCallContext.Create("fooMethod", "test.example.com", DateTime.UtcNow.AddHours(1), new Metadata(), CancellationToken.None, "127.0.0.1", null, null, (metadata) => TaskUtils.CompletedTask, () => new WriteOptions(), (writeOptions) => { }));
                     Assert.True(actualReply.Success);
                 }
             }
