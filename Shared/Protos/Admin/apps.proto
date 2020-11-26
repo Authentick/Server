@@ -9,7 +9,8 @@ service Apps {
   rpc GetAppDetails (AppDetailRequest) returns (AppDetailReply);
   rpc AddNewApp (AddNewAppRequest) returns (AddNewAppReply);
   rpc AddGroupToApp (AddGroupToAppRequest) returns (AddGroupToAppReply); 
-  rpc RemoveGroupFromApp (RemoveGroupFromAppRequest) returns (RemoveGroupFromAppReply);
+  rpc RemoveGroupFromApp (RemoveGroupFromAppRequest) returns
+  (RemoveGroupFromAppReply);
 }
 
 message AddGroupToAppRequest {

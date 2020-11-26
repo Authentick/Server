@@ -9,7 +9,8 @@ service Groups {
   rpc GetGroupDetails (GroupDetailRequest) returns (GroupDetailResponse);
   rpc CreateGroup (GroupCreationRequest) returns (GroupCreationResponse);
   rpc AddUserToGroup (AddUserToGroupRequest) returns (AddUserToGroupResponse);
-  rpc RemoveUserFromGroup (RemoveUserFromGroupRequest) returns (RemoveUserFromGroupResponse);
+  rpc RemoveUserFromGroup (RemoveUserFromGroupRequest) returns 
+  (RemoveUserFromGroupResponse);
 }
 
 message GroupDetailRequest {
