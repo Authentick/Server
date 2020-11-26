@@ -7,6 +7,7 @@ using AuthServer.Shared.Admin;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace AuthServer.Server.GRPC.Admin
 {
@@ -30,11 +31,14 @@ namespace AuthServer.Server.GRPC.Admin
 
             if (request.HasLdapAuth || request.HasLdapDirectory)
             {
+                string[] baseDnFromHost = context.Host.Split("."); 
+                string assembledBaseDn = "dn=" + app.Id + ",dn=" + System.String.Join(",dn=", baseDnFromHost);
+
                 LdapAppSettings ldapAppSettings = new LdapAppSettings
                 {
                     AuthApp = app,
-                    BaseDn = "test",
-                    BindUser = "test",
+                    BaseDn = assembledBaseDn,
+                    BindUser = "cn=BindUser," + assembledBaseDn,
                     UseForAuthentication = request.HasLdapAuth,
                     UseForIdentity = request.HasLdapDirectory,
                 };
@@ -48,7 +52,9 @@ namespace AuthServer.Server.GRPC.Admin
 
         public override Task<AppDetailReply> GetAppDetails(AppDetailRequest request, ServerCallContext context)
         {
-            AuthApp app = _authDbContext.AuthApp.Single(f => f.Id == new Guid(request.Id));
+            AuthApp app = _authDbContext.AuthApp
+                .Include(a => a.LdapAppSettings)
+                .Single(f => f.Id == new Guid(request.Id));
 
             AppDetailReply reply = new AppDetailReply
             {
