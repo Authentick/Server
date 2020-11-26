@@ -14,6 +14,7 @@ namespace AuthServer.Server.Models
         public DbSet<AuthSession> AuthSessions { get; set; } = null!;
         public DbSet<AuthApp> AuthApp { get; set; } = null!;
         public DbSet<LdapAppSettings> LdapAppSettings { get; set; } = null!;
+        public DbSet<UserGroup> UserGroup { get; set; } = null!;
     }
 
     public class AuthApp

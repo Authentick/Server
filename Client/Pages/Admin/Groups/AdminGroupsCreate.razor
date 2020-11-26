@@ -1,0 +1,30 @@
+@page "/admin/groups/create"
+@attribute [Authorize]
+
+@layout AdminShell
+
+@using AuthServer.Shared.Admin
+
+@inject AuthServer.Shared.Admin.Groups.GroupsClient GroupsClient
+@inject NavigationManager NavigationManager
+
+<h2 class="text-lg">Create group</h2>
+
+<form @onsubmit="@SubmitForm">
+    <input type="text" @bind="@Name" placeholder="Name..." />
+    <button type="submit">Create</button>
+</form>
+
+@code {
+   private string Name = "";
+
+   private async Task SubmitForm() 
+   {
+       GroupCreationRequest request = new GroupCreationRequest{
+           Name = Name,
+       };
+       GroupCreationResponse response = await GroupsClient.CreateGroupAsync(request);
+
+       NavigationManager.NavigateTo("/admin/groups/details/" + response.GroupId);
+   }
+}

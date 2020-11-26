@@ -31,7 +31,7 @@ namespace AuthServer.Server.GRPC.Admin
 
             if (request.HasLdapAuth || request.HasLdapDirectory)
             {
-                string[] baseDnFromHost = context.Host.Split("."); 
+                string[] baseDnFromHost = context.Host.Split(".");
                 string assembledBaseDn = "dn=" + app.Id + ",dn=" + System.String.Join(",dn=", baseDnFromHost);
 
                 LdapAppSettings ldapAppSettings = new LdapAppSettings

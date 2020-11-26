@@ -1,0 +1,29 @@
+@page "/admin/groups"
+@attribute [Authorize]
+
+@layout AdminShell
+
+@using AuthServer.Shared.Admin
+
+@inject AuthServer.Shared.Admin.Groups.GroupsClient GroupsClient
+
+<h2 class="text-lg">Groups</h2>
+
+<a href="/admin/groups/create">Create group</a>
+
+@if (groupsListReply != null)
+{
+    foreach (Group group in groupsListReply.Groups)
+    {
+        <div><a href="/admin/groups/details/@group.Id">@group.Name</a></div>
+    }
+}
+
+@code {
+    private GroupsListReply? groupsListReply;
+
+    protected override async Task OnInitializedAsync()
+    {
+        groupsListReply = await GroupsClient.ListGroupsAsync(new Google.Protobuf.WellKnownTypes.Empty());
+    }
+}

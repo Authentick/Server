@@ -1,0 +1,65 @@
+@page "/admin/groups/details/{Id:guid}"
+@attribute [Authorize]
+
+@layout AdminShell
+
+@using AuthServer.Shared.Admin
+
+@inject AuthServer.Shared.Admin.Groups.GroupsClient GroupsClient
+@inject NavigationManager NavigationManager
+
+@if (GroupDetails != null)
+{
+    <h2>@GroupDetails.Name</h2>
+
+    <p>Members:</p>
+
+    <ul>
+        @foreach(GroupMember member in GroupDetails.Members)
+        {
+            <li>@member.Name (@member.Id) <button @onclick="@(async () => await RemoveMember(member))">Remove</button></li>
+        }
+    </ul>
+
+    <form @onsubmit="@AddUserToGroupSubmit">
+        <input type="text" @bind="@UserId" placeholder="User Id..." />
+        <button type="submit">Add user to group</button>
+    </form>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private GroupDetailResponse? GroupDetails;
+    private string UserId = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        GroupDetailRequest request = new GroupDetailRequest
+        {
+            Id = Id.ToString(),
+        };
+
+        GroupDetails = await GroupsClient.GetGroupDetailsAsync(request);
+    }
+
+    private async Task AddUserToGroupSubmit() {
+        AddUserToGroupRequest addUserToGroupRequest = new AddUserToGroupRequest {
+            GroupId = Id.ToString(),
+            UserId = UserId,
+        };
+
+        await GroupsClient.AddUserToGroupAsync(addUserToGroupRequest);
+    }
+
+    private async Task RemoveMember(GroupMember member) 
+    {
+        RemoveUserFromGroupRequest request = new RemoveUserFromGroupRequest {
+            GroupId = Id.ToString(),
+            UserId = member.Id,
+        };
+
+        await GroupsClient.RemoveUserFromGroupAsync(request);
+    }
+}
