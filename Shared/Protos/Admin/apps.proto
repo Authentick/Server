@@ -8,6 +8,26 @@ service Apps {
   rpc ListApps (google.protobuf.Empty) returns (AppListReply);
   rpc GetAppDetails (AppDetailRequest) returns (AppDetailReply);
   rpc AddNewApp (AddNewAppRequest) returns (AddNewAppReply);
+  rpc AddGroupToApp (AddGroupToAppRequest) returns (AddGroupToAppReply); 
+  rpc RemoveGroupFromApp (RemoveGroupFromAppRequest) returns (RemoveGroupFromAppReply);
+}
+
+message AddGroupToAppRequest {
+  string group_id = 1;
+  string app_id = 2;
+}
+
+message AddGroupToAppReply {
+  bool success = 1;
+}
+
+message RemoveGroupFromAppRequest {
+  string group_id = 1;
+  string app_id = 2;
+}
+
+message RemoveGroupFromAppReply {
+  bool success = 1;
 }
 
 message AddNewAppRequest {
@@ -38,4 +58,10 @@ message AppDetailReply {
   string name = 2;
   string ldap_dn = 3;
   string ldap_bind_credentials = 4;
+  repeated GrantedAppGroup groups = 5;
+}
+
+message GrantedAppGroup {
+  string id = 1;
+  string name = 2;
 }

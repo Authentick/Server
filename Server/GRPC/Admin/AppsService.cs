@@ -21,6 +21,23 @@ namespace AuthServer.Server.GRPC.Admin
             _authDbContext = authDbContext;
         }
 
+        public override async Task<AddGroupToAppReply> AddGroupToApp(AddGroupToAppRequest request, ServerCallContext context)
+        {
+            Guid groupId = new Guid(request.GroupId);
+            UserGroup group = await _authDbContext.UserGroup
+                .SingleAsync(g => g.Id == groupId);
+
+            Guid appId = new Guid(request.AppId);
+            AuthApp app = await _authDbContext.AuthApp
+                .Include(a => a.UserGroups)
+                .SingleAsync(a => a.Id == appId);
+
+            app.UserGroups.Add(group);
+            await _authDbContext.SaveChangesAsync();
+
+            return new AddGroupToAppReply { Success = true };
+        }
+
         public override async Task<AddNewAppReply> AddNewApp(AddNewAppRequest request, ServerCallContext context)
         {
             AuthApp app = new AuthApp
@@ -54,6 +71,7 @@ namespace AuthServer.Server.GRPC.Admin
         {
             AuthApp app = _authDbContext.AuthApp
                 .Include(a => a.LdapAppSettings)
+                .Include(a => a.UserGroups)
                 .Single(f => f.Id == new Guid(request.Id));
 
             AppDetailReply reply = new AppDetailReply
@@ -63,6 +81,16 @@ namespace AuthServer.Server.GRPC.Admin
                 LdapDn = (app.LdapAppSettings != null) ? app.LdapAppSettings.BaseDn : "",
                 Name = app.Name,
             };
+
+            foreach (UserGroup group in app.UserGroups)
+            {
+                GrantedAppGroup appGroup = new GrantedAppGroup
+                {
+                    Id = group.Id.ToString(),
+                    Name = group.Name,
+                };
+                reply.Groups.Add(appGroup);
+            }
 
             return Task.FromResult(reply);
         }
@@ -85,6 +113,23 @@ namespace AuthServer.Server.GRPC.Admin
             }
 
             return Task.FromResult(reply);
+        }
+
+        public override async Task<RemoveGroupFromAppReply> RemoveGroupFromApp(RemoveGroupFromAppRequest request, ServerCallContext context)
+        {
+            Guid groupId = new Guid(request.GroupId);
+            UserGroup group = await _authDbContext.UserGroup
+                .SingleAsync(g => g.Id == groupId);
+
+            Guid appId = new Guid(request.AppId);
+            AuthApp app = await _authDbContext.AuthApp
+                .Include(a => a.UserGroups)
+                .SingleAsync(a => a.Id == appId);
+
+            app.UserGroups.Remove(group);
+            await _authDbContext.SaveChangesAsync();
+
+            return new RemoveGroupFromAppReply { Success = true };
         }
     }
 }
