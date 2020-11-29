@@ -14,6 +14,7 @@ namespace AuthServer.Server.Models
         public DbSet<AuthSession> AuthSessions { get; set; } = null!;
         public DbSet<AuthApp> AuthApp { get; set; } = null!;
         public DbSet<LdapAppSettings> LdapAppSettings { get; set; } = null!;
+        public DbSet<LdapAppUserCredentials> LdapAppUserCredentials { get; set; } = null!;
         public DbSet<UserGroup> UserGroup { get; set; } = null!;
     }
 
@@ -35,6 +36,14 @@ namespace AuthServer.Server.Models
         public string BaseDn { get; set; } = null!;
         public bool UseForAuthentication { get; set; }
         public bool UseForIdentity { get; set; }
+    }
+
+    public class LdapAppUserCredentials
+    {
+        public Guid Id { get; set; }
+        public LdapAppSettings LdapAppSettings { get; set; } = null!;
+        public AppUser User { get; set; } = null!;
+        public string HashedPassword { get; set; } = null!;
     }
 
     public class AuthSession
