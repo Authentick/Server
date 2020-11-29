@@ -31,6 +31,7 @@ namespace AuthServer.Server.Models
         public Guid AuthAppId { get; set; }
         public AuthApp AuthApp { get; set; } = null!;
         public string BindUser { get; set; } = null!;
+        public string BindUserPassword { get; set; } = null!;
         public string BaseDn { get; set; } = null!;
         public bool UseForAuthentication { get; set; }
         public bool UseForIdentity { get; set; }

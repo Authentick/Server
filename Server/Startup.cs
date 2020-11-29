@@ -20,6 +20,7 @@ using AuthServer.Server.Services.Authentication.Session;
 using AuthServer.Server.Services.User;
 using AuthServer.Server.GRPC.Admin;
 using AuthServer.Server.Services.Ldap;
+using AuthServer.Server.Services.Crypto;
 
 namespace AuthServer.Server
 {
@@ -75,6 +76,9 @@ namespace AuthServer.Server
 
             // Authentication
             services.AddScoped<SessionManager>();
+
+            // Crypto
+            services.AddScoped<SecureRandom>();
 
             // LDAP
             services.AddScoped<LdapEventListener>();

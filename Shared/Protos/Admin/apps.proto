@@ -60,6 +60,7 @@ message AppDetailReply {
   string ldap_dn = 3;
   string ldap_bind_credentials = 4;
   repeated GrantedAppGroup groups = 5;
+  string ldap_bind_credentials_password = 6;
 }
 
 message GrantedAppGroup {

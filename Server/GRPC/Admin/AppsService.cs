@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
+using AuthServer.Server.Services.Crypto;
 using AuthServer.Shared.Admin;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthServer.Server.GRPC.Admin
@@ -15,10 +17,18 @@ namespace AuthServer.Server.GRPC.Admin
     public class AppsService : AuthServer.Shared.Admin.Apps.AppsBase
     {
         private readonly AuthDbContext _authDbContext;
+        private readonly IDataProtector _ldapSettingsDataProtector;
+        private readonly SecureRandom _secureRandom;
 
-        public AppsService(AuthDbContext authDbContext)
+        public AppsService(
+            AuthDbContext authDbContext,
+            IDataProtectionProvider dataProtectionProvider,
+            SecureRandom secureRandom
+            )
         {
             _authDbContext = authDbContext;
+            _ldapSettingsDataProtector = dataProtectionProvider.CreateProtector("LdapSettingsDataProtector");
+            _secureRandom = secureRandom;
         }
 
         public override async Task<AddGroupToAppReply> AddGroupToApp(AddGroupToAppRequest request, ServerCallContext context)
@@ -48,14 +58,15 @@ namespace AuthServer.Server.GRPC.Admin
 
             if (request.HasLdapAuth || request.HasLdapDirectory)
             {
-                string[] baseDnFromHost = context.Host.Split(".");
-                string assembledBaseDn = "dn=" + app.Id + ",dn=" + System.String.Join(",dn=", baseDnFromHost);
+                string assembledBaseDn = "dc=" + app.Id;
+                string password = _ldapSettingsDataProtector.Protect(_secureRandom.GetRandomString(16));
 
                 LdapAppSettings ldapAppSettings = new LdapAppSettings
                 {
                     AuthApp = app,
                     BaseDn = assembledBaseDn,
                     BindUser = "cn=BindUser," + assembledBaseDn,
+                    BindUserPassword = password,
                     UseForAuthentication = request.HasLdapAuth,
                     UseForIdentity = request.HasLdapDirectory,
                 };
@@ -78,6 +89,7 @@ namespace AuthServer.Server.GRPC.Admin
             {
                 Id = app.Id.ToString(),
                 LdapBindCredentials = (app.LdapAppSettings != null) ? app.LdapAppSettings.BindUser : "",
+                LdapBindCredentialsPassword = (app.LdapAppSettings != null) ? _ldapSettingsDataProtector.Unprotect(app.LdapAppSettings.BindUserPassword) : "",
                 LdapDn = (app.LdapAppSettings != null) ? app.LdapAppSettings.BaseDn : "",
                 Name = app.Name,
             };

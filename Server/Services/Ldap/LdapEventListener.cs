@@ -19,9 +19,30 @@ namespace AuthServer.Server.Services.Ldap
             _authDbContext = authDbContext;
         }
 
-        public override Task<bool> OnAuthenticationRequest(ClientContext context, AuthenticationEvent authenticationEvent)
+        public override async Task<bool> OnAuthenticationRequest(ClientContext context, AuthenticationEvent authenticationEvent)
         {
-            return Task.FromResult(true);
+            string[] splittedUsername = authenticationEvent.Username.Split(",");
+            string dc = "";
+            string ou = "";
+            string cn = "";
+
+            foreach (string splitString in splittedUsername)
+            {
+                if (splitString.StartsWith("cn="))
+                {
+                    cn = splitString;
+                }
+                else if (splitString.StartsWith("dc="))
+                {
+                    dc = splitString;
+                }
+                else if (splitString.StartsWith("ou="))
+                {
+                    ou = splitString;
+                }
+            }
+
+            return true;
         }
 
         public override Task<List<SearchResultReply>> OnSearchRequest(ClientContext context, SearchEvent searchEvent)
