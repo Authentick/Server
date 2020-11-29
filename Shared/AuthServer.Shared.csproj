@@ -22,6 +22,7 @@
     <Protobuf Include="Protos\Admin\apps.proto" />
     <Protobuf Include="Protos\Admin\groups.proto" />
     <Protobuf Include="Protos\Admin\users.proto" />
+    <Protobuf Include="Protos\Admin\apps.proto" />
     <Protobuf Include="Protos\Security\Settings.proto" />
     <Protobuf Include="Protos\Security\Sessions.proto" />
     <Protobuf Include="Protos\Security\Alerts.proto" />
