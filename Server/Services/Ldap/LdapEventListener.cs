@@ -2,21 +2,30 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using Gatekeeper.LdapServerLibrary;
 using Gatekeeper.LdapServerLibrary.Session.Events;
 using Gatekeeper.LdapServerLibrary.Session.Replies;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.EntityFrameworkCore;
 
 namespace AuthServer.Server.Services.Ldap
 {
     public class LdapEventListener : LdapEvents
     {
         private readonly AuthDbContext _authDbContext;
+        private readonly IDataProtector _ldapSettingsDataProtector;
 
-        public LdapEventListener(AuthDbContext authDbContext)
+        public LdapEventListener(
+            AuthDbContext authDbContext,
+            IDataProtectionProvider dataProtectionProvider
+            )
         {
             _authDbContext = authDbContext;
+            _ldapSettingsDataProtector = dataProtectionProvider.CreateProtector("LdapSettingsDataProtector");
         }
 
         public override async Task<bool> OnAuthenticationRequest(ClientContext context, AuthenticationEvent authenticationEvent)
@@ -42,7 +51,26 @@ namespace AuthServer.Server.Services.Ldap
                 }
             }
 
-            return true;
+            if (cn == "cn=BindUser" && ou == "")
+            {
+                LdapAppSettings? settings = await _authDbContext.LdapAppSettings
+                    .Include(s => s.AuthApp)
+                    .SingleOrDefaultAsync(s => s.BindUser == authenticationEvent.Username);
+
+                if(settings != null) {
+                    byte[] correctPassword = Encoding.ASCII.GetBytes(_ldapSettingsDataProtector.Unprotect(settings.BindUserPassword));
+                    byte[] providedPassword = Encoding.ASCII.GetBytes(authenticationEvent.Password);
+                    bool isCorrectPassword = CryptographicOperations.FixedTimeEquals(correctPassword, providedPassword);
+                
+                    return isCorrectPassword;
+                }
+            }
+            else if (ou == "People")
+            {
+
+            }
+
+            return false;
         }
 
         public override Task<List<SearchResultReply>> OnSearchRequest(ClientContext context, SearchEvent searchEvent)
