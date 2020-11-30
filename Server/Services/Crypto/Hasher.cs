@@ -7,7 +7,8 @@ namespace AuthServer.Server.Services.Crypto
 {
     public class Hasher
     {
-        private string HashV1(string input, byte[] salt) {
+        private string HashV1(string input, byte[] salt)
+        {
             string saltString = Convert.ToBase64String(salt);
 
             string hashed = Convert.ToBase64String(
@@ -29,7 +30,7 @@ namespace AuthServer.Server.Services.Crypto
             {
                 rng.GetBytes(salt);
             }
-            
+
             return HashV1(input, salt);
         }
 

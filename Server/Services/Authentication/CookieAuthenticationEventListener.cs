@@ -54,7 +54,9 @@ namespace AuthServer.Server.Services.Authentication
             if (session == null)
             {
                 context.RejectPrincipal();
-            } else {
+            }
+            else
+            {
                 _sessionManager.MarkSessionLastUsedNow(session);
             }
         }

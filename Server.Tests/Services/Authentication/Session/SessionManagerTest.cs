@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using AuthServer.Server.Services.Authentication.Session;
 using NodaTime;
@@ -36,7 +37,7 @@ namespace AuthServer.Server.Tests.Services.Authentication.Session
                     context.Add(session);
                     context.SaveChanges();
 
-                    manager.MarkSessionLastUsedNow(session.Id);
+                    manager.MarkSessionLastUsedNow(session);
 
                     AuthSession newLoadedTime = context.AuthSessions.Single(s => s.Id == session.Id);
 
@@ -58,7 +59,7 @@ namespace AuthServer.Server.Tests.Services.Authentication.Session
                     context.Add(session);
                     context.SaveChanges();
 
-                    manager.MarkSessionLastUsedNow(session.Id);
+                    manager.MarkSessionLastUsedNow(session);
 
                     AuthSession newLoadedTime = context.AuthSessions.Single(s => s.Id == session.Id);
 
@@ -87,7 +88,7 @@ namespace AuthServer.Server.Tests.Services.Authentication.Session
                     context.Add(session);
                     context.SaveChanges();
 
-                    manager.MarkSessionLastUsedNow(session.Id);
+                    manager.MarkSessionLastUsedNow(session);
 
                     AuthSession newLoadedTime = context.AuthSessions.Single(s => s.Id == session.Id);
 
@@ -97,7 +98,7 @@ namespace AuthServer.Server.Tests.Services.Authentication.Session
         }
 
         [Fact]
-        public void IsSessionActive_for_active_session_and_correct_user()
+        public async Task IsSessionActive_for_active_session_and_correct_user()
         {
             using (var transaction = Fixture.Connection.BeginTransaction())
             {
@@ -117,15 +118,15 @@ namespace AuthServer.Server.Tests.Services.Authentication.Session
                     context.Add(session);
                     context.SaveChanges();
 
-                    bool isActive = manager.IsSessionActive(user, session.Id);
+                    AuthSession readSession = await manager.GetActiveSessionById(user.Id, session.Id);
 
-                    Assert.True(isActive);
+                    Assert.Equal(session, readSession);
                 }
             }
         }
 
         [Fact]
-        public void IsSessionActive_for_active_session_and_incorrect_user()
+        public async Task IsSessionActive_for_active_session_and_incorrect_user()
         {
             using (var transaction = Fixture.Connection.BeginTransaction())
             {
@@ -146,15 +147,15 @@ namespace AuthServer.Server.Tests.Services.Authentication.Session
                     context.Add(session);
                     context.SaveChanges();
 
-                    bool isActive = manager.IsSessionActive(user2, session.Id);
+                    AuthSession readSession = await manager.GetActiveSessionById(user2.Id, session.Id);
 
-                    Assert.False(isActive);
+                    Assert.Null(readSession);
                 }
             }
         }
 
         [Fact]
-        public void IsSessionActive_for_expired_session_and_correct_user()
+        public async Task IsSessionActive_for_expired_session_and_correct_user()
         {
             using (var transaction = Fixture.Connection.BeginTransaction())
             {
@@ -176,9 +177,9 @@ namespace AuthServer.Server.Tests.Services.Authentication.Session
 
                     manager.ExpireSession(user, session.Id);
 
-                    bool isActive = manager.IsSessionActive(user, session.Id);
+                    AuthSession readSession = await manager.GetActiveSessionById(user.Id, session.Id);
 
-                    Assert.False(isActive);
+                    Assert.Null(readSession);
                 }
             }
         }

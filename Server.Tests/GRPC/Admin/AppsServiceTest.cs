@@ -1,15 +1,14 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using AuthServer.Server.GRPC.Admin;
 using AuthServer.Server.Models;
-using AuthServer.Server.Services.User;
+using AuthServer.Server.Services.Crypto;
 using AuthServer.Shared.Admin;
 using Grpc.Core;
 using Grpc.Core.Testing;
 using Grpc.Core.Utils;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.DataProtection;
 using Moq;
 using Xunit;
 
@@ -17,12 +16,30 @@ namespace AuthServer.Server.Tests.GRPC.Admin
 {
     public class AppsServiceTest : IClassFixture<SharedDatabaseFixture>
     {
+        public readonly SharedDatabaseFixture Fixture;
+        private Mock<IDataProtectionProvider> _protectionProviderMock;
+        private Mock<IDataProtector> _protectorMock;
+
         public AppsServiceTest(SharedDatabaseFixture fixture)
         {
             Fixture = fixture;
         }
 
-        public SharedDatabaseFixture Fixture { get; }
+        private AppsService GetAppsService(AuthDbContext dbContext) {
+            _protectorMock = new Mock<IDataProtector>();
+
+            _protectionProviderMock = new Mock<IDataProtectionProvider>();
+            _protectionProviderMock.Setup(m => m.CreateProtector("LdapSettingsDataProtector"))
+                .Returns(_protectorMock.Object);
+            
+            Mock<SecureRandom> secureRandomMock = new Mock<SecureRandom>();
+
+            return new AppsService(
+                dbContext,
+                _protectionProviderMock.Object,
+                secureRandomMock.Object
+            );
+        }
 
         [Fact]
         public async Task AddNewApp()
@@ -31,7 +48,7 @@ namespace AuthServer.Server.Tests.GRPC.Admin
             {
                 using (var context = Fixture.CreateContext(transaction))
                 {
-                    AppsService appsService = new AppsService(context);
+                    AppsService appsService = GetAppsService(context);
 
                     AddNewAppRequest request = new AddNewAppRequest
                     {
@@ -60,7 +77,7 @@ namespace AuthServer.Server.Tests.GRPC.Admin
                     context.AuthApp.Add(app);
                     await context.SaveChangesAsync();
 
-                    AppsService appsService = new AppsService(context);
+                    AppsService appsService = GetAppsService(context);
 
                     AppDetailRequest request = new AppDetailRequest
                     {
@@ -95,7 +112,7 @@ namespace AuthServer.Server.Tests.GRPC.Admin
                     context.AuthApp.Add(app);
                     await context.SaveChangesAsync();
 
-                    AppsService appsService = new AppsService(context);
+                    AppsService appsService = GetAppsService(context);
 
                     AppListReply expected = new AppListReply();
                     expected.Apps.Add(new AppListEntry

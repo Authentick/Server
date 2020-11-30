@@ -23,7 +23,8 @@ namespace AuthServer.Server.Services.Authentication.Session
             return new Guid(principal.Claims.Single(u => u.Type == "cookie_identifier").Value);
         }
 
-        public async Task<AuthSession?> GetActiveSessionById(Guid userId, Guid sessionId) {
+        public async Task<AuthSession?> GetActiveSessionById(Guid userId, Guid sessionId)
+        {
             return await _authDbContext.AuthSessions
                 .SingleOrDefaultAsync(s => s.User.Id == userId && s.Id == sessionId && s.ExpiredTime == null);
         }

@@ -179,7 +179,7 @@ namespace AuthServer.Server
 
             using var keyStorageDbContext = serviceScope.ServiceProvider.GetService<KeyStorageDbContext>();
 
-            if (keyStorageDbContext== null)
+            if (keyStorageDbContext == null)
             {
                 throw new Exception("KeyStorageDbContext is null");
             }

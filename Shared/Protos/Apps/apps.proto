@@ -6,7 +6,8 @@ option csharp_namespace = "AuthServer.Shared.Apps";
 
 service Apps {
   rpc ListApps (google.protobuf.Empty) returns (AppListReply);
-  rpc CreateLdapCredential (CreateLdapCredentialRequest) returns (CreateLdapCredentialReply);
+  rpc CreateLdapCredential (CreateLdapCredentialRequest) returns 
+  (CreateLdapCredentialReply);
   rpc GetAppDetails (GetAppDetailsRequest) returns (GetAppDetailsReply);
 }
 
