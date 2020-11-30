@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using AuthServer.Server.GRPC;
 using AuthServer.Server.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Hangfire;
@@ -44,6 +45,15 @@ namespace AuthServer.Server
                     o => o.UseNodaTime()
                 )
             );
+
+            // Keystorage DB
+            services.AddDbContext<KeyStorageDbContext>(options =>
+                options.UseNpgsql(
+                    Configuration.GetConnectionString("KeyStorageDb"),
+                    o => o.UseNodaTime()
+                )
+            );
+            services.AddDataProtection().PersistKeysToDbContext<KeyStorageDbContext>();
 
             // Identity
             services.AddScoped<CookieAuthenticationEventListener>();
@@ -166,6 +176,15 @@ namespace AuthServer.Server
             }
 
             authDbContext.Database.Migrate();
+
+            using var keyStorageDbContext = serviceScope.ServiceProvider.GetService<KeyStorageDbContext>();
+
+            if (keyStorageDbContext== null)
+            {
+                throw new Exception("KeyStorageDbContext is null");
+            }
+
+            keyStorageDbContext.Database.Migrate();
         }
     }
 }
