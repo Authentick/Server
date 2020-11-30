@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
@@ -22,13 +23,9 @@ namespace AuthServer.Server.Services.Authentication.Session
             return new Guid(principal.Claims.Single(u => u.Type == "cookie_identifier").Value);
         }
 
-        public bool IsSessionActive(AppUser user, Guid sessionId)
-        {
-            AuthSession? session = _authDbContext.AuthSessions
-                .AsNoTracking()
-                .SingleOrDefault(s => s.User == user && s.Id == sessionId && s.ExpiredTime == null);
-
-            return session != null;
+        public async Task<AuthSession?> GetActiveSessionById(Guid userId, Guid sessionId) {
+            return await _authDbContext.AuthSessions
+                .SingleOrDefaultAsync(s => s.User.Id == userId && s.Id == sessionId && s.ExpiredTime == null);
         }
 
         public void ExpireSession(AppUser user, Guid sessionId)
@@ -64,10 +61,8 @@ namespace AuthServer.Server.Services.Authentication.Session
             return sessions;
         }
 
-        public void MarkSessionLastUsedNow(Guid sessionId)
+        public void MarkSessionLastUsedNow(AuthSession session)
         {
-            AuthSession session = _authDbContext.AuthSessions.Single(s => s.Id == sessionId);
-
             Duration duration = Duration.FromMinutes(1);
 
             if ((SystemClock.Instance.GetCurrentInstant().Minus(duration)) > session.LastUsedTime)

@@ -46,16 +46,16 @@ namespace AuthServer.Server.Services.Authentication
 
         public override async Task ValidatePrincipal(CookieValidatePrincipalContext context)
         {
-            AppUser user = await _userManager.GetUserAsync(context.Principal);
+            Guid userId = new Guid(_userManager.GetUserId(context.Principal));
             Guid cookieId = _sessionManager.GetCurrentSessionId(context.Principal);
 
-            bool isActiveSession = _sessionManager.IsSessionActive(user, cookieId);
+            AuthSession session = await _sessionManager.GetActiveSessionById(userId, cookieId);
 
-            if (!isActiveSession)
+            if (session == null)
             {
                 context.RejectPrincipal();
             } else {
-                _sessionManager.MarkSessionLastUsedNow(cookieId);
+                _sessionManager.MarkSessionLastUsedNow(session);
             }
         }
 
