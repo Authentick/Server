@@ -4,8 +4,10 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
+using AuthServer.Server.Services.Crypto;
 using Gatekeeper.LdapServerLibrary;
 using Gatekeeper.LdapServerLibrary.Session.Events;
 using Gatekeeper.LdapServerLibrary.Session.Replies;
@@ -18,14 +20,17 @@ namespace AuthServer.Server.Services.Ldap
     {
         private readonly AuthDbContext _authDbContext;
         private readonly IDataProtector _ldapSettingsDataProtector;
+        private readonly Hasher _hasher;
 
         public LdapEventListener(
             AuthDbContext authDbContext,
-            IDataProtectionProvider dataProtectionProvider
+            IDataProtectionProvider dataProtectionProvider,
+            Hasher hasher
             )
         {
             _authDbContext = authDbContext;
             _ldapSettingsDataProtector = dataProtectionProvider.CreateProtector("LdapSettingsDataProtector");
+            _hasher = hasher;
         }
 
         public override async Task<bool> OnAuthenticationRequest(ClientContext context, AuthenticationEvent authenticationEvent)
@@ -57,17 +62,49 @@ namespace AuthServer.Server.Services.Ldap
                     .Include(s => s.AuthApp)
                     .SingleOrDefaultAsync(s => s.BindUser == authenticationEvent.Username);
 
-                if(settings != null) {
+                if (settings != null)
+                {
                     byte[] correctPassword = Encoding.ASCII.GetBytes(_ldapSettingsDataProtector.Unprotect(settings.BindUserPassword));
                     byte[] providedPassword = Encoding.ASCII.GetBytes(authenticationEvent.Password);
                     bool isCorrectPassword = CryptographicOperations.FixedTimeEquals(correctPassword, providedPassword);
-                
+
                     return isCorrectPassword;
                 }
             }
-            else if (ou == "People")
+            else if (ou == "ou=People")
             {
+                string userName = cn.Remove(0, 3);
+                IEnumerable<LdapAppUserCredentials> creds = await _authDbContext.LdapAppUserCredentials
+                    .Where(c => c.User.NormalizedUserName == userName.ToUpper())
+                    .Where(c => c.LdapAppSettings.BaseDn == dc)
+                    .ToListAsync();
 
+                bool validCredentials = false;
+
+                CancellationTokenSource cts = new CancellationTokenSource();
+                ParallelOptions po = new ParallelOptions();
+                po.CancellationToken = cts.Token;
+                po.CancellationToken.ThrowIfCancellationRequested();
+
+                try
+                {
+                    Parallel.ForEach(creds, po, (cred) =>
+                    {
+                        bool isValid = _hasher.VerifyHash(cred.HashedPassword, authenticationEvent.Password);
+                        if (isValid)
+                        {
+                            validCredentials = true;
+                            cts.Cancel();
+                        }
+                    });
+                }
+                catch (OperationCanceledException) { }
+                finally
+                {
+                    cts.Dispose();
+                }
+
+                return validCredentials;
             }
 
             return false;
