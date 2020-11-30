@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AuthServer.Server.GRPC.Admin
 {
     [Authorize]
-    public class AppsService : AuthServer.Shared.Admin.Apps.AppsBase
+    public class AppsService : AuthServer.Shared.Admin.AdminApps.AdminAppsBase
     {
         private readonly AuthDbContext _authDbContext;
         private readonly IDataProtector _ldapSettingsDataProtector;

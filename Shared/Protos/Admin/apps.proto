@@ -4,7 +4,7 @@ import "google/protobuf/empty.proto";
 
 option csharp_namespace = "AuthServer.Shared.Admin";
 
-service Apps {
+service AdminApps {
   rpc ListApps (google.protobuf.Empty) returns (AppListReply);
   rpc GetAppDetails (AppDetailRequest) returns (AppDetailReply);
   rpc AddNewApp (AddNewAppRequest) returns (AddNewAppReply);

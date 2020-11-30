@@ -79,6 +79,7 @@ namespace AuthServer.Server
 
             // Crypto
             services.AddScoped<SecureRandom>();
+            services.AddScoped<Hasher>();
 
             // LDAP
             services.AddScoped<LdapEventListener>();
@@ -144,8 +145,9 @@ namespace AuthServer.Server
                 endpoints.MapGrpcService<SessionsService>();
                 endpoints.MapGrpcService<SettingsService>();
                 endpoints.MapGrpcService<UsersService>();
-                endpoints.MapGrpcService<AppsService>();
+                endpoints.MapGrpcService<GRPC.Admin.AppsService>();
                 endpoints.MapGrpcService<GroupsService>();
+                endpoints.MapGrpcService<GRPC.Apps.AppsService>();
                 endpoints.MapFallbackToPage("/_Host");
             });
         }

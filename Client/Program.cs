@@ -24,8 +24,9 @@ namespace AuthServer.Client
             builder.Services.AddScoped(services => { return new AuthServer.Shared.Security.Settings.SettingsClient(GetGrpcChannel(services)); });
             builder.Services.AddScoped(services => { return new AuthServer.Shared.Security.Sessions.SessionsClient(GetGrpcChannel(services)); });
             builder.Services.AddScoped(services => { return new AuthServer.Shared.Admin.Users.UsersClient(GetGrpcChannel(services)); });
-            builder.Services.AddScoped(services => { return new AuthServer.Shared.Admin.Apps.AppsClient(GetGrpcChannel(services)); });
+            builder.Services.AddScoped(services => { return new AuthServer.Shared.Admin.AdminApps.AdminAppsClient(GetGrpcChannel(services)); });
             builder.Services.AddScoped(services => { return new AuthServer.Shared.Admin.Groups.GroupsClient(GetGrpcChannel(services)); });
+            builder.Services.AddScoped(services => { return new AuthServer.Shared.Apps.Apps.AppsClient(GetGrpcChannel(services)); });
 
             builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
 
