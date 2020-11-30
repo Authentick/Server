@@ -9,6 +9,12 @@
 
 @if(appReply != null) {
     <h2>@appReply.Name</h2>
+
+    @if(newL</button>dapPassword != null) {
+        <p>@newLdapPassword</p>
+    }
+
+    <button @onclick="@CreateLdapPassword">Create LDAP password</button>
 }
 
 @code {
@@ -16,6 +22,7 @@
     public Guid Id { get; set; }
 
     private GetAppDetailsReply? appReply;
+    private String newLdapPassword;
 
     protected override async Task OnInitializedAsync()
     {
@@ -24,5 +31,14 @@
         };
 
         appReply = await AppsClient.GetAppDetailsAsync(request);
+    }
+
+    private async Task CreateLdapPassword() 
+    {
+        CreateLdapCredentialRequest request = new CreateLdapCredentialRequest {
+            Id = Id.ToString(),
+        };
+
+        newLdapPassword = (await AppsClient.CreateLdapCredentialAsync(request)).Password;
     }
 }
