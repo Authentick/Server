@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "AuthServer.Shared.Apps";
+
+service Apps {
+  rpc ListApps (google.protobuf.Empty) returns (AppListReply);
+  rpc CreateLdapCredential (CreateLdapCredentialRequest) returns 
+  (CreateLdapCredentialReply);
+  rpc GetAppDetails (GetAppDetailsRequest) returns (GetAppDetailsReply);
+}
+
+message GetAppDetailsRequest {
+  string id = 1;
+}
+
+message GetAppDetailsReply {
+  string id = 1;
+  string name = 2;
+}
+
+message CreateLdapCredentialRequest {
+  string id = 1;
+}
+
+message CreateLdapCredentialReply {
+  string password = 1;
+}
+
+message AppListReply {
+  repeated AppListEntry apps = 1;
+}
+
+message AppListEntry {
+  string id = 1;
+  string name = 2;
+}

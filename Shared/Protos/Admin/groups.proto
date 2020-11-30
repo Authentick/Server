@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "AuthServer.Shared.Admin";
+
+service Groups {
+  rpc ListGroups (google.protobuf.Empty) returns (GroupsListReply);
+  rpc GetGroupDetails (GroupDetailRequest) returns (GroupDetailResponse);
+  rpc CreateGroup (GroupCreationRequest) returns (GroupCreationResponse);
+  rpc AddUserToGroup (AddUserToGroupRequest) returns (AddUserToGroupResponse);
+  rpc RemoveUserFromGroup (RemoveUserFromGroupRequest) returns 
+  (RemoveUserFromGroupResponse);
+}
+
+message GroupDetailRequest {
+  string id = 1;
+}
+
+message GroupDetailResponse {
+  string name = 1;
+  repeated GroupMember members = 2;
+}
+
+message GroupMember {
+  string id = 1;
+  string name = 2;
+}
+
+message GroupsListReply {
+  repeated Group groups = 1;
+}
+
+message Group {
+  string id = 1;
+  string name = 2;
+}
+
+message GroupCreationRequest {
+  string name = 1;
+}
+
+message GroupCreationResponse {
+  bool success = 1;
+  string group_id = 2;
+}
+
+message AddUserToGroupRequest {
+  string user_id = 1;
+  string group_id = 2;
+}
+
+message AddUserToGroupResponse {
+  bool success = 1;
+}
+
+message RemoveUserFromGroupRequest {
+  string user_id = 1;
+  string group_id = 2;
+}
+
+message RemoveUserFromGroupResponse {
+  bool success = 1;
+}

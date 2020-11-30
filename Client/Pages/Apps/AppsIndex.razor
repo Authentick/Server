@@ -3,31 +3,29 @@
 
 @layout AppShell
 
+@using AuthServer.Shared.Apps
+
+@inject AuthServer.Shared.Apps.Apps.AppsClient AppsClient
+
 <div class="d-flex flex-row flex-wrap">
-    <div class="logo-card d-flex flex-column align-items-center text-center p-3 m-3">
-        <img src="img/unsplash/profile.jpg" class="avatar avatar__md">
-        <p class="text-lg font-weight-bold pt-2">Name</p>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-    </div>
-    <div class="logo-card d-flex flex-column align-items-center text-center p-3 m-3">
-        <img src="img/unsplash/profile.jpg" class="avatar avatar__md">
-        <p class="text-lg font-weight-bold pt-2">Name</p>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-    </div>
-    <div class="logo-card d-flex flex-column align-items-center text-center p-3 m-3">
-        <img src="img/unsplash/profile.jpg" class="avatar avatar__md">
-        <p class="text-lg font-weight-bold pt-2">Name</p>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-    
-    </div>
-    <div class="logo-card d-flex flex-column align-items-center text-center p-3 m-3">
-        <img src="img/unsplash/profile.jpg" class="avatar avatar__md">
-        <p class="text-lg font-weight-bold pt-2">Name</p>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-    </div>
-    <div class="logo-card d-flex flex-column align-items-center text-center p-3 m-3">
-        <img src="img/unsplash/profile.jpg" class="avatar avatar__md">
-        <p class="text-lg font-weight-bold pt-2">Name</p>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-    </div>
+    @if(appsReply != null) {
+        foreach(AppListEntry entry in appsReply.Apps) {
+            <a href="/apps/details/@entry.Id">
+                <div class="logo-card d-flex flex-column align-items-center text-center p-3 m-3">
+                    <img src="img/unsplash/profile.jpg" class="avatar avatar__md">
+                    <p class="text-lg font-weight-bold pt-2">@entry.Name</p>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                </div>
+            </a>
+        }
+    }
 </div>
+
+@code {
+    private AppListReply? appsReply;
+
+    protected override async Task OnInitializedAsync()
+    {
+        appsReply = await AppsClient.ListAppsAsync(new Google.Protobuf.WellKnownTypes.Empty());
+    }
+}

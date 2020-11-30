@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using AuthServer.Server.GRPC;
 using AuthServer.Server.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Hangfire;
@@ -20,6 +21,7 @@ using AuthServer.Server.Services.Authentication.Session;
 using AuthServer.Server.Services.User;
 using AuthServer.Server.GRPC.Admin;
 using AuthServer.Server.Services.Ldap;
+using AuthServer.Server.Services.Crypto;
 
 namespace AuthServer.Server
 {
@@ -43,6 +45,15 @@ namespace AuthServer.Server
                     o => o.UseNodaTime()
                 )
             );
+
+            // Keystorage DB
+            services.AddDbContext<KeyStorageDbContext>(options =>
+                options.UseNpgsql(
+                    Configuration.GetConnectionString("KeyStorageDb"),
+                    o => o.UseNodaTime()
+                )
+            );
+            services.AddDataProtection().PersistKeysToDbContext<KeyStorageDbContext>();
 
             // Identity
             services.AddScoped<CookieAuthenticationEventListener>();
@@ -75,6 +86,10 @@ namespace AuthServer.Server
 
             // Authentication
             services.AddScoped<SessionManager>();
+
+            // Crypto
+            services.AddScoped<SecureRandom>();
+            services.AddScoped<Hasher>();
 
             // LDAP
             services.AddScoped<LdapEventListener>();
@@ -140,7 +155,9 @@ namespace AuthServer.Server
                 endpoints.MapGrpcService<SessionsService>();
                 endpoints.MapGrpcService<SettingsService>();
                 endpoints.MapGrpcService<UsersService>();
-                endpoints.MapGrpcService<AppsService>();
+                endpoints.MapGrpcService<GRPC.Admin.AppsService>();
+                endpoints.MapGrpcService<GroupsService>();
+                endpoints.MapGrpcService<GRPC.Apps.AppsService>();
                 endpoints.MapFallbackToPage("/_Host");
             });
         }
@@ -159,6 +176,15 @@ namespace AuthServer.Server
             }
 
             authDbContext.Database.Migrate();
+
+            using var keyStorageDbContext = serviceScope.ServiceProvider.GetService<KeyStorageDbContext>();
+
+            if (keyStorageDbContext == null)
+            {
+                throw new Exception("KeyStorageDbContext is null");
+            }
+
+            keyStorageDbContext.Database.Migrate();
         }
     }
 }

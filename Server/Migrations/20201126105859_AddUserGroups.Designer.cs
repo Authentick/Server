@@ -3,6 +3,7 @@ using System;
 using AuthServer.Server.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -10,9 +11,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AuthServer.Server.Migrations
 {
     [DbContext(typeof(AuthDbContext))]
-    partial class AuthDbContextModelSnapshot : ModelSnapshot
+    [Migration("20201126105859_AddUserGroups")]
+    partial class AddUserGroups
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -176,10 +178,6 @@ namespace AuthServer.Server.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("BindUserPassword")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<bool>("UseForAuthentication")
                         .HasColumnType("boolean");
 
@@ -192,31 +190,6 @@ namespace AuthServer.Server.Migrations
                         .IsUnique();
 
                     b.ToTable("LdapAppSettings");
-                });
-
-            modelBuilder.Entity("AuthServer.Server.Models.LdapAppUserCredentials", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("HashedPassword")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid?>("LdapAppSettingsId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LdapAppSettingsId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("LdapAppUserCredentials");
                 });
 
             modelBuilder.Entity("AuthServer.Server.Models.UserGroup", b =>
@@ -412,21 +385,6 @@ namespace AuthServer.Server.Migrations
                         .IsRequired();
 
                     b.Navigation("AuthApp");
-                });
-
-            modelBuilder.Entity("AuthServer.Server.Models.LdapAppUserCredentials", b =>
-                {
-                    b.HasOne("AuthServer.Server.Models.LdapAppSettings", "LdapAppSettings")
-                        .WithMany()
-                        .HasForeignKey("LdapAppSettingsId");
-
-                    b.HasOne("AuthServer.Server.Models.AppUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("LdapAppSettings");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
