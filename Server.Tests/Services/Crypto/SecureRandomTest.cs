@@ -9,7 +9,7 @@ namespace AuthServer.Server.Tests.Services.Crypto
         public void TestGetRandomString()
         {
             SecureRandom random = new SecureRandom();
-         
+
             Assert.Equal(23, random.GetRandomString(23).Length);
         }
     }

@@ -25,13 +25,14 @@ namespace AuthServer.Server.Tests.GRPC.Admin
             Fixture = fixture;
         }
 
-        private AppsService GetAppsService(AuthDbContext dbContext) {
+        private AppsService GetAppsService(AuthDbContext dbContext)
+        {
             _protectorMock = new Mock<IDataProtector>();
 
             _protectionProviderMock = new Mock<IDataProtectionProvider>();
             _protectionProviderMock.Setup(m => m.CreateProtector("LdapSettingsDataProtector"))
                 .Returns(_protectorMock.Object);
-            
+
             Mock<SecureRandom> secureRandomMock = new Mock<SecureRandom>();
 
             return new AppsService(
