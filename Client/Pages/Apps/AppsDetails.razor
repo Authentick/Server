@@ -1,0 +1,28 @@
+@page "/apps/details/{Id:guid}"
+@attribute [Authorize]
+
+@layout AppShell
+
+@using AuthServer.Shared.Apps
+
+@inject AuthServer.Shared.Apps.Apps.AppsClient AppsClient
+
+@if(appReply != null) {
+    <h2></h2>@appReply.Name</h2>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private GetAppDetailsReply? appReply;
+
+    protected override async Task OnInitializedAsync()
+    {
+        GetAppDetailsRequest request = new GetAppDetailsRequest {
+            Id = Id.ToString(),
+        };
+
+        appReply = await AppsClient.GetAppDetailsAsync(request);
+    }
+}
