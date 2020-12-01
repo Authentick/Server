@@ -33,84 +33,74 @@ namespace AuthServer.Server.Services.Ldap
             _hasher = hasher;
         }
 
-        public override async Task<bool> OnAuthenticationRequest(ClientContext context, AuthenticationEvent authenticationEvent)
+        public override async Task<bool> OnAuthenticationRequest(ClientContext context, IAuthenticationEvent authenticationEvent)
         {
-            string[] splittedUsername = authenticationEvent.Username.Split(",");
-            string dc = "";
-            string ou = "";
-            string cn = "";
+            List<string>? cns = null;
+            authenticationEvent.Rdn.TryGetValue("cn", out cns);
 
-            foreach (string splitString in splittedUsername)
+            List<string>? dcs = null;
+            authenticationEvent.Rdn.TryGetValue("dc", out dcs);
+
+            List<string>? ous = null;
+            authenticationEvent.Rdn.TryGetValue("ou", out ous);
+
+            if (cns != null && dcs != null)
             {
-                if (splitString.StartsWith("cn="))
+                if (cns[0] == "BindUser" && ous == null)
                 {
-                    cn = splitString;
-                }
-                else if (splitString.StartsWith("dc="))
-                {
-                    dc = splitString;
-                }
-                else if (splitString.StartsWith("ou="))
-                {
-                    ou = splitString;
-                }
-            }
+                    LdapAppSettings? settings = await _authDbContext.LdapAppSettings
+                        .Include(s => s.AuthApp)
+                        .SingleOrDefaultAsync(s => s.BindUser == cns[0]);
 
-            if (cn == "cn=BindUser" && ou == "")
-            {
-                LdapAppSettings? settings = await _authDbContext.LdapAppSettings
-                    .Include(s => s.AuthApp)
-                    .SingleOrDefaultAsync(s => s.BindUser == authenticationEvent.Username);
-
-                if (settings != null)
-                {
-                    byte[] correctPassword = Encoding.ASCII.GetBytes(_ldapSettingsDataProtector.Unprotect(settings.BindUserPassword));
-                    byte[] providedPassword = Encoding.ASCII.GetBytes(authenticationEvent.Password);
-                    bool isCorrectPassword = CryptographicOperations.FixedTimeEquals(correctPassword, providedPassword);
-
-                    return isCorrectPassword;
-                }
-            }
-            else if (ou == "ou=People")
-            {
-                string userName = cn.Remove(0, 3);
-                IEnumerable<LdapAppUserCredentials> creds = await _authDbContext.LdapAppUserCredentials
-                    .Where(c => c.User.NormalizedUserName == userName.ToUpper())
-                    .Where(c => c.LdapAppSettings.BaseDn == dc)
-                    .ToListAsync();
-
-                bool validCredentials = false;
-
-                CancellationTokenSource cts = new CancellationTokenSource();
-                ParallelOptions po = new ParallelOptions();
-                po.CancellationToken = cts.Token;
-                po.CancellationToken.ThrowIfCancellationRequested();
-
-                try
-                {
-                    Parallel.ForEach(creds, po, (cred) =>
+                    if (settings != null)
                     {
-                        bool isValid = _hasher.VerifyHash(cred.HashedPassword, authenticationEvent.Password);
-                        if (isValid)
-                        {
-                            validCredentials = true;
-                            cts.Cancel();
-                        }
-                    });
-                }
-                catch (OperationCanceledException) { }
-                finally
-                {
-                    cts.Dispose();
-                }
+                        byte[] correctPassword = Encoding.ASCII.GetBytes(_ldapSettingsDataProtector.Unprotect(settings.BindUserPassword));
+                        byte[] providedPassword = Encoding.ASCII.GetBytes(authenticationEvent.Password);
+                        bool isCorrectPassword = CryptographicOperations.FixedTimeEquals(correctPassword, providedPassword);
 
-                return validCredentials;
+                        return isCorrectPassword;
+                    }
+                }
+                else if (ous != null && ous[0] == "People")
+                {
+                    IEnumerable<LdapAppUserCredentials> creds = await _authDbContext.LdapAppUserCredentials
+                        .Where(c => c.User.NormalizedUserName == cns[0].ToUpper())
+                        .Where(c => c.LdapAppSettings.BaseDn == dcs[0])
+                        .ToListAsync();
+
+                    bool validCredentials = false;
+
+                    CancellationTokenSource cts = new CancellationTokenSource();
+                    ParallelOptions po = new ParallelOptions();
+                    po.CancellationToken = cts.Token;
+                    po.CancellationToken.ThrowIfCancellationRequested();
+
+                    try
+                    {
+                        Parallel.ForEach(creds, po, (cred) =>
+                        {
+                            bool isValid = _hasher.VerifyHash(cred.HashedPassword, authenticationEvent.Password);
+                            if (isValid)
+                            {
+                                validCredentials = true;
+                                cts.Cancel();
+                            }
+                        });
+                    }
+                    catch (OperationCanceledException) { }
+                    finally
+                    {
+                        cts.Dispose();
+                    }
+
+                    return validCredentials;
+                }
             }
 
             return false;
         }
 
-        public override Task<List<SearchResultReply>> OnSearchRequest(ClientContext context, SearchEvent searchEvent)
+        public override Task<List<SearchResultReply>> OnSearchRequest(ClientContext context, ISearchEvent searchEvent)
         {
             int? limit = searchEvent.SizeLimit;
 
