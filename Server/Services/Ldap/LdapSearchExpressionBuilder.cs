@@ -94,7 +94,7 @@ namespace AuthServer.Server.Services.Ldap
                 "dn",
                 "displayname",
                 "email",
-                "object",
+                "objectclass",
                 "entryuuid",
             };
 

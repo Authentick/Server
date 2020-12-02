@@ -127,7 +127,7 @@ namespace AuthServer.Server.Services.Ldap
                 List<SearchResultReply.Attribute> attributes = new List<SearchResultReply.Attribute>{
                     new SearchResultReply.Attribute("displayname", new List<string>{user.UserName}),
                     new SearchResultReply.Attribute("email", new List<string>{user.Email}),
-                    new SearchResultReply.Attribute("object", new List<string>{"inetOrgPerson"}),
+                    new SearchResultReply.Attribute("objectclass", new List<string>{"inetOrgPerson"}),
                     new SearchResultReply.Attribute("entryuuid", new List<string>{user.Id.ToString()}),
                 };
                 SearchResultReply reply = new SearchResultReply(
