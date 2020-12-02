@@ -4,7 +4,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Gatekeeper.LdapServerLibrary.Session.Events;
 using Microsoft.EntityFrameworkCore;
 using static Gatekeeper.LdapServerLibrary.Session.Events.ISearchEvent;
 

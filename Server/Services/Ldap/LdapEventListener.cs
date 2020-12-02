@@ -118,7 +118,7 @@ namespace AuthServer.Server.Services.Ldap
             int? limit = searchEvent.SizeLimit;
 
             var itemExpression = Expression.Parameter(typeof(AppUser));
-            SearchExpressionBuilder searchExpressionBuilder = new SearchExpressionBuilder(searchEvent);
+            SearchExpressionBuilder searchExpressionBuilder = new SearchExpressionBuilder();
             var conditions = searchExpressionBuilder.Build(searchEvent.Filter, itemExpression);
             var queryLambda = Expression.Lambda<Func<AppUser, bool>>(conditions, itemExpression);
             var predicate = queryLambda.Compile();
