@@ -266,7 +266,7 @@ namespace AuthServer.Server.Services.Ldap
             {
                 if (filter.AssertionValue == "inetOrgPerson")
                 {
-                   return GetAlwaysTrueExpression();
+                    return GetAlwaysTrueExpression();
                 }
                 else
                 {
