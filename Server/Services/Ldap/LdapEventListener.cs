@@ -63,9 +63,10 @@ namespace AuthServer.Server.Services.Ldap
                 }
                 else if (ous != null && ous[0] == "People")
                 {
+                    Guid appGuid = new Guid(dcs[0]);
                     IEnumerable<LdapAppUserCredentials> creds = await _authDbContext.LdapAppUserCredentials
                         .Where(c => c.User.NormalizedUserName == cns[0].ToUpper())
-                        .Where(c => c.LdapAppSettings.BaseDn == dcs[0])
+                        .Where(c => c.LdapAppSettings.AuthApp.Id == appGuid)
                         .ToListAsync();
 
                     bool validCredentials = false;
