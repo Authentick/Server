@@ -43,11 +43,6 @@ namespace AuthServer.Server.Services.Ldap
                     throw new NotImplementedException("Filter for " + filter.GetType() + " is not implemented");
             }
 
-            return BuildWithBaseFilter(filterExpr, itemExpression);
-        }
-
-        private Expression BuildWithBaseFilter(Expression filterExpr, Expression itemExpr)
-        {
             return filterExpr;
         }
 
