@@ -50,7 +50,7 @@ namespace AuthServer.Server.Services.Ldap
         {
             List<Expression> expressions = new List<Expression>();
 
-            Expression orFilterExpr = null;
+            Expression? orFilterExpr = null;
             foreach (IFilterChoice subFilter in filter.Filters)
             {
                 Expression subExpr = Build(subFilter, itemExpression);
@@ -71,7 +71,7 @@ namespace AuthServer.Server.Services.Ldap
         {
             List<Expression> expressions = new List<Expression>();
 
-            Expression andFilterExpr = null;
+            Expression? andFilterExpr = null;
             foreach (IFilterChoice subFilter in filter.Filters)
             {
                 Expression subExpr = Build(subFilter, itemExpression);
