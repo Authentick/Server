@@ -18,17 +18,17 @@ namespace AuthServer.Server.Services.Ldap
 {
     public class LdapEventListener : LdapEvents
     {
-        private readonly AuthDbContext _authDbContext;
+        private readonly IDbContextFactory<AuthDbContext> _authDbContextFactory;
         private readonly IDataProtector _ldapSettingsDataProtector;
         private readonly Hasher _hasher;
 
         public LdapEventListener(
-            AuthDbContext authDbContext,
+            IDbContextFactory<AuthDbContext> authDbContextFactory,
             IDataProtectionProvider dataProtectionProvider,
             Hasher hasher
             )
         {
-            _authDbContext = authDbContext;
+            _authDbContextFactory = authDbContextFactory;
             _ldapSettingsDataProtector = dataProtectionProvider.CreateProtector("LdapSettingsDataProtector");
             _hasher = hasher;
         }
@@ -49,9 +49,13 @@ namespace AuthServer.Server.Services.Ldap
             {
                 if (cns[0] == "BindUser" && ous == null)
                 {
-                    LdapAppSettings? settings = await _authDbContext.LdapAppSettings
-                        .Include(s => s.AuthApp)
-                        .SingleOrDefaultAsync(s => s.AuthApp.Id == appGuid);
+                    LdapAppSettings? settings;
+                    using (var authDbContext = _authDbContextFactory.CreateDbContext())
+                    {
+                        settings = await authDbContext.LdapAppSettings
+                            .Include(s => s.AuthApp)
+                            .SingleOrDefaultAsync(s => s.AuthApp.Id == appGuid);
+                    }
 
                     if (settings != null)
                     {
@@ -65,10 +69,15 @@ namespace AuthServer.Server.Services.Ldap
                 else if (ous != null && ous[0] == "people")
                 {
                     Guid userId = new Guid(cns[0]);
-                    IEnumerable<LdapAppUserCredentials> creds = await _authDbContext.LdapAppUserCredentials
-                        .Where(c => c.User.Id == userId)
-                        .Where(c => c.LdapAppSettings.AuthApp.Id == appGuid)
-                        .ToListAsync();
+                    IEnumerable<LdapAppUserCredentials> creds = new List<LdapAppUserCredentials>();
+                    
+                    using (var authDbContext = _authDbContextFactory.CreateDbContext())
+                    {
+                        creds = await authDbContext.LdapAppUserCredentials
+                           .Where(c => c.User.Id == userId)
+                           .Where(c => c.LdapAppSettings.AuthApp.Id == appGuid)
+                           .ToListAsync();
+                    }
 
                     bool validCredentials = false;
 
@@ -114,14 +123,18 @@ namespace AuthServer.Server.Services.Ldap
             var queryLambda = Expression.Lambda<Func<AppUser, bool>>(conditions, itemExpression);
             var predicate = queryLambda.Compile();
 
-            var results = _authDbContext.Users
-                .AsNoTracking()
-                .Include(u => u.Groups)
-                    .ThenInclude(g => g.AuthApps)
-                .Where(queryLambda)
-                .Where(u => u.Groups.Any(g => g.AuthApps.Any(a => a.Id == appId)))
-                .AsSplitQuery()
-                .ToList();
+            List<AppUser> results = new List<AppUser>();
+            using (var authDbContext = _authDbContextFactory.CreateDbContext())
+            {
+                results = authDbContext.Users
+                    .AsNoTracking()
+                    .Include(u => u.Groups)
+                        .ThenInclude(g => g.AuthApps)
+                    .Where(queryLambda)
+                    .Where(u => u.Groups.Any(g => g.AuthApps.Any(a => a.Id == appId)))
+                    .AsSplitQuery()
+                    .ToList();
+            }
 
             List<SearchResultReply> replies = new List<SearchResultReply>();
             foreach (AppUser user in results)
