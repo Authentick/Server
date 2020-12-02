@@ -221,7 +221,7 @@ namespace AuthServer.Server.Services.Ldap
                 Expression right = Expression.Constant(new Guid(filter.AssertionValue));
                 return Expression.Equal(left, right);
             }
-            else if (filter.AttributeDesc == "object")
+            else if (filter.AttributeDesc == "objectclass")
             {
                 if (filter.AssertionValue == "inetOrgPerson")
                 {
