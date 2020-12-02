@@ -90,12 +90,28 @@ namespace AuthServer.Server.Services.Ldap
 
         private Expression BuildPresentFilter(PresentFilter filter, Expression itemExpression)
         {
-            // Currently returns true for anything
+            List<string> existingAttributes = new List<string>() {
+                "dn",
+                "displayname",
+                "email",
+                "object",
+                "entryuuid",
+            };
 
-            Expression left = Expression.Constant(1);
-            Expression right = Expression.Constant(1);
+            if (existingAttributes.Contains(filter.Value.ToLower()))
+            {
+                Expression left = Expression.Constant(1);
+                Expression right = Expression.Constant(1);
 
-            return Expression.Equal(left, right);
+                return Expression.Equal(left, right);
+            }
+            else
+            {
+                Expression left = Expression.Constant(1);
+                Expression right = Expression.Constant(2);
+
+                return Expression.Equal(left, right);
+            }
         }
 
         private Expression BuildSubstringFilter(SubstringFilter filter, Expression itemExpression)
@@ -183,36 +199,57 @@ namespace AuthServer.Server.Services.Ldap
         {
             if (filter.AttributeDesc == "cn")
             {
-                Expression left = Expression.Property(itemExpression, "Cn");
-                string baseObj = (_searchEvent.BaseObject == "") ? "" : "," + _searchEvent.BaseObject;
-                Expression right = Expression.Constant("cn=" + filter.AssertionValue + baseObj);
+                Expression left = Expression.Property(itemExpression, "NormalizedUserName");
+                Expression right = Expression.Constant(filter.AssertionValue.ToUpper());
                 return Expression.Equal(left, right);
             }
-            else
+            else if (filter.AttributeDesc == "email")
             {
-                Expression attributeExpr = Expression.Property(itemExpression, "Attributes");
-
-                // Pair to search for
-                ParameterExpression keyValuePair = Expression.Parameter(typeof(KeyValuePair<string, List<string>>), "a");
-
-                // (a.Key == attributeName)
-                Expression subExprLeftAttributeName = Expression.Property(keyValuePair, "Key");
-                Expression subExprRightAttributeName = Expression.Constant(filter.AttributeDesc.ToLower());
-                Expression subExprAttributeName = Expression.Equal(subExprLeftAttributeName, subExprRightAttributeName);
-
-                // a.Value.Contains(attributeValue) 
-                Expression subExprValue = Expression.Property(keyValuePair, "Value");
-                Expression subExprContains = Expression.Call(subExprValue, typeof(List<string>).GetMethod("Contains", new Type[] { typeof(string) }), Expression.Constant(filter.AssertionValue));
-
-                // ((a.Key == attributeName) && a.Value.Contains(attributeValue))
-                Expression attributeExprMatch = Expression.And(subExprAttributeName, subExprContains);
-
-                // {a => ((a.Key == attributeName) And a.Value.Contains(attributeValue))}
-                var lambda = Expression.Lambda<Func<KeyValuePair<string, List<string>>, bool>>(attributeExprMatch, keyValuePair);
-
-                MethodInfo anyMethod = typeof(Enumerable).GetMethods(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public).First(m => m.Name == "Any" && m.GetParameters().Count() == 2).MakeGenericMethod(typeof(KeyValuePair<string, List<string>>));
-                return Expression.Call(anyMethod, attributeExpr, lambda);
+                Expression left = Expression.Property(itemExpression, "NormalizedEmail");
+                Expression right = Expression.Constant(filter.AssertionValue.ToUpper());
+                return Expression.Equal(left, right);
             }
+            else if (filter.AttributeDesc == "displayname")
+            {
+                Expression left = Expression.Property(itemExpression, "NormalizedUserName");
+                Expression right = Expression.Constant(filter.AssertionValue.ToUpper());
+                return Expression.Equal(left, right);
+            }
+            else if (filter.AttributeDesc == "entryuuid")
+            {
+                Expression left = Expression.Property(itemExpression, "Id");
+                Expression right = Expression.Constant(new Guid(filter.AssertionValue));
+                return Expression.Equal(left, right);
+            }
+            else if (filter.AttributeDesc == "object")
+            {
+                if (filter.AssertionValue == "inetOrgPerson")
+                {
+                    // Everyone has a inetOrgPerson
+                    Expression left = Expression.Constant(1);
+                    Expression right = Expression.Constant(1);
+
+                    return Expression.Equal(left, right);
+                }
+                else
+                {
+                    // Currently returns false for anything
+                    Expression left = Expression.Constant(1);
+                    Expression right = Expression.Constant(2);
+
+                    return Expression.Equal(left, right);
+                }
+            }
+            else if (filter.AttributeDesc == "dn")
+            {
+                // Currently returns false for anything
+                Expression left = Expression.Constant(1);
+                Expression right = Expression.Constant(2);
+
+                return Expression.Equal(left, right);
+            }
+
+            return Expression.Equal(Expression.Constant(1), Expression.Constant(2));;
         }
     }
 }
