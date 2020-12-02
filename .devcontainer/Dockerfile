@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y \
        software-properties-common \
        htop \
        ldap-utils \
+       tcpdump \
     && curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - \
     && if [ "$(uname -m)" = 'x86_64' ]; then \
         add-apt-repository \
