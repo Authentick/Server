@@ -62,10 +62,11 @@ namespace AuthServer.Server.Services.Ldap
                         return isCorrectPassword;
                     }
                 }
-                else if (ous != null && ous[0] == "People")
+                else if (ous != null && ous[0] == "people")
                 {
+                    Guid userId = new Guid(cns[0]);
                     IEnumerable<LdapAppUserCredentials> creds = await _authDbContext.LdapAppUserCredentials
-                        .Where(c => c.User.NormalizedUserName == cns[0].ToUpper())
+                        .Where(c => c.User.Id == userId)
                         .Where(c => c.LdapAppSettings.AuthApp.Id == appGuid)
                         .ToListAsync();
 
