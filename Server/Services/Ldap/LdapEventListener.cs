@@ -70,7 +70,7 @@ namespace AuthServer.Server.Services.Ldap
                 {
                     Guid userId = new Guid(cns[0]);
                     IEnumerable<LdapAppUserCredentials> creds = new List<LdapAppUserCredentials>();
-                    
+
                     using (var authDbContext = _authDbContextFactory.CreateDbContext())
                     {
                         creds = await authDbContext.LdapAppUserCredentials

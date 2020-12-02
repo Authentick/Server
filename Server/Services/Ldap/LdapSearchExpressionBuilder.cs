@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
 using static Gatekeeper.LdapServerLibrary.Session.Events.ISearchEvent;
 
-[assembly:InternalsVisibleTo("AuthServer.Tests")]
+[assembly: InternalsVisibleTo("AuthServer.Tests")]
 namespace AuthServer.Server.Services.Ldap
 {
     internal class SearchExpressionBuilder
