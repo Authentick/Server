@@ -117,7 +117,7 @@ namespace AuthServer.Server.Services.Ldap
                 .AsNoTracking()
                 .Include(u => u.Groups)
                     .ThenInclude(g => g.AuthApps)
-                .Where(predicate)
+                .Where(queryLambda)
                 .Where(u => u.Groups.Any(g => g.AuthApps.Any(a => a.Id == appId)))
                 .ToList();
 

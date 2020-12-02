@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using Gatekeeper.LdapServerLibrary.Session.Events;
+using Microsoft.EntityFrameworkCore;
 using static Gatekeeper.LdapServerLibrary.Session.Events.ISearchEvent;
 
 namespace AuthServer.Server.Services.Ldap
@@ -114,110 +114,151 @@ namespace AuthServer.Server.Services.Ldap
             }
         }
 
+        private string EscapeLikeString(string input)
+        {
+            input = input.Replace("%", "\\%");
+            input = input.Replace("_", "\\_");
+
+            return input;
+        }
+
+        private MethodCallExpression BuildLikeForPropertyAndString(Expression itemExpression, MemberExpression property, ConstantExpression search)
+        {
+            MethodInfo methodInfo = typeof(NpgsqlDbFunctionsExtensions)
+                .GetMethods()
+                .Where(p => p.Name == "ILike")
+                .First();
+
+            return Expression.Call(methodInfo, new Expression[]
+            {
+                Expression.Property(null, typeof(EF).GetProperty("Functions")),
+                property,
+                search
+            });
+        }
+
+        private BinaryExpression GetAlwaysFalseExpression()
+        {
+            Expression left = Expression.Constant(1);
+            Expression right = Expression.Constant(2);
+
+            return Expression.Equal(left, right);
+        }
+
+        private BinaryExpression GetAlwaysTrueExpression()
+        {
+            Expression left = Expression.Constant(1);
+            Expression right = Expression.Constant(1);
+
+            return Expression.Equal(left, right);
+        }
+
         private Expression BuildSubstringFilter(SubstringFilter filter, Expression itemExpression)
         {
-            string suppliedRegex = "";
+            string suppliedLikeString = "";
 
             if (filter.Initial != null)
             {
-                suppliedRegex = Regex.Escape(filter.Initial);
+                suppliedLikeString = EscapeLikeString(filter.Initial);
             }
             else
             {
-                suppliedRegex = ".*";
+                suppliedLikeString = "%";
             }
 
             foreach (string anyString in filter.Any)
             {
-                suppliedRegex = suppliedRegex + ".*" + Regex.Escape(anyString) + ".*";
+                suppliedLikeString = suppliedLikeString + "%" + EscapeLikeString(anyString) + "%";
             }
 
             if (filter.Final != null)
             {
-                suppliedRegex = suppliedRegex + Regex.Escape(filter.Final);
+                suppliedLikeString = suppliedLikeString + EscapeLikeString(filter.Final);
             }
             else
             {
-                suppliedRegex = suppliedRegex + ".*";
+                suppliedLikeString = suppliedLikeString + "%";
             }
+
+            ConstantExpression searchExpr = Expression.Constant(suppliedLikeString);
 
             if (filter.AttributeDesc == "cn")
             {
-                MemberExpression cnProperty = Expression.Property(itemExpression, "Cn");
-                string baseObj = (_searchEvent.BaseObject == "") ? "" : "," + _searchEvent.BaseObject;
-
-                Regex regex = new Regex("^cn=" + suppliedRegex + Regex.Escape(baseObj) + "$", RegexOptions.Compiled);
-                ConstantExpression regexConst = Expression.Constant(regex);
-
-                MethodInfo methodInfo = typeof(Regex).GetMethod("IsMatch", new Type[] { typeof(string) });
-                Expression[] callExprs = new Expression[] { cnProperty };
-
-                return Expression.Call(regexConst, methodInfo, callExprs);
+                MemberExpression emailProperty = GetMemberExpressionForAttribute(itemExpression, MemberExpressionAttributes.CN);
+                return BuildLikeForPropertyAndString(itemExpression, emailProperty, searchExpr);
             }
-            else
+            else if (filter.AttributeDesc == "email")
             {
-                Expression attributeExpr = Expression.Property(itemExpression, "Attributes");
-
-                // Pair to search for
-                ParameterExpression keyValuePair = Expression.Parameter(typeof(KeyValuePair<string, List<string>>), "a");
-
-                // rsl
-                ParameterExpression regexStringList = Expression.Parameter(typeof(string), "rsl");
-
-                // regex.IsMatch(rsl)
-                Regex regex = new Regex("^" + suppliedRegex + "$", RegexOptions.Compiled);
-                ConstantExpression regexConst = Expression.Constant(regex);
-                MethodInfo methodInfo = typeof(Regex).GetMethod("IsMatch", new Type[] { typeof(string) });
-                Expression[] callExprs = new Expression[] { regexStringList };
-                MethodCallExpression regexMatchExpr = Expression.Call(regexConst, methodInfo, callExprs);
-
-                // {rsl => regex.IsMatch(rsl)}
-                var regexLambda = Expression.Lambda<Func<string, bool>>(regexMatchExpr, regexStringList);
-
-                // a.Value.Any(rsl => regex.IsMatch(rsl))
-                Expression subExprValue = Expression.Property(keyValuePair, "Value");
-                MethodInfo regexAnyMethodInfo = typeof(Enumerable).GetMethods(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public).First(m => m.Name == "Any" && m.GetParameters().Count() == 2).MakeGenericMethod(typeof(string));
-                MethodCallExpression regexAnyCallExpr = Expression.Call(regexAnyMethodInfo, subExprValue, regexLambda);
-
-                // (a.Key == attributeName)
-                Expression subExprLeftAttributeName = Expression.Property(keyValuePair, "Key");
-                Expression subExprRightAttributeName = Expression.Constant(filter.AttributeDesc.ToLower());
-                Expression subExprAttributeName = Expression.Equal(subExprLeftAttributeName, subExprRightAttributeName);
-
-                // ((a.Key == attributeName) && a.Value.Any(rsl => regex.IsMatch(rsl)))
-                Expression attributeExprMatch = Expression.And(subExprAttributeName, regexAnyCallExpr);
-
-                // {a => ((a.Key == attributeName) And a.Value.Any(rsl => regex.IsMatch(rsl)))}
-                var lambda = Expression.Lambda<Func<KeyValuePair<string, List<string>>, bool>>(attributeExprMatch, keyValuePair);
-
-                MethodInfo anyMethod = typeof(Enumerable).GetMethods(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public).First(m => m.Name == "Any" && m.GetParameters().Count() == 2).MakeGenericMethod(typeof(KeyValuePair<string, List<string>>));
-                return Expression.Call(anyMethod, attributeExpr, lambda);
+                MemberExpression emailProperty = GetMemberExpressionForAttribute(itemExpression, MemberExpressionAttributes.Email);
+                return BuildLikeForPropertyAndString(itemExpression, emailProperty, searchExpr);
             }
+            else if (filter.AttributeDesc == "displayname")
+            {
+                MemberExpression emailProperty = GetMemberExpressionForAttribute(itemExpression, MemberExpressionAttributes.Email);
+                return BuildLikeForPropertyAndString(itemExpression, emailProperty, searchExpr);
+            }
+            else if (filter.AttributeDesc == "entryuuid")
+            {
+                MemberExpression emailProperty = GetMemberExpressionForAttribute(itemExpression, MemberExpressionAttributes.EntryUUID);
+                return BuildLikeForPropertyAndString(itemExpression, emailProperty, searchExpr);
+            }
+
+            return GetAlwaysFalseExpression();
+        }
+
+        private MemberExpression GetMemberExpressionForAttribute(Expression itemExpression, MemberExpressionAttributes attribute)
+        {
+            string name = "";
+            switch (attribute)
+            {
+                case MemberExpressionAttributes.CN:
+                    name = "NormalizedUserName";
+                    break;
+                case MemberExpressionAttributes.Email:
+                    name = "NormalizedEmail";
+                    break;
+                case MemberExpressionAttributes.DisplayName:
+                    name = "NormalizedUserName";
+                    break;
+                case MemberExpressionAttributes.EntryUUID:
+                    name = "Id";
+                    break;
+            }
+
+            return MemberExpression.Property(itemExpression, name);
+        }
+
+        private enum MemberExpressionAttributes
+        {
+            CN = 1,
+            Email = 2,
+            DisplayName = 3,
+            EntryUUID = 4,
         }
 
         private Expression BuildEqualityFilter(EqualityMatchFilter filter, Expression itemExpression)
         {
             if (filter.AttributeDesc == "cn")
             {
-                Expression left = Expression.Property(itemExpression, "NormalizedUserName");
+                Expression left = GetMemberExpressionForAttribute(itemExpression, MemberExpressionAttributes.CN);
                 Expression right = Expression.Constant(filter.AssertionValue.ToUpper());
                 return Expression.Equal(left, right);
             }
             else if (filter.AttributeDesc == "email")
             {
-                Expression left = Expression.Property(itemExpression, "NormalizedEmail");
+                Expression left = GetMemberExpressionForAttribute(itemExpression, MemberExpressionAttributes.Email);
                 Expression right = Expression.Constant(filter.AssertionValue.ToUpper());
                 return Expression.Equal(left, right);
             }
             else if (filter.AttributeDesc == "displayname")
             {
-                Expression left = Expression.Property(itemExpression, "NormalizedUserName");
+                Expression left = GetMemberExpressionForAttribute(itemExpression, MemberExpressionAttributes.DisplayName);
                 Expression right = Expression.Constant(filter.AssertionValue.ToUpper());
                 return Expression.Equal(left, right);
             }
             else if (filter.AttributeDesc == "entryuuid")
             {
-                Expression left = Expression.Property(itemExpression, "Id");
+                Expression left = GetMemberExpressionForAttribute(itemExpression, MemberExpressionAttributes.EntryUUID);
                 Expression right = Expression.Constant(new Guid(filter.AssertionValue));
                 return Expression.Equal(left, right);
             }
@@ -225,31 +266,19 @@ namespace AuthServer.Server.Services.Ldap
             {
                 if (filter.AssertionValue == "inetOrgPerson")
                 {
-                    // Everyone has a inetOrgPerson
-                    Expression left = Expression.Constant(1);
-                    Expression right = Expression.Constant(1);
-
-                    return Expression.Equal(left, right);
+                   return GetAlwaysTrueExpression();
                 }
                 else
                 {
-                    // Currently returns false for anything
-                    Expression left = Expression.Constant(1);
-                    Expression right = Expression.Constant(2);
-
-                    return Expression.Equal(left, right);
+                    return GetAlwaysFalseExpression();
                 }
             }
             else if (filter.AttributeDesc == "dn")
             {
-                // Currently returns false for anything
-                Expression left = Expression.Constant(1);
-                Expression right = Expression.Constant(2);
-
-                return Expression.Equal(left, right);
+                return GetAlwaysFalseExpression();
             }
 
-            return Expression.Equal(Expression.Constant(1), Expression.Constant(2));;
+            return GetAlwaysFalseExpression();
         }
     }
 }
