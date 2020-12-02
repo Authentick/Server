@@ -103,6 +103,8 @@ namespace AuthServer.Server.Services.Ldap
 
         public override Task<List<SearchResultReply>> OnSearchRequest(ClientContext context, ISearchEvent searchEvent)
         {
+            Guid appId = new Guid(context.Rdn["dc"][0]);
+
             int? limit = searchEvent.SizeLimit;
 
             var itemExpression = Expression.Parameter(typeof(AppUser));
@@ -111,7 +113,12 @@ namespace AuthServer.Server.Services.Ldap
             var queryLambda = Expression.Lambda<Func<AppUser, bool>>(conditions, itemExpression);
             var predicate = queryLambda.Compile();
 
-            var results = _authDbContext.Users.Where(predicate).ToList();
+            var results = _authDbContext.Users
+                .Include(u => u.Groups)
+                    .ThenInclude(g => g.AuthApps)
+                .Where(predicate)
+                .Where(u => u.Groups.Any(g => g.AuthApps.Any(a => a.Id == appId)))
+                .ToList();
 
             List<SearchResultReply> replies = new List<SearchResultReply>();
             foreach (AppUser user in results)
