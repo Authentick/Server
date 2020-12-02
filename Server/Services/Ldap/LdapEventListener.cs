@@ -43,6 +43,7 @@ namespace AuthServer.Server.Services.Ldap
 
             List<string>? ous = null;
             authenticationEvent.Rdn.TryGetValue("ou", out ous);
+            Guid appGuid = new Guid(dcs[0]);
 
             if (cns != null && dcs != null)
             {
@@ -50,7 +51,7 @@ namespace AuthServer.Server.Services.Ldap
                 {
                     LdapAppSettings? settings = await _authDbContext.LdapAppSettings
                         .Include(s => s.AuthApp)
-                        .SingleOrDefaultAsync(s => s.BindUser == cns[0]);
+                        .SingleOrDefaultAsync(s => s.AuthApp.Id == appGuid);
 
                     if (settings != null)
                     {
@@ -63,7 +64,6 @@ namespace AuthServer.Server.Services.Ldap
                 }
                 else if (ous != null && ous[0] == "People")
                 {
-                    Guid appGuid = new Guid(dcs[0]);
                     IEnumerable<LdapAppUserCredentials> creds = await _authDbContext.LdapAppUserCredentials
                         .Where(c => c.User.NormalizedUserName == cns[0].ToUpper())
                         .Where(c => c.LdapAppSettings.AuthApp.Id == appGuid)
