@@ -114,6 +114,7 @@ namespace AuthServer.Server.Services.Ldap
             var predicate = queryLambda.Compile();
 
             var results = _authDbContext.Users
+                .AsNoTracking()
                 .Include(u => u.Groups)
                     .ThenInclude(g => g.AuthApps)
                 .Where(predicate)
@@ -130,7 +131,7 @@ namespace AuthServer.Server.Services.Ldap
                     new SearchResultReply.Attribute("entryuuid", new List<string>{user.Id.ToString()}),
                 };
                 SearchResultReply reply = new SearchResultReply(
-                    user.Id.ToString(),
+                    "cn=" + user.Id.ToString() + ",ou=People,dc=" + appId,
                     attributes
                 );
 
