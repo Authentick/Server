@@ -39,6 +39,12 @@ namespace AuthServer.Server
         public void ConfigureServices(IServiceCollection services)
         {
             // DB Context
+            services.AddDbContextFactory<AuthDbContext>(options =>
+                options.UseNpgsql(
+                    Configuration.GetConnectionString("AuthDb"),
+                    o => o.UseNodaTime()
+                )
+            );
             services.AddDbContext<AuthDbContext>(options =>
                 options.UseNpgsql(
                     Configuration.GetConnectionString("AuthDb"),

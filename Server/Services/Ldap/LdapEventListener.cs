@@ -18,17 +18,17 @@ namespace AuthServer.Server.Services.Ldap
 {
     public class LdapEventListener : LdapEvents
     {
-        private readonly AuthDbContext _authDbContext;
+        private readonly IDbContextFactory<AuthDbContext> _authDbContextFactory;
         private readonly IDataProtector _ldapSettingsDataProtector;
         private readonly Hasher _hasher;
 
         public LdapEventListener(
-            AuthDbContext authDbContext,
+            IDbContextFactory<AuthDbContext> authDbContextFactory,
             IDataProtectionProvider dataProtectionProvider,
             Hasher hasher
             )
         {
-            _authDbContext = authDbContext;
+            _authDbContextFactory = authDbContextFactory;
             _ldapSettingsDataProtector = dataProtectionProvider.CreateProtector("LdapSettingsDataProtector");
             _hasher = hasher;
         }
@@ -43,14 +43,19 @@ namespace AuthServer.Server.Services.Ldap
 
             List<string>? ous = null;
             authenticationEvent.Rdn.TryGetValue("ou", out ous);
+            Guid appGuid = new Guid(dcs[0]);
 
             if (cns != null && dcs != null)
             {
                 if (cns[0] == "BindUser" && ous == null)
                 {
-                    LdapAppSettings? settings = await _authDbContext.LdapAppSettings
-                        .Include(s => s.AuthApp)
-                        .SingleOrDefaultAsync(s => s.BindUser == cns[0]);
+                    LdapAppSettings? settings;
+                    using (var authDbContext = _authDbContextFactory.CreateDbContext())
+                    {
+                        settings = await authDbContext.LdapAppSettings
+                            .Include(s => s.AuthApp)
+                            .SingleOrDefaultAsync(s => s.AuthApp.Id == appGuid);
+                    }
 
                     if (settings != null)
                     {
@@ -61,12 +66,18 @@ namespace AuthServer.Server.Services.Ldap
                         return isCorrectPassword;
                     }
                 }
-                else if (ous != null && ous[0] == "People")
+                else if (ous != null && ous[0] == "people")
                 {
-                    IEnumerable<LdapAppUserCredentials> creds = await _authDbContext.LdapAppUserCredentials
-                        .Where(c => c.User.NormalizedUserName == cns[0].ToUpper())
-                        .Where(c => c.LdapAppSettings.BaseDn == dcs[0])
-                        .ToListAsync();
+                    Guid userId = new Guid(cns[0]);
+                    IEnumerable<LdapAppUserCredentials> creds = new List<LdapAppUserCredentials>();
+
+                    using (var authDbContext = _authDbContextFactory.CreateDbContext())
+                    {
+                        creds = await authDbContext.LdapAppUserCredentials
+                           .Where(c => c.User.Id == userId)
+                           .Where(c => c.LdapAppSettings.AuthApp.Id == appGuid)
+                           .ToListAsync();
+                    }
 
                     bool validCredentials = false;
 
@@ -102,15 +113,28 @@ namespace AuthServer.Server.Services.Ldap
 
         public override Task<List<SearchResultReply>> OnSearchRequest(ClientContext context, ISearchEvent searchEvent)
         {
+            Guid appId = new Guid(context.Rdn["dc"][0]);
+
             int? limit = searchEvent.SizeLimit;
 
             var itemExpression = Expression.Parameter(typeof(AppUser));
-            SearchExpressionBuilder searchExpressionBuilder = new SearchExpressionBuilder(searchEvent);
+            SearchExpressionBuilder searchExpressionBuilder = new SearchExpressionBuilder();
             var conditions = searchExpressionBuilder.Build(searchEvent.Filter, itemExpression);
             var queryLambda = Expression.Lambda<Func<AppUser, bool>>(conditions, itemExpression);
             var predicate = queryLambda.Compile();
 
-            var results = _authDbContext.Users.Where(predicate).ToList();
+            List<AppUser> results = new List<AppUser>();
+            using (var authDbContext = _authDbContextFactory.CreateDbContext())
+            {
+                results = authDbContext.Users
+                    .AsNoTracking()
+                    .Include(u => u.Groups)
+                        .ThenInclude(g => g.AuthApps)
+                    .Where(queryLambda)
+                    .Where(u => u.Groups.Any(g => g.AuthApps.Any(a => a.Id == appId)))
+                    .AsSplitQuery()
+                    .ToList();
+            }
 
             List<SearchResultReply> replies = new List<SearchResultReply>();
             foreach (AppUser user in results)
@@ -118,11 +142,11 @@ namespace AuthServer.Server.Services.Ldap
                 List<SearchResultReply.Attribute> attributes = new List<SearchResultReply.Attribute>{
                     new SearchResultReply.Attribute("displayname", new List<string>{user.UserName}),
                     new SearchResultReply.Attribute("email", new List<string>{user.Email}),
-                    new SearchResultReply.Attribute("object", new List<string>{"inetOrgPerson"}),
+                    new SearchResultReply.Attribute("objectclass", new List<string>{"inetOrgPerson"}),
                     new SearchResultReply.Attribute("entryuuid", new List<string>{user.Id.ToString()}),
                 };
                 SearchResultReply reply = new SearchResultReply(
-                    user.Id.ToString(),
+                    "cn=" + user.Id.ToString() + ",ou=People,dc=" + appId,
                     attributes
                 );
 
