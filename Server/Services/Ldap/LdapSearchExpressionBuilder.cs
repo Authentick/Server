@@ -3,21 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Gatekeeper.LdapServerLibrary.Session.Events;
 using Microsoft.EntityFrameworkCore;
 using static Gatekeeper.LdapServerLibrary.Session.Events.ISearchEvent;
 
+[assembly:InternalsVisibleTo("AuthServer.Tests")]
 namespace AuthServer.Server.Services.Ldap
 {
     internal class SearchExpressionBuilder
     {
-        private readonly ISearchEvent _searchEvent;
-
-        public SearchExpressionBuilder(ISearchEvent searchEvent)
-        {
-            _searchEvent = searchEvent;
-        }
-
         public Expression Build(IFilterChoice filter, Expression itemExpression)
         {
 
