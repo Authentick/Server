@@ -119,6 +119,7 @@ namespace AuthServer.Server.Services.Ldap
                     .ThenInclude(g => g.AuthApps)
                 .Where(queryLambda)
                 .Where(u => u.Groups.Any(g => g.AuthApps.Any(a => a.Id == appId)))
+                .AsSplitQuery()
                 .ToList();
 
             List<SearchResultReply> replies = new List<SearchResultReply>();
