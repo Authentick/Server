@@ -20,6 +20,7 @@ namespace AuthServer.Client
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
+            builder.Services.AddScoped(services => { return new AuthServer.Shared.Typeahead.TypeaheadClient(GetGrpcChannel(services)); });
             builder.Services.AddScoped(services => { return new AuthServer.Shared.Auth.AuthClient(GetGrpcChannel(services)); });
             builder.Services.AddScoped(services => { return new AuthServer.Shared.Security.Settings.SettingsClient(GetGrpcChannel(services)); });
             builder.Services.AddScoped(services => { return new AuthServer.Shared.Security.Sessions.SessionsClient(GetGrpcChannel(services)); });

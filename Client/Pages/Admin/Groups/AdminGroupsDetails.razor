@@ -4,8 +4,11 @@
 @layout AdminShell
 
 @using AuthServer.Shared.Admin
+@using AuthServer.Shared
 
 @inject AuthServer.Shared.Admin.Groups.GroupsClient GroupsClient
+@inject AuthServer.Shared.Typeahead.TypeaheadClient TypeaheadClient
+
 @inject NavigationManager NavigationManager
 
 @if (GroupDetails != null)
@@ -22,9 +25,15 @@
     </ul>
 
     <form @onsubmit="@AddUserToGroupSubmit">
-        <input type="text" @bind="@UserId" placeholder="User Id..." />
+        <input type="text" @bind-value="Username" @bind-value:event="oninput"  @onkeyup="@SearchKeyUpEvent" placeholder="User Id..." />
         <button type="submit">Add user to group</button>
     </form>
+
+    @if(SearchUserReply != null) {
+        foreach(SearchUserEntry entry in SearchUserReply.Entries) {
+            <span>@entry.Id @entry.Name</span>
+        }
+    }
 }
 
 @code {
@@ -32,10 +41,16 @@
     public Guid Id { get; set; }
 
     private GroupDetailResponse? GroupDetails;
-    private string UserId = "";
+    private SearchUserReply? SearchUserReply;
+    private string Username = "";
+    private System.Timers.Timer? SearchTimer;
 
     protected override async Task OnInitializedAsync()
     {
+        SearchTimer = new System.Timers.Timer(500);
+        SearchTimer.Elapsed += ExecuteSearchUsers;
+        SearchTimer.AutoReset = false;
+
         GroupDetailRequest request = new GroupDetailRequest
         {
             Id = Id.ToString(),
@@ -44,13 +59,33 @@
         GroupDetails = await GroupsClient.GetGroupDetailsAsync(request);
     }
 
+    private void SearchKeyUpEvent() {
+        if(SearchTimer != null) {
+            SearchTimer.Stop();
+            SearchTimer.Start();     
+        } 
+    }
+
+    private void ExecuteSearchUsers(Object source, System.Timers.ElapsedEventArgs e) {
+        InvokeAsync(async () => {
+            SearchUserRequest request = new SearchUserRequest{
+                SearchParameter = Username,
+            };
+            
+            SearchUserReply = await TypeaheadClient.SearchUserAsync(request);
+            StateHasChanged();
+        });
+    }
+
     private async Task AddUserToGroupSubmit() {
+        
+/*
         AddUserToGroupRequest addUserToGroupRequest = new AddUserToGroupRequest {
             GroupId = Id.ToString(),
             UserId = UserId,
         };
 
-        await GroupsClient.AddUserToGroupAsync(addUserToGroupRequest);
+        await GroupsClient.AddUserToGroupAsync(addUserToGroupRequest);*/
     }
 
     private async Task RemoveMember(GroupMember member) 
