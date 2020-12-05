@@ -30,7 +30,7 @@
                 <UserTypeahead OnSelectCallback="@UserSelected" />
             </div>
             
-            <button type="submit" class="btn btn-secondary-dark w-100">Add user to group</button>
+            <button type="submit" class="btn btn-secondary-dark w-100" disabled="@(SelectedUserId == null)">Add user to group</button>
         </div>
     </form>
 
@@ -40,9 +40,16 @@
     [Parameter]
     public Guid Id { get; set; }
 
+    private string? SelectedUserId;
+
     private GroupDetailResponse? GroupDetails;
 
     protected override async Task OnInitializedAsync()
+    {
+        await LoadGroupMembers();
+    }
+
+    private async Task LoadGroupMembers() 
     {
         GroupDetailRequest request = new GroupDetailRequest
         {
@@ -52,30 +59,34 @@
         GroupDetails = await GroupsClient.GetGroupDetailsAsync(request);
     }
 
-    private async Task UserSelected(Guid userId) 
+    private void UserSelected(string? userId) 
     {
-
+        SelectedUserId = userId;
     }
 
     private async Task AddUserToGroupSubmit() 
     {
-        
-/*
-        AddUserToGroupRequest addUserToGroupRequest = new AddUserToGroupRequest {
+        AddUserToGroupRequest addUserToGroupRequest = new AddUserToGroupRequest 
+        {
             GroupId = Id.ToString(),
-            UserId = UserId,
+            UserId = SelectedUserId,
         };
 
-        await GroupsClient.AddUserToGroupAsync(addUserToGroupRequest);*/
+        SelectedUserId = null;
+
+        await GroupsClient.AddUserToGroupAsync(addUserToGroupRequest);
+        await LoadGroupMembers();
     }
 
     private async Task RemoveMember(GroupMember member) 
     {
-        RemoveUserFromGroupRequest request = new RemoveUserFromGroupRequest {
+        RemoveUserFromGroupRequest request = new RemoveUserFromGroupRequest
+        {
             GroupId = Id.ToString(),
             UserId = member.Id,
         };
 
         await GroupsClient.RemoveUserFromGroupAsync(request);
+        await LoadGroupMembers();
     }
 }
