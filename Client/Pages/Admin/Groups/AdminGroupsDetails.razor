@@ -5,9 +5,9 @@
 
 @using AuthServer.Shared.Admin
 @using AuthServer.Shared
+@using AuthServer.Client.Shared.Components.Typeahead
 
 @inject AuthServer.Shared.Admin.Groups.GroupsClient GroupsClient
-@inject AuthServer.Shared.Typeahead.TypeaheadClient TypeaheadClient
 
 @inject NavigationManager NavigationManager
 
@@ -25,15 +25,15 @@
     </ul>
 
     <form @onsubmit="@AddUserToGroupSubmit">
-        <input type="text" @bind-value="Username" @bind-value:event="oninput"  @onkeyup="@SearchKeyUpEvent" placeholder="User Id..." />
-        <button type="submit">Add user to group</button>
+        <div class="form-group form-group col-12 col-md-8 p-0 d-flex flex-column flex-md-row">
+            <div class="d-flex flex-column mb-3 mb-md-0 mr-0 mr-md-3 w-100">
+                <UserTypeahead OnSelectCallback="@UserSelected" />
+            </div>
+            
+            <button type="submit" class="btn btn-secondary-dark w-100">Add user to group</button>
+        </div>
     </form>
 
-    @if(SearchUserReply != null) {
-        foreach(SearchUserEntry entry in SearchUserReply.Entries) {
-            <span>@entry.Id @entry.Name</span>
-        }
-    }
 }
 
 @code {
@@ -41,16 +41,9 @@
     public Guid Id { get; set; }
 
     private GroupDetailResponse? GroupDetails;
-    private SearchUserReply? SearchUserReply;
-    private string Username = "";
-    private System.Timers.Timer? SearchTimer;
 
     protected override async Task OnInitializedAsync()
     {
-        SearchTimer = new System.Timers.Timer(500);
-        SearchTimer.Elapsed += ExecuteSearchUsers;
-        SearchTimer.AutoReset = false;
-
         GroupDetailRequest request = new GroupDetailRequest
         {
             Id = Id.ToString(),
@@ -59,25 +52,13 @@
         GroupDetails = await GroupsClient.GetGroupDetailsAsync(request);
     }
 
-    private void SearchKeyUpEvent() {
-        if(SearchTimer != null) {
-            SearchTimer.Stop();
-            SearchTimer.Start();     
-        } 
+    private async Task UserSelected(Guid userId) 
+    {
+
     }
 
-    private void ExecuteSearchUsers(Object source, System.Timers.ElapsedEventArgs e) {
-        InvokeAsync(async () => {
-            SearchUserRequest request = new SearchUserRequest{
-                SearchParameter = Username,
-            };
-            
-            SearchUserReply = await TypeaheadClient.SearchUserAsync(request);
-            StateHasChanged();
-        });
-    }
-
-    private async Task AddUserToGroupSubmit() {
+    private async Task AddUserToGroupSubmit() 
+    {
         
 /*
         AddUserToGroupRequest addUserToGroupRequest = new AddUserToGroupRequest {

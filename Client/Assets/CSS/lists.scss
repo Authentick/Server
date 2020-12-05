@@ -1,0 +1,10 @@
+.typeahead-dropdown {
+    a {
+        color: black;
+        &:hover {
+            font-weight: 500;
+            background: $light-gray;
+            text-decoration: none;
+          }
+    }
+}

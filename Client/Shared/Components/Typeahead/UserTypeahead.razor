@@ -1,0 +1,47 @@
+@using AuthServer.Shared
+
+@inject AuthServer.Shared.Typeahead.TypeaheadClient TypeaheadClient
+
+<input type="text" class="form-control bg-secondary" @bind-value="Username" @bind-value:event="oninput"  @onkeyup="@SearchKeyUpEvent" placeholder="User Id..." />
+<div class="typeahead-dropdown list-group">
+    @if(SearchUserReply != null) {
+        foreach(SearchUserEntry entry in SearchUserReply.Entries) {
+            <a href="#" class="list-group-item text-decoration-none">@entry.Name</a>
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<Guid> OnSelectCallback { get; set; }
+
+    private string Username = "";
+    private SearchUserReply? SearchUserReply;
+    private System.Timers.Timer? SearchTimer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        SearchTimer = new System.Timers.Timer(500);
+        SearchTimer.Elapsed += ExecuteSearchUsers;
+        SearchTimer.AutoReset = false;
+    }
+
+    private void SearchKeyUpEvent() {
+        if(SearchTimer != null) {
+            SearchTimer.Stop();
+            SearchTimer.Start();     
+        } 
+    }
+
+    private void ExecuteSearchUsers(Object source, System.Timers.ElapsedEventArgs e) {
+        InvokeAsync(async () => {
+            SearchUserRequest request = new SearchUserRequest{
+                SearchParameter = Username,
+            };
+            
+            SearchUserReply = await TypeaheadClient.SearchUserAsync(request);
+            StateHasChanged();
+        });
+    }
+
+}
