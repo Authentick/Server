@@ -4,8 +4,11 @@
 @layout AdminShell
 
 @using AuthServer.Shared.Admin
+@using AuthServer.Shared
+@using AuthServer.Client.Shared.Components.Typeahead
 
 @inject AuthServer.Shared.Admin.Groups.GroupsClient GroupsClient
+
 @inject NavigationManager NavigationManager
 
 @if (GroupDetails != null)
@@ -22,19 +25,31 @@
     </ul>
 
     <form @onsubmit="@AddUserToGroupSubmit">
-        <input type="text" @bind="@UserId" placeholder="User Id..." />
-        <button type="submit">Add user to group</button>
+        <div class="form-group form-group col-12 col-md-8 p-0 d-flex flex-column flex-md-row">
+            <div class="d-flex flex-column mb-3 mb-md-0 mr-0 mr-md-3 w-100">
+                <UserTypeahead OnSelectCallback="@UserSelected" />
+            </div>
+            
+            <button type="submit" class="btn btn-secondary-dark w-100" disabled="@(SelectedUserId == null)">Add user to group</button>
+        </div>
     </form>
+
 }
 
 @code {
     [Parameter]
     public Guid Id { get; set; }
 
+    private string? SelectedUserId;
+
     private GroupDetailResponse? GroupDetails;
-    private string UserId = "";
 
     protected override async Task OnInitializedAsync()
+    {
+        await LoadGroupMembers();
+    }
+
+    private async Task LoadGroupMembers() 
     {
         GroupDetailRequest request = new GroupDetailRequest
         {
@@ -44,22 +59,34 @@
         GroupDetails = await GroupsClient.GetGroupDetailsAsync(request);
     }
 
-    private async Task AddUserToGroupSubmit() {
-        AddUserToGroupRequest addUserToGroupRequest = new AddUserToGroupRequest {
+    private void UserSelected(string? userId) 
+    {
+        SelectedUserId = userId;
+    }
+
+    private async Task AddUserToGroupSubmit() 
+    {
+        AddUserToGroupRequest addUserToGroupRequest = new AddUserToGroupRequest 
+        {
             GroupId = Id.ToString(),
-            UserId = UserId,
+            UserId = SelectedUserId,
         };
 
+        SelectedUserId = null;
+
         await GroupsClient.AddUserToGroupAsync(addUserToGroupRequest);
+        await LoadGroupMembers();
     }
 
     private async Task RemoveMember(GroupMember member) 
     {
-        RemoveUserFromGroupRequest request = new RemoveUserFromGroupRequest {
+        RemoveUserFromGroupRequest request = new RemoveUserFromGroupRequest
+        {
             GroupId = Id.ToString(),
             UserId = member.Id,
         };
 
         await GroupsClient.RemoveUserFromGroupAsync(request);
+        await LoadGroupMembers();
     }
 }

@@ -158,6 +158,7 @@ namespace AuthServer.Server
                 endpoints.MapControllers();
                 endpoints.MapRazorPages();
                 endpoints.MapGrpcService<AuthService>();
+                endpoints.MapGrpcService<TypeaheadService>();
                 endpoints.MapGrpcService<SessionsService>();
                 endpoints.MapGrpcService<SettingsService>();
                 endpoints.MapGrpcService<UsersService>();
