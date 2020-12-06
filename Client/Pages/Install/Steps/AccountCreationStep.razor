@@ -2,22 +2,62 @@
 
 <h1>Create your first account</h1>
 
-<input type="text" class="form-control bg-secondary" placeholder="Username">
-<br/>
-<input type="text" class="form-control bg-secondary" placeholder="Email">
-<br/>
-<input type="text" class="form-control bg-secondary" placeholder="Password">
-<br/>
-<input type="text" class="form-control bg-secondary" placeholder="Confirm password">
+<EditForm EditContext="@editContext">
+    <DataAnnotationsValidator />
 
+    <InputText @bind-Value="userAccount.Username" class="form-control bg-secondary" placeholder="Username" />
+    <br/>
+
+    <InputText @bind-Value="userAccount.Password" type="password" class="form-control bg-secondary" placeholder="Password" />
+    <br/>
+
+    <InputText @bind-Value="userAccount.Email" class="form-control bg-secondary" placeholder="Email" />
+</EditForm>
 
 @code {
     [Parameter]
     public InstallStateMachine StateMachine { get; set; }
+    private UserAccount userAccount = new UserAccount();
+    private EditContext? editContext;
 
-    protected override void OnInitialized() 
+    protected override void OnInitialized()
     {
+        editContext = new EditContext(userAccount);
+        editContext.OnFieldChanged += HandleFieldChanged;
+
         StateMachine.SetNextStep(null);
         StateMachine.SetPreviousStep(new DbSelectionStep());
+    }
+
+    private void HandleFieldChanged(object sender, FieldChangedEventArgs e)
+    {
+        if(editContext != null) 
+        {
+            bool formValid = editContext.Validate();
+            if (formValid)
+            {
+                StateMachine.SetNextStep(null);
+            } 
+            else
+            {
+                StateMachine.SetNextStep(null);
+            } 
+        }
+    }
+
+    public void Dispose()
+    {
+        editContext.OnFieldChanged -= HandleFieldChanged;
+    }
+
+    class UserAccount {
+        [Required]
+        public string? Username { get; set; }
+
+        [Required]
+        public string? Password { get; set; }
+
+        [Required]
+        public string? Email { get; set; }
     }
 }

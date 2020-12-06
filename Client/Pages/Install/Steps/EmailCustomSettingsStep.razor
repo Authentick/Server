@@ -1,21 +1,71 @@
 @implements IStep
+@implements IDisposable
 
 <h1>Configure custom SMTP server</h1>
 
-<input type="text" class="form-control bg-secondary" placeholder="Hostname">
-<br/>
-<input type="text" class="form-control bg-secondary" placeholder="Username">
-<br/>
-<input type="text" class="form-control bg-secondary" placeholder="Password">
-<br/>
-<input type="text" class="form-control bg-secondary" placeholder="Sender address">
+<EditForm EditContext="@editContext">
+    <DataAnnotationsValidator />
+    
+    <InputText @bind-Value="emailSettings.Hostname" class="form-control bg-secondary" placeholder="Hostname" />
+    <br/>
+
+    <InputText @bind-Value="emailSettings.Username" class="form-control bg-secondary" placeholder="Username" />
+    <br/>
+
+    <InputText @bind-Value="emailSettings.Password" type="password" class="form-control bg-secondary" placeholder="Password" />
+    <br/>
+
+    <InputText @bind-Value="emailSettings.SenderAddress" class="form-control bg-secondary" placeholder="Sender address" />
+</EditForm>
 
 @code {
     [Parameter]
     public InstallStateMachine StateMachine { get; set; }
-    protected override void OnInitialized() 
+    private EmailSettings emailSettings = new EmailSettings();
+    private EditContext? editContext;
+
+    protected override void OnInitialized()
     {
-        StateMachine.SetNextStep(new AccountCreationStep());
+        editContext = new EditContext(emailSettings);
+        editContext.OnFieldChanged += HandleFieldChanged;
+
+        StateMachine.SetNextStep(null);
         StateMachine.SetPreviousStep(new EmailSelectionStep());
+    }
+
+
+    private void HandleFieldChanged(object sender, FieldChangedEventArgs e)
+    {
+        if(editContext != null) 
+        {
+            bool formValid = editContext.Validate();
+            if (formValid)
+            {
+                StateMachine.SetNextStep(new AccountCreationStep());
+            } 
+            else
+            {
+                StateMachine.SetNextStep(null);
+            } 
+        }
+    }
+
+    public void Dispose()
+    {
+        editContext.OnFieldChanged -= HandleFieldChanged;
+    }
+
+    class EmailSettings {
+        [Required]
+        public string? Hostname { get; set; }
+
+        [Required]
+        public string? Username { get; set; }
+
+        [Required]
+        public string? Password { get; set; }
+
+        [Required]
+        public string? SenderAddress { get; set; }
     }
 }
