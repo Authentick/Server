@@ -1,3 +1,5 @@
+@implements IStep
+
 <h1>Create your first account</h1>
 
 <input type="text" class="form-control bg-secondary" placeholder="Username">
@@ -7,3 +9,15 @@
 <input type="text" class="form-control bg-secondary" placeholder="Password">
 <br/>
 <input type="text" class="form-control bg-secondary" placeholder="Confirm password">
+
+
+@code {
+    [Parameter]
+    public InstallStateMachine StateMachine { get; set; }
+
+    protected override void OnInitialized() 
+    {
+        StateMachine.SetNextStep(null);
+        StateMachine.SetPreviousStep(new DbSelectionStep());
+    }
+}

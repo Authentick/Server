@@ -1,3 +1,5 @@
+@implements IStep
+
 <h1>Configure how to send emails</h1>
 
 <p>Gatekeeper stores its configuration in a PostgreSQL database. You can either choose the built-in server or configure a custom one.</p>
@@ -6,3 +8,14 @@
     <input type="checkbox" class="form-check-input">
     <label class="form-check-label">Configure custom SMTP server<br />Configure a custom SMTP server to use.</label>
 </div>
+
+@code {
+    [Parameter]
+    public InstallStateMachine StateMachine { get; set; }
+
+    protected override void OnInitialized() 
+    {
+        StateMachine.SetNextStep(new EmailCustomSettingsStep());
+        StateMachine.SetPreviousStep(new DbSelectionStep());
+    }
+}

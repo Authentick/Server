@@ -1,3 +1,5 @@
+@implements IStep
+
 <h1>Configure custom database</h1>
 
 <input type="text" class="form-control bg-secondary" placeholder="Hostname">
@@ -7,3 +9,14 @@
 <input type="text" class="form-control bg-secondary" placeholder="Password">
 <br/>
 <input type="text" class="form-control bg-secondary" placeholder="Database name">
+
+@code {
+    [Parameter]
+    public InstallStateMachine StateMachine { get; set; }
+
+    protected override void OnInitialized() 
+    {
+        StateMachine.SetNextStep(new EmailSelectionStep());
+        StateMachine.SetPreviousStep(new DbSelectionStep());
+    }
+}

@@ -1,3 +1,5 @@
+@implements IStep
+
 <h1>Configure custom SMTP server</h1>
 
 <input type="text" class="form-control bg-secondary" placeholder="Hostname">
@@ -7,3 +9,13 @@
 <input type="text" class="form-control bg-secondary" placeholder="Password">
 <br/>
 <input type="text" class="form-control bg-secondary" placeholder="Sender address">
+
+@code {
+    [Parameter]
+    public InstallStateMachine StateMachine { get; set; }
+    protected override void OnInitialized() 
+    {
+        StateMachine.SetNextStep(new AccountCreationStep());
+        StateMachine.SetPreviousStep(new EmailSelectionStep());
+    }
+}

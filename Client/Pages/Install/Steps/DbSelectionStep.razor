@@ -1,13 +1,25 @@
+@implements IStep
+
 <h1>Configure your database</h1>
 
 <p>Gatekeeper stores its configuration in a PostgreSQL database. You can either choose the built-in server or configure a custom one.</p>
 
 <div class="form-check">
-    <input type="checkbox" class="form-check-input">
+    <input type="checkbox" class="form-check-input" @onchange="(() => StateMachine.SetNextStep(new EmailSelectionStep()))">
     <label class="form-check-label">Built-in Database<br />Use the built-in PostgreSQL database.</label>
 </div>
 
 <div class="form-check">
-    <input type="checkbox" class="form-check-input">
+    <input type="checkbox" class="form-check-input" @onchange="(() => StateMachine.SetNextStep(new DbCustomSettingsStep()) )">
     <label class="form-check-label">Configure custom database<br />Use your own PostgreSQL database.</label>
 </div>
+
+@code {
+    [Parameter]
+    public InstallStateMachine StateMachine { get; set; }
+    protected override void OnInitialized() 
+    {
+        StateMachine.SetNextStep(null);
+        StateMachine.SetPreviousStep(new InitialSetupStep());
+    }
+}

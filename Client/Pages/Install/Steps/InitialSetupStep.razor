@@ -1,4 +1,17 @@
+@implements IStep
+
 <h1>Just a few more steps...</h1>
 
 <p>Just a few more steps until your Gatekeeper instance is set up and ready to be used.</p>
 <p>But don’t worry, this will be quick and easy.</p>
+
+@code {
+    [Parameter]
+    public InstallStateMachine StateMachine { get; set; }
+
+    protected override void OnInitialized() 
+    {
+        StateMachine.SetNextStep(new DbSelectionStep());
+        StateMachine.SetPreviousStep(null);
+    }
+}
