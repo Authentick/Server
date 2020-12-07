@@ -1,0 +1,69 @@
+@implements IStep
+@implements IDisposable
+
+<h1>Configure custom database</h1>
+
+<EditForm EditContext="@editContext">
+    <DataAnnotationsValidator />
+    
+    <InputText @bind-Value="dbSettings.Hostname" class="form-control bg-secondary" placeholder="Hostname" />
+    <br/>
+
+    <InputText @bind-Value="dbSettings.Username" class="form-control bg-secondary" placeholder="Username" />
+    <br/>
+
+    <InputText @bind-Value="dbSettings.Password" type="password" class="form-control bg-secondary" placeholder="Password" />
+    <br/>
+
+    <InputText @bind-Value="dbSettings.DatabaseName" class="form-control bg-secondary" placeholder="Database name" />
+</EditForm>
+
+@code {
+    [Parameter]
+    public InstallStateMachine StateMachine { get; set; }
+    private DbSettings dbSettings = new DbSettings();
+    private EditContext? editContext;
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(dbSettings);
+        editContext.OnFieldChanged += HandleFieldChanged;
+
+        StateMachine.SetNextStep(null);
+        StateMachine.SetPreviousStep(new DbSelectionStep());
+    }
+
+    private void HandleFieldChanged(object sender, FieldChangedEventArgs e)
+    {
+        if(editContext != null) 
+        {
+            bool formValid = editContext.Validate();
+            if (formValid)
+            {
+                StateMachine.SetNextStep(new EmailSelectionStep());
+            } 
+            else
+            {
+                StateMachine.SetNextStep(null);
+            } 
+        }
+    }
+
+    public void Dispose()
+    {
+        editContext.OnFieldChanged -= HandleFieldChanged;
+    }
+    class DbSettings {
+        [Required]
+        public string? Hostname { get; set; }
+
+        [Required]
+        public string? Username { get; set; }
+
+        [Required]
+        public string? Password { get; set; }
+
+        [Required]
+        public string? DatabaseName { get; set; }
+    }
+}

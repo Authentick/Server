@@ -1,0 +1,49 @@
+@implements IStep
+
+<h1>Configure your database</h1>
+
+<p>Gatekeeper stores its configuration in a PostgreSQL database. You can either choose the built-in server or configure a custom one.</p>
+
+<div class="form-check">
+    <input @onchange="RadioSelection" class="form-check-input" type="radio" id="builtInDbOption" name="dbRadio" value="builtin">
+    <label class="form-check-label" for="builtInDbOption">
+        Built-in Database<br />
+        Use the built-in PostgreSQL database.
+        </label>
+</div>
+<div class="form-check">
+    <input @onchange="RadioSelection" class="form-check-input" type="radio" id="customDbOption" name="dbRadio" value="custom">
+    <label class="form-check-label" for="customDbOption">
+        Configure custom database<br />
+        Use your own PostgreSQL database.
+    </label>
+</div>
+
+@code {
+    [Parameter]
+    public InstallStateMachine StateMachine { get; set; }
+
+    protected override void OnInitialized() 
+    {
+        StateMachine.SetNextStep(null);
+        StateMachine.SetPreviousStep(new InitialSetupStep());
+    }
+    
+    void RadioSelection(ChangeEventArgs args)
+    {
+        if(args.Value != null) {
+            string? value = args.Value.ToString();
+            if(value != null) {
+                if(value == "builtin") 
+                {
+                    StateMachine.SetNextStep(new EmailSelectionStep());
+                }
+                else if (value == "custom") 
+                {
+                    StateMachine.SetNextStep(new DbCustomSettingsStep());
+                }
+            }
+        }
+    }
+
+}

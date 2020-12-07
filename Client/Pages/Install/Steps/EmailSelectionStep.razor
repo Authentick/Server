@@ -1,0 +1,37 @@
+@implements IStep
+
+<h1>Configure how to send emails</h1>
+
+<p>Gatekeeper stores its configuration in a PostgreSQL database. You can either choose the built-in server or configure a custom one.</p>
+
+<div class="form-check">
+    <input @onchange="RadioSelection" class="form-check-input" type="radio" id="useCustomSmtp" name="emailConfigRadio" value="useCustomSmtp">
+    <label class="form-check-label" for="useCustomSmtp">
+        Configure custom SMTP server<br />
+        Use a custom SMTP Server.
+    </label>
+</div>
+
+@code {
+    [Parameter]
+    public InstallStateMachine StateMachine { get; set; }
+
+    protected override void OnInitialized() 
+    {
+        StateMachine.SetNextStep(null);
+        StateMachine.SetPreviousStep(new DbSelectionStep());
+    }
+
+    void RadioSelection(ChangeEventArgs args)
+    {
+        if(args.Value != null) {
+            string? value = args.Value.ToString();
+            if(value != null) {
+                if(value == "useCustomSmtp") 
+                {
+                    StateMachine.SetNextStep(new EmailCustomSettingsStep());
+                }
+            }
+        }
+    }
+}

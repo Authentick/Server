@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+import "google/protobuf/wrappers.proto";
+
+option csharp_namespace = "AuthServer.Shared";
+
+service Install {
+  rpc SetupInstance (SetupInstanceRequest) returns (SetupInstanceReply);
+}
+
+message SetupInstanceRequest {
+  SetupDatabaseData database_settings = 1;
+  SetupSmtpData smtp_settings = 2;
+  SetupAccountData account_data = 3;
+}
+
+message SetupDatabaseData {
+  string username = 1;
+  string password = 2;
+  string hostname = 3;
+  string database = 4;
+}
+
+message SetupSmtpData {
+  string username = 1;
+  string password = 2;
+  string hostname = 3;
+  string sender_address = 4;
+}
+
+message SetupAccountData {
+  string username = 1;
+  string password = 2;
+  string email = 3;
+}
+
+message SetupInstanceReply {
+  bool succeeded = 1;
+  google.protobuf.StringValue errorMessage = 2;
+}

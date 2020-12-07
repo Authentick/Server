@@ -1,0 +1,57 @@
+@page "/install"
+
+@implements IDisposable
+
+@layout LoggedOutLayout
+
+<div class="h-100 pt-0 pt-md-4">
+    @RenderCurrentStep()
+
+    <div class="row justify-content-center mt-5">
+        <button type="submit" class="col-sm-5 btn" @onclick="RevertToPreviousStep" disabled="@(!(InstallStateMachine.HasPreviousStep()))">Previous step</button>
+
+        <button type="submit" class="col-sm-5 offset-sm-1 btn" @onclick="ProceedToNextStep" disabled="@(!(InstallStateMachine.HasNextStep()))">Next step</button>
+    </div>
+</div>
+
+@code {
+    private InstallStateMachine InstallStateMachine = null!;
+    private IStep? CurrentStep;
+
+    protected override void OnInitialized() {
+        InstallStateMachine = new InstallStateMachine();
+        InstallStateMachine.Initialize();
+        InstallStateMachine.OnChange += StateHasChanged;
+        SetCurrentStep();
+    }
+
+    public void Dispose()
+    {
+        InstallStateMachine.OnChange -= StateHasChanged;
+    }
+
+    private void RevertToPreviousStep() {
+        InstallStateMachine.GoBack(CurrentStep);
+        SetCurrentStep();
+    }
+
+    private void ProceedToNextStep() {
+        InstallStateMachine.FinishStep(CurrentStep);
+        SetCurrentStep();
+    }
+
+    private void SetCurrentStep() {
+        CurrentStep = InstallStateMachine.GetCurrentStep();
+    }
+
+    private RenderFragment RenderCurrentStep() => builder =>
+    {
+        if(CurrentStep != null) 
+        {
+            builder.OpenComponent(0, CurrentStep.GetType());
+            builder.AddAttribute(1, "StateMachine", InstallStateMachine);
+            builder.AddComponentReferenceCapture(2, capturedRef => { CurrentStep = (IStep)capturedRef; });
+            builder.CloseComponent();
+        }
+    };
+}
