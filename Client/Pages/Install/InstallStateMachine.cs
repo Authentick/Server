@@ -1,5 +1,6 @@
 using System;
 using AuthServer.Client.Pages.Install.Steps;
+using AuthServer.Shared;
 
 namespace AuthServer.Client.Pages.Install
 {
@@ -10,14 +11,42 @@ namespace AuthServer.Client.Pages.Install
         IStep _currentStep;
         private IStep? PreviousStep;
         private IStep? NextStep;
+        private SetupInstanceRequest _setupInstanceRequest = new SetupInstanceRequest();
 
         internal void Initialize()
         {
             _currentStep = new InitialSetupStep();
         }
 
+        internal SetupInstanceRequest GetSetupInstanceRequest()
+        {
+            return _setupInstanceRequest;
+        }
+
         public void FinishStep(IStep step)
         {
+            switch (step)
+            {
+                case EmailCustomSettingsStep emailStep:
+                    _setupInstanceRequest.SmtpSettings = new SetupSmtpData
+                    {
+                        Hostname = emailStep.emailSettings.Hostname,
+                        Password = emailStep.emailSettings.Password,
+                        SenderAddress = emailStep.emailSettings.SenderAddress,
+                        Username = emailStep.emailSettings.Username,
+                        Port = Int32.Parse(emailStep.emailSettings.Port),
+                    };
+                    break;
+                case AccountCreationStep accountCreationStep:
+                    _setupInstanceRequest.AccountData = new SetupAccountData
+                    {
+                        Username = accountCreationStep.userAccount.Username,
+                        Email = accountCreationStep.userAccount.Email,
+                        Password = accountCreationStep.userAccount.Password,
+                    };
+                    return;
+            }
+
             _currentStep = NextStep;
         }
 

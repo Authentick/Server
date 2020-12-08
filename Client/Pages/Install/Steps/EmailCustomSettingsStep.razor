@@ -9,19 +9,22 @@
     <InputText @bind-Value="emailSettings.Hostname" class="form-control bg-secondary" placeholder="Hostname" />
     <br/>
 
+    <InputText @bind-Value="emailSettings.Port" type="text" class="form-control bg-secondary" placeholder="Port" />
+    <br/>
+
     <InputText @bind-Value="emailSettings.Username" class="form-control bg-secondary" placeholder="Username" />
     <br/>
 
     <InputText @bind-Value="emailSettings.Password" type="password" class="form-control bg-secondary" placeholder="Password" />
     <br/>
 
-    <InputText @bind-Value="emailSettings.SenderAddress" class="form-control bg-secondary" placeholder="Sender address" />
+    <InputText @bind-Value="emailSettings.SenderAddress" type="email" class="form-control bg-secondary" placeholder="Sender address" />
 </EditForm>
 
 @code {
     [Parameter]
     public InstallStateMachine StateMachine { get; set; }
-    private EmailSettings emailSettings = new EmailSettings();
+    internal EmailSettings emailSettings = new EmailSettings();
     private EditContext? editContext;
 
     protected override void OnInitialized()
@@ -55,7 +58,7 @@
         editContext.OnFieldChanged -= HandleFieldChanged;
     }
 
-    class EmailSettings {
+    internal class EmailSettings {
         [Required]
         public string? Hostname { get; set; }
 
@@ -67,5 +70,8 @@
 
         [Required]
         public string? SenderAddress { get; set; }
+
+        [Required]
+        public string? Port { get; set; }
     }
 }

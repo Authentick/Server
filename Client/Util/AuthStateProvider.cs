@@ -6,18 +6,24 @@ using static AuthServer.Shared.Auth;
 
 namespace AuthServer.Client.Util
 {
-    public class AuthStateProvider : AuthenticationStateProvider
+    class AuthStateProvider : AuthenticationStateProvider
     {
         private readonly AuthClient _authClient;
+        private readonly InstallationStateProvider _installationStateProvider;
 
-        public AuthStateProvider(AuthClient authClient)
+        public AuthStateProvider(
+            AuthClient authClient,
+            InstallationStateProvider installationStateProvider
+            )
         {
             _authClient = authClient;
+            _installationStateProvider = installationStateProvider;
         }
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
             var identityResult = await _authClient.WhoAmIAsync(new Google.Protobuf.WellKnownTypes.Empty());
+            _installationStateProvider.IsInstalled = identityResult.IsInstalled;
 
             List<Claim> claims = new List<Claim>();
             if (identityResult.IsAuthenticated)
@@ -33,6 +39,11 @@ namespace AuthServer.Client.Util
 
             var user = new ClaimsPrincipal(identity);
             return new AuthenticationState(user);
+        }
+
+        public void StateHasChanged()
+        {
+            this.NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
         }
     }
 }

@@ -4,6 +4,7 @@
 
 @inject AuthServer.Shared.Auth.AuthClient AuthClient
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 @using AuthServer.Shared
 
@@ -15,7 +16,7 @@
     }
     <form class="d-flex flex-column justify-content-start h-100 col-12 col-md-8 pl-0" @onsubmit="@SubmitForm" method="post">
         <div class="pt-3">
-            <input type="email" class="form-control w-100 mt-2" required name="email" @bind="@Email" placeholder="Username"/>
+            <input type="text" class="form-control w-100 mt-2" required name="email" @bind="@Email" placeholder="Username"/>
         </div>
 
         <div class="pt-3">
@@ -52,6 +53,7 @@
                 NavigationManager.NavigateTo("/login/mfa");
                 break;
             case LoginStateEnum.Success:
+                ((Util.AuthStateProvider) AuthenticationStateProvider).StateHasChanged();
                 NavigationManager.NavigateTo("/");
                 break;
         }

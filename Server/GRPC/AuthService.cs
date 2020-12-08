@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
@@ -9,6 +10,7 @@ using Grpc.Core;
 using Hangfire;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 
 namespace AuthServer.Server.GRPC
 {
@@ -16,14 +18,17 @@ namespace AuthServer.Server.GRPC
     {
         private readonly UserManager _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly AuthDbContext _authDbContext;
 
         public AuthService(
             UserManager userManager,
-            SignInManager<AppUser> signInManager
+            SignInManager<AppUser> signInManager,
+            AuthDbContext authDbContext
             )
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _authDbContext = authDbContext;
         }
 
         public override async Task<LoginReply> Login(LoginRequest request, ServerCallContext context)
@@ -126,21 +131,27 @@ namespace AuthServer.Server.GRPC
             return new VerifyEmailReply { Success = false };
         }
 
-        public override Task<WhoAmIReply> WhoAmI(Empty request, ServerCallContext context)
+        public override async Task<WhoAmIReply> WhoAmI(Empty request, ServerCallContext context)
         {
             string? userId = _userManager.GetUserId(context.GetHttpContext().User);
 
-            WhoAmIReply result;
+            WhoAmIReply result = new WhoAmIReply();
+
+            SystemSetting? installedSetting = await _authDbContext.SystemSettings
+                .SingleOrDefaultAsync(s => s.Name == "installer.is_installed" && s.Value == "true");
+            result.IsInstalled = (installedSetting != null);
+
             if (userId != null)
             {
-                result = new WhoAmIReply { IsAuthenticated = true, UserId = userId };
+                result.IsAuthenticated = true;
+                result.UserId = userId;
             }
             else
             {
-                result = new WhoAmIReply { IsAuthenticated = false };
+                result.IsAuthenticated = false;
             }
 
-            return Task.FromResult(result);
+            return result;
         }
     }
 }

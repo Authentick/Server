@@ -4,25 +4,54 @@
 
 @layout LoggedOutLayout
 
+@inject AuthServer.Shared.Install.InstallClient InstallClient
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@using AuthServer.Shared
+
 <div class="h-100 pt-0 pt-md-4">
-    @RenderCurrentStep()
+    @if(_installIsPossible) {
+        @RenderCurrentStep()
 
-    <div class="row justify-content-center mt-5">
-        <button type="submit" class="col-sm-5 btn" @onclick="RevertToPreviousStep" disabled="@(!(InstallStateMachine.HasPreviousStep()))">Previous step</button>
+        <div class="row justify-content-center mt-5">
+            <button type="submit" class="col-sm-5 btn" @onclick="RevertToPreviousStep" disabled="@(!(InstallStateMachine.HasPreviousStep()))">Previous step</button>
 
-        <button type="submit" class="col-sm-5 offset-sm-1 btn" @onclick="ProceedToNextStep" disabled="@(!(InstallStateMachine.HasNextStep()))">Next step</button>
-    </div>
+            @if(CurrentStep != null && CurrentStep.GetType() == typeof(Steps.AccountCreationStep)) {
+                <button type="submit" class="col-sm-5 offset-sm-1 btn" @onclick="SetupInstance" disabled="@(!(InstallStateMachine.HasNextStep()))">Finish setup</button>
+            } else {
+                <button type="submit" class="col-sm-5 offset-sm-1 btn" @onclick="ProceedToNextStep" disabled="@(!(InstallStateMachine.HasNextStep()))">Next step</button>
+            }
+        </div>
+    } else {
+        <div>Installation is not possible at the moment.</div>
+    }
 </div>
 
 @code {
     private InstallStateMachine InstallStateMachine = null!;
     private IStep? CurrentStep;
+    private string? _authToken;
+    private bool _installIsPossible = true;
 
-    protected override void OnInitialized() {
+    protected override void OnInitialized() 
+    {
         InstallStateMachine = new InstallStateMachine();
         InstallStateMachine.Initialize();
         InstallStateMachine.OnChange += StateHasChanged;
         SetCurrentStep();
+    }
+
+    protected override async Task OnInitializedAsync() 
+    {
+        StartSetupReply reply = await InstallClient.StartSetupAsync(new Google.Protobuf.WellKnownTypes.Empty{});
+        _authToken = reply.AuthToken;
+
+        if (!reply.Success) 
+        {
+            _installIsPossible = false;
+            return;
+        }
     }
 
     public void Dispose()
@@ -42,6 +71,24 @@
 
     private void SetCurrentStep() {
         CurrentStep = InstallStateMachine.GetCurrentStep();
+    }
+
+    private async Task SetupInstance() {
+        InstallStateMachine.FinishStep(CurrentStep);
+
+        SetupInstanceRequest request = InstallStateMachine.GetSetupInstanceRequest();
+        request.AuthToken = _authToken;
+        SetupInstanceReply reply = await InstallClient.SetupInstanceAsync(request);
+
+        if(reply.Succeeded) 
+        {
+            ((Util.AuthStateProvider) AuthenticationStateProvider).StateHasChanged();
+            NavigationManager.NavigateTo("/");
+        } 
+        else 
+        {
+            _installIsPossible = false;        
+        }
     }
 
     private RenderFragment RenderCurrentStep() => builder =>

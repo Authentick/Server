@@ -16,6 +16,7 @@ service Auth {
 message WhoAmIReply {
   bool isAuthenticated = 1;
   google.protobuf.StringValue userId = 2;
+  bool is_installed = 3;
 }
 
 message LoginRequest {

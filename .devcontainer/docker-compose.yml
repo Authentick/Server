@@ -17,8 +17,7 @@ services:
       restart: always
       environment:
         POSTGRES_PASSWORD: example
-      ports:
-        - 5432:5432
+      network_mode: service:authserverdev
   adminer:
       image: adminer
       restart: always

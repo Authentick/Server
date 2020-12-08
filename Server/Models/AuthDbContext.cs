@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,14 @@ namespace AuthServer.Server.Models
         public DbSet<LdapAppSettings> LdapAppSettings { get; set; } = null!;
         public DbSet<LdapAppUserCredentials> LdapAppUserCredentials { get; set; } = null!;
         public DbSet<UserGroup> UserGroup { get; set; } = null!;
+        public DbSet<SystemSetting> SystemSettings { get; set; } = null!;
+    }
+
+    public class SystemSetting
+    {
+        [Key]
+        public string Name { get; set; } = null!;
+        public string Value { get; set; } = null!;
     }
 
     public class AuthApp
