@@ -21,7 +21,7 @@
 @code {
     [Parameter]
     public InstallStateMachine StateMachine { get; set; }
-    private EmailSettings emailSettings = new EmailSettings();
+    internal EmailSettings emailSettings = new EmailSettings();
     private EditContext? editContext;
 
     protected override void OnInitialized()
@@ -55,7 +55,7 @@
         editContext.OnFieldChanged -= HandleFieldChanged;
     }
 
-    class EmailSettings {
+    internal class EmailSettings {
         [Required]
         public string? Hostname { get; set; }
 

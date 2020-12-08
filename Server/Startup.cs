@@ -155,8 +155,6 @@ namespace AuthServer.Server
             // Endpoints
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
-                endpoints.MapRazorPages();
                 endpoints.MapGrpcService<AuthService>();
                 endpoints.MapGrpcService<TypeaheadService>();
                 endpoints.MapGrpcService<SessionsService>();
@@ -165,6 +163,7 @@ namespace AuthServer.Server
                 endpoints.MapGrpcService<GRPC.Admin.AppsService>();
                 endpoints.MapGrpcService<GroupsService>();
                 endpoints.MapGrpcService<GRPC.Apps.AppsService>();
+                endpoints.MapGrpcService<InstallService>();
                 endpoints.MapFallbackToPage("/_Host");
             });
         }

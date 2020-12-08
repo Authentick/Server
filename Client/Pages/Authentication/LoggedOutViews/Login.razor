@@ -4,6 +4,7 @@
 
 @inject AuthServer.Shared.Auth.AuthClient AuthClient
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 @using AuthServer.Shared
 
@@ -52,6 +53,7 @@
                 NavigationManager.NavigateTo("/login/mfa");
                 break;
             case LoginStateEnum.Success:
+                ((Util.AuthStateProvider) AuthenticationStateProvider).StateHasChanged();
                 NavigationManager.NavigateTo("/");
                 break;
         }

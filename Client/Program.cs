@@ -28,8 +28,10 @@ namespace AuthServer.Client
             builder.Services.AddScoped(services => { return new AuthServer.Shared.Admin.AdminApps.AdminAppsClient(GetGrpcChannel(services)); });
             builder.Services.AddScoped(services => { return new AuthServer.Shared.Admin.Groups.GroupsClient(GetGrpcChannel(services)); });
             builder.Services.AddScoped(services => { return new AuthServer.Shared.Apps.Apps.AppsClient(GetGrpcChannel(services)); });
+            builder.Services.AddScoped(services => { return new AuthServer.Shared.Install.InstallClient(GetGrpcChannel(services)); });
 
             builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
+            builder.Services.AddScoped<InstallationStateProvider>();
 
             builder.Services.AddOptions();
             builder.Services.AddAuthorizationCore();

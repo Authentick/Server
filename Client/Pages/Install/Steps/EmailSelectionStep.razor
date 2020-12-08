@@ -19,7 +19,7 @@
     protected override void OnInitialized() 
     {
         StateMachine.SetNextStep(null);
-        StateMachine.SetPreviousStep(new DbSelectionStep());
+        StateMachine.SetPreviousStep(new InitialSetupStep());
     }
 
     void RadioSelection(ChangeEventArgs args)

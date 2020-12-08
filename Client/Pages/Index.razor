@@ -1,6 +1,7 @@
 ﻿@page "/"
 
 @inject NavigationManager NavigationManager
+@inject Util.InstallationStateProvider InstallationStateProvider;
 
 @code {
     [CascadingParameter]
@@ -11,13 +12,17 @@
         var authState = await authenticationStateTask;
         var user = authState.User;
 
-        if ((user.Identity != null) && user.Identity.IsAuthenticated)
-        {
-            NavigationManager.NavigateTo("apps");
-        }
-        else
-        {
-            NavigationManager.NavigateTo("login");
+        if (InstallationStateProvider.IsInstalled) {
+            if ((user.Identity != null) && user.Identity.IsAuthenticated)
+            {
+                NavigationManager.NavigateTo("apps");
+            }
+            else
+            {
+                NavigationManager.NavigateTo("login");
+            }
+        } else {
+            NavigationManager.NavigateTo("install");
         }
     }
 }
