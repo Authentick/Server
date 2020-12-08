@@ -113,6 +113,12 @@ namespace AuthServer.Server.GRPC
                 Name = "smtp.senderAddress",
                 Value = request.SmtpSettings.SenderAddress,
             };
+            SystemSetting smtpPort = new SystemSetting
+            {
+                Name = "smtp.port",
+                Value = request.SmtpSettings.Port.ToString(),
+            };
+
 
             _authDbContext.AddRange(installSetting, smtpHostnameSetting, smtpUsernameSetting, smtpPasswordSetting, smtpSenderAddress);
             await _authDbContext.SaveChangesAsync();

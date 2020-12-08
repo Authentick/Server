@@ -34,6 +34,7 @@ namespace AuthServer.Client.Pages.Install
                         Password = emailStep.emailSettings.Password,
                         SenderAddress = emailStep.emailSettings.SenderAddress,
                         Username = emailStep.emailSettings.Username,
+                        Port = Int32.Parse(emailStep.emailSettings.Port),
                     };
                     break;
                 case AccountCreationStep accountCreationStep:
