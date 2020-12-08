@@ -97,6 +97,9 @@ namespace AuthServer.Server
             services.AddScoped<SecureRandom>();
             services.AddScoped<Hasher>();
 
+            // Configuration
+            services.AddScoped<Services.ConfigurationProvider>();
+
             // LDAP
             services.AddScoped<LdapEventListener>();
             services.AddHostedService<LdapServerListener>();

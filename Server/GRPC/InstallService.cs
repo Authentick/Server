@@ -35,7 +35,7 @@ namespace AuthServer.Server.GRPC
         {
             SystemSetting? isInstalledSetting = await _authDbContext.SystemSettings
                 .AsNoTracking()
-                .Where(s => s.Name == INSTALLED_KEY && s.Value.Contains("true"))
+                .Where(s => s.Name == INSTALLED_KEY && s.Value == "true")
                 .SingleOrDefaultAsync();
 
             return isInstalledSetting != null;
@@ -53,7 +53,7 @@ namespace AuthServer.Server.GRPC
                 return null;
             }
 
-            return isInstalledSetting.Value.First();
+            return isInstalledSetting.Value;
         }
 
         public override async Task<CheckIsInstalledReply> CheckIsInstalled(Empty request, ServerCallContext context)
@@ -91,27 +91,27 @@ namespace AuthServer.Server.GRPC
             SystemSetting installSetting = new SystemSetting
             {
                 Name = this.INSTALLED_KEY,
-                Value = new List<string> { "true" },
+                Value = "true",
             };
             SystemSetting smtpHostnameSetting = new SystemSetting
             {
                 Name = "smtp.hostname",
-                Value = new List<string> { request.SmtpSettings.Hostname },
+                Value = request.SmtpSettings.Hostname,
             };
             SystemSetting smtpUsernameSetting = new SystemSetting
             {
                 Name = "smtp.username",
-                Value = new List<string> { request.SmtpSettings.Username },
+                Value = request.SmtpSettings.Username,
             };
             SystemSetting smtpPasswordSetting = new SystemSetting
             {
                 Name = "smtp.password",
-                Value = new List<string> { request.SmtpSettings.Password },
+                Value = request.SmtpSettings.Password,
             };
             SystemSetting smtpSenderAddress = new SystemSetting
             {
                 Name = "smtp.senderAddress",
-                Value = new List<string> { request.SmtpSettings.SenderAddress },
+                Value = request.SmtpSettings.SenderAddress,
             };
 
             _authDbContext.AddRange(installSetting, smtpHostnameSetting, smtpUsernameSetting, smtpPasswordSetting, smtpSenderAddress);
@@ -140,7 +140,7 @@ namespace AuthServer.Server.GRPC
             SystemSetting authKeySetting = new SystemSetting
             {
                 Name = this.AUTH_KEY,
-                Value = new List<string>() { newAuthKey },
+                Value = newAuthKey,
             };
             _authDbContext.Add(authKeySetting);
             await _authDbContext.SaveChangesAsync();

@@ -24,7 +24,7 @@ namespace AuthServer.Server.Models
     {
         [Key]
         public string Name { get; set; } = null!;
-        public List<string> Value { get; set; } = null!;
+        public string Value { get; set; } = null!;
     }
 
     public class AuthApp

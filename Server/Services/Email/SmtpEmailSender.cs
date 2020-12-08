@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace AuthServer.Server.Services.Email
 {
-    public class SmtpEmailSender : IEmailSender
+    class SmtpEmailSender : IEmailSender
     {
-        private readonly IConfiguration _configuration;
+        private readonly ConfigurationProvider _configuration;
 
-        public SmtpEmailSender(IConfiguration configuration)
+        public SmtpEmailSender(ConfigurationProvider configuration)
         {
             _configuration = configuration;
         }
@@ -30,8 +30,11 @@ namespace AuthServer.Server.Services.Email
             string subject, 
             string message)
         {
+            string? senderAddress;
+            _configuration.TryGet("smtp.senderAddress", out senderAddress);
+
             MimeMessage mail = new MimeMessage();
-            mail.From.Add(new MailboxAddress("No Reply", "no-reply@example.com"));
+            mail.From.Add(new MailboxAddress("No Reply", senderAddress));
             mail.To.Add(new MailboxAddress(recipientName, email));
             mail.Subject = subject;
 
@@ -41,10 +44,23 @@ namespace AuthServer.Server.Services.Email
 
             using (SmtpClient client = new SmtpClient())
             {
+                string? smtpHost;
+                _configuration.TryGet("smtp.hostname", out smtpHost);
+
+                string? smtpPort;
+                _configuration.TryGet("smtp.port", out smtpPort);
+
                 await client.ConnectAsync(
-                    _configuration["SMTP_HOST"], 
-                    Int32.Parse(_configuration["SMTP_PORT"])
+                    smtpHost, 
+                    Int32.Parse(smtpPort)
                 );
+
+                string? username;
+                _configuration.TryGet("smtp.username", out username);
+                string? password;
+                _configuration.TryGet("smtp.password", out password);
+                await client.AuthenticateAsync(username, password);
+
                 await client.SendAsync(mail);
                 await client.DisconnectAsync(true);
             }

@@ -138,7 +138,7 @@ namespace AuthServer.Server.GRPC
             WhoAmIReply result = new WhoAmIReply();
 
             SystemSetting? installedSetting = await _authDbContext.SystemSettings
-                .SingleOrDefaultAsync(s => s.Name == "installer.is_installed" && s.Value.Contains("true"));
+                .SingleOrDefaultAsync(s => s.Name == "installer.is_installed" && s.Value == "true");
             result.IsInstalled = (installedSetting != null);
 
             if (userId != null)
