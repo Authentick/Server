@@ -3,7 +3,9 @@
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "authserverdev",
 	"forwardPorts": [
-		5001,
+		80,
+		389,
+		443,
 		8080,
 		8025
 	],
