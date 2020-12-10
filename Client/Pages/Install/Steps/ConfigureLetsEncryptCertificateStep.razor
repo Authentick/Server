@@ -1,0 +1,65 @@
+@implements IStep
+@implements IDisposable
+
+<h1>Configure LetsEncrypt certificates</h1>
+
+<p>By proceeding you agree to the currently-in-effect <a href="https://letsencrypt.org/repository/">Subscriber Agreement.</a>.</p>
+
+<EditForm EditContext="@editContext">
+    <DataAnnotationsValidator />
+    
+    <InputText @bind-Value="letsEncryptCertificateSettings.DomainName" class="form-control bg-secondary" placeholder="Hostname (e.g. example.com)" />
+    <br/>
+
+    <InputText @bind-Value="letsEncryptCertificateSettings.Email" type="email" class="form-control bg-secondary" placeholder="Sender address" />
+</EditForm>
+
+@code {
+    #nullable enable
+
+    [Parameter]
+    public InstallStateMachine StateMachine { get; set; }
+
+    internal LetsEncryptCertificateSettings letsEncryptCertificateSettings = new LetsEncryptCertificateSettings();
+    private EditContext? editContext;
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(letsEncryptCertificateSettings);
+        editContext.OnFieldChanged += HandleFieldChanged;
+
+        StateMachine.SetNextStep(null);
+        StateMachine.SetPreviousStep(new EmailSelectionStep());
+    }
+
+    private void HandleFieldChanged(object sender, FieldChangedEventArgs e)
+    {
+        if(editContext != null) 
+        {
+            bool formValid = editContext.Validate();
+            if (formValid)
+            {
+                StateMachine.SetNextStep(new EmailSelectionStep());
+            } 
+            else
+            {
+                StateMachine.SetNextStep(null);
+            } 
+        }
+    }
+
+    public void Dispose()
+    {
+        editContext.OnFieldChanged -= HandleFieldChanged;
+    }
+
+    internal class LetsEncryptCertificateSettings 
+    {
+        [Required]
+        public string? DomainName { get; set; }
+
+        [Required]
+        public string? Email { get; set; }
+
+    }
+}

@@ -19,11 +19,17 @@ message SetupInstanceRequest {
   SetupSmtpData smtp_settings = 1;
   SetupAccountData account_data = 2;
   string auth_token = 3;
+  SetupTlsData tls_data = 4;
 }
 
 message StartSetupReply {
   bool success = 1;
   google.protobuf.StringValue auth_token = 2;
+}
+
+message SetupTlsData {
+  string domain = 1;
+  string contact_email = 2;
 }
 
 message SetupSmtpData {

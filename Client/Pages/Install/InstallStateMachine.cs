@@ -37,6 +37,13 @@ namespace AuthServer.Client.Pages.Install
                         Port = Int32.Parse(emailStep.emailSettings.Port),
                     };
                     break;
+                case ConfigureLetsEncryptCertificateStep tlsStep:
+                    _setupInstanceRequest.TlsData = new SetupTlsData
+                    {
+                        Domain = tlsStep.letsEncryptCertificateSettings.DomainName,
+                        ContactEmail = tlsStep.letsEncryptCertificateSettings.Email,
+                    };
+                    break;
                 case AccountCreationStep accountCreationStep:
                     _setupInstanceRequest.AccountData = new SetupAccountData
                     {

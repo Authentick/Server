@@ -22,6 +22,9 @@ using AuthServer.Server.Services.User;
 using AuthServer.Server.GRPC.Admin;
 using AuthServer.Server.Services.Ldap;
 using AuthServer.Server.Services.Crypto;
+using AuthServer.Server.Services.TLS;
+using Hangfire.Dashboard;
+using AuthServer.Server.Services.Authentication.Filter;
 
 namespace AuthServer.Server
 {
@@ -79,6 +82,10 @@ namespace AuthServer.Server
                 options.EventsType = typeof(CookieAuthenticationEventListener);
             });
 
+            // TLS
+            services.AddSingleton<AcmeChallengeSingleton>();
+            services.AddScoped<IRequestAcmeCertificateJob, RequestAcmeCertificateJob>();
+
             // Framework
             services.AddGrpc();
             services.AddControllersWithViews();
@@ -134,16 +141,11 @@ namespace AuthServer.Server
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
 
             // Routing
             app.UseRouting();
-
-            // Hangfire
-            app.UseHangfireServer();
-            app.UseHangfireDashboard();
 
             // MiniProfiler
             app.UseMiniProfiler();
@@ -155,9 +157,21 @@ namespace AuthServer.Server
             app.UseAuthentication();
             app.UseAuthorization();
 
+            // Hangfire
+            app.UseHangfireServer();
+            var options = new DashboardOptions
+            {
+                Authorization = new []
+                {
+                    new HangfireAuthorizationFilter(),
+                }
+            };
+            app.UseHangfireDashboard("/hangfire", options);
+
             // Endpoints
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllers();
                 endpoints.MapGrpcService<AuthService>();
                 endpoints.MapGrpcService<TypeaheadService>();
                 endpoints.MapGrpcService<SessionsService>();
