@@ -6,6 +6,7 @@ using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
+using AuthServer.Server.Services.TLS;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
 using Microsoft.Extensions.Configuration;
@@ -30,25 +31,21 @@ namespace AuthServer.Server
                     {
                         kestrelOptions.AddServerHeader = false;
 
-                        kestrelOptions.ListenAnyIP(443, listenOptions =>
+                     kestrelOptions.ListenAnyIP(443, listenOptions =>
                         {
                             listenOptions.UseHttps(async (stream, clientHelloInfo, state, cancellationToken) =>
                             {
                                 await Task.Yield();
 
-                                string? snapFolder = Environment.GetEnvironmentVariable("SNAP_USER_DATA");
-                                string targetHostName = stream.TargetHostName.Replace("/", "").Replace("\\", "");
-                                string targetFile = snapFolder + "/" + targetHostName + ".pfx";
-
                                 SslServerAuthenticationOptions options = new SslServerAuthenticationOptions { };
 
-                                if (File.Exists(targetFile))
+                                if (CertificateLocationHelper.CertificateExists(clientHelloInfo.ServerName))
                                 {
-                                    options.ServerCertificate = X509Certificate.CreateFromCertFile(targetFile);
+                                    options.ServerCertificate = new X509Certificate2(CertificateLocationHelper.GetPath(clientHelloInfo.ServerName));
                                 }
                                 else
                                 {
-                                    // Use default certificate
+                                    // FIXME: Use default certificate
                                 }
 
                                 return options;

@@ -21,7 +21,7 @@ namespace AuthServer.Server.Services.Ldap
             {
                 LdapServer server = new LdapServer
                 {
-                    Port = 389,
+                    Port = 3389,
                 };
 
                 LdapEventListener ldapEventListener = scope.ServiceProvider.GetRequiredService<LdapEventListener>();

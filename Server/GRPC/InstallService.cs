@@ -1,14 +1,15 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using AuthServer.Server.Services.Crypto;
+using AuthServer.Server.Services.TLS;
 using AuthServer.Server.Services.User;
 using AuthServer.Shared;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthServer.Server.GRPC
@@ -119,6 +120,10 @@ namespace AuthServer.Server.GRPC
                 Value = request.SmtpSettings.Port.ToString(),
             };
 
+            if (request.TlsData.Domain != null)
+            {
+                BackgroundJob.Enqueue<IRequestAcmeCertificateJob>(job => job.Request(request.TlsData.ContactEmail, request.TlsData.Domain));
+            }
 
             _authDbContext.AddRange(installSetting, smtpHostnameSetting, smtpUsernameSetting, smtpPasswordSetting, smtpSenderAddress);
             await _authDbContext.SaveChangesAsync();
