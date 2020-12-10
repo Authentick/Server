@@ -117,8 +117,11 @@ namespace AuthServer.Server
                 config.UsePostgreSqlStorage(Configuration.GetConnectionString("HangfireDb")));
 
             // Miniprofiler
-            services.AddMiniProfiler()
-                .AddEntityFramework();
+            services.AddMiniProfiler(options =>
+            {
+                options.ResultsAuthorize = request => MiniProfileFilter.CanSeeProfiler(request);
+                options.ResultsListAuthorize = request => MiniProfileFilter.CanSeeProfiler(request);
+            }).AddEntityFramework();
 
             // Reverse Proxy
             services.AddReverseProxy().LoadFromConfig(Configuration.GetSection("ReverseProxy"));
@@ -147,9 +150,6 @@ namespace AuthServer.Server
             // Routing
             app.UseRouting();
 
-            // MiniProfiler
-            app.UseMiniProfiler();
-
             // GRPC
             app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true });
 
@@ -157,11 +157,14 @@ namespace AuthServer.Server
             app.UseAuthentication();
             app.UseAuthorization();
 
+            // MiniProfiler
+            app.UseMiniProfiler();
+
             // Hangfire
             app.UseHangfireServer();
             var options = new DashboardOptions
             {
-                Authorization = new []
+                Authorization = new[]
                 {
                     new HangfireAuthorizationFilter(),
                 }

@@ -8,7 +8,6 @@ option csharp_namespace = "AuthServer.Shared";
 service Auth {
   rpc WhoAmI (google.protobuf.Empty) returns (WhoAmIReply);
   rpc Login (LoginRequest) returns (LoginReply);
-  rpc Register (RegisterRequest) returns (RegisterReply);
   rpc VerifyEmail (VerifyEmailRequest) returns (VerifyEmailReply);
   rpc VerifyAuthenticatorToken (VerifyAuthenticatorTokenRequest) returns (VerifyAuthenticatorReply);
 }
@@ -32,15 +31,6 @@ enum LoginStateEnum {
   failed = 0;
   success = 1;
   twoFactorRequired = 2;
-}
-
-message RegisterRequest {
-  string email = 1;
-  string password = 2;
-}
-
-message RegisterReply {
-  bool success = 1;
 }
 
 message VerifyEmailRequest {

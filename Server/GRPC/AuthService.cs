@@ -37,7 +37,7 @@ namespace AuthServer.Server.GRPC
 
             if (user != null)
             {
-                
+
                 Microsoft.AspNetCore.Identity.SignInResult result =
                     await _signInManager.PasswordSignInAsync(user, request.Password, true, false);
 
@@ -61,34 +61,6 @@ namespace AuthServer.Server.GRPC
             {
                 State = LoginStateEnum.Failed
             };
-        }
-
-        public override async Task<RegisterReply> Register(RegisterRequest request, ServerCallContext context)
-        {
-
-            AppUser user = new AppUser
-            {
-                UserName = request.Email,
-                Email = request.Email
-            };
-
-            IdentityResult result = await _userManager.CreateAsync(user, request.Password);
-
-            if (result.Succeeded)
-            {
-                string code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-
-                BackgroundJob.Enqueue<IEmailSender>(x => x.SendEmailAsync(
-                    request.Email,
-                    "Foo",
-                    "Test",
-                    "/email/confirm?userId=" + user.Id.ToString() + "&code=" + WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))
-                ));
-
-                return new RegisterReply { Success = true };
-            }
-
-            return new RegisterReply { Success = false };
         }
 
         public override async Task<VerifyAuthenticatorReply> VerifyAuthenticatorToken(VerifyAuthenticatorTokenRequest request, ServerCallContext context)
