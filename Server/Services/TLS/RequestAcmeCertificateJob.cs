@@ -25,8 +25,6 @@ namespace AuthServer.Server.Services.TLS
 
             var authorizations = await order.Authorization(domainName);
             var httpChallenge = await authorizations.Http();
-            System.Console.WriteLine(httpChallenge.Token);
-            System.Console.WriteLine(httpChallenge.KeyAuthz);
 
             _challengeSingleton.AddChallenge(httpChallenge.Token, httpChallenge.KeyAuthz);
 
