@@ -18,7 +18,7 @@ namespace AuthServer.Server.Services.TLS
 
         public async Task Request(string contactEmail, string domainName)
         {
-            var acme = new AcmeContext(WellKnownServers.LetsEncryptStagingV2);
+            var acme = new AcmeContext(WellKnownServers.LetsEncryptV2);
             var account = await acme.NewAccount(contactEmail, true);
 
             var order = await acme.NewOrder(new[] { domainName });
