@@ -6,8 +6,6 @@ services:
         - .:/workspace:cached
         - /var/run/docker.sock:/var/run/docker-host.sock
       command: /bin/sh -c "while sleep 1000; do :; done"
-      depends_on:
-        - db
       ports:
         - 1025:1025
         - 8080:8080
@@ -22,8 +20,6 @@ services:
       image: adminer
       restart: always
       network_mode: service:authserverdev
-      depends_on:
-        - db
   mailhog:
       image: mailhog/mailhog
       restart: always
