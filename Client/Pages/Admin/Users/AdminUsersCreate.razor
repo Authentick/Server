@@ -1,0 +1,40 @@
+@page "/admin/users/create"
+@attribute [Authorize]
+
+@layout AdminShell
+
+@using AuthServer.Shared.Admin
+
+@inject NavigationManager NavigationManager
+@inject AuthServer.Shared.Admin.Users.UsersClient UsersClient
+
+<h2 class="text-lg">Add a new user</h2>
+
+<form @onsubmit="@SubmitForm" class="form-group col-12 col-md-6 pl-0">
+    <input type="text" @bind="@Username" class="form-control bg-secondary mb-3 mt-4" placeholder="Username" />
+    <input type="email" @bind="@Email" class="form-control bg-secondary mb-3" placeholder="Email" />
+    <input type="password" @bind="@Password" class="form-control bg-secondary mb-4" placeholder="Password" />
+    <button type="submit" class="btn btn-secondary-dark">Add</button>
+</form>
+
+@code {
+    private string Username = "";
+    private string Email = "";
+    private string Password = "";
+
+   private async Task SubmitForm() 
+   {
+
+       CreateUserRequest createUserRequest = new CreateUserRequest 
+       {
+           Username = Username,
+           Email = Email,
+           Password = Password,
+       };
+
+       CreateUserResponse response = await UsersClient.CreateUserAsync(createUserRequest);
+
+       NavigationManager.NavigateTo("/admin/users/");
+   }
+   
+}

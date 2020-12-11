@@ -7,7 +7,10 @@
 
 @inject AuthServer.Shared.Admin.Users.UsersClient UsersClient
 
-<h2>Users</h2>
+<div class="d-flex flex-column flex-md-row justify-content-between">
+    <h2>Users</h2>
+    <a class="btn btn-secondary-dark mb-3 mb-md-0" href="/admin/users/create">Add a new user</a>
+</div>
 
 @if (UserListReply != null)
 {
