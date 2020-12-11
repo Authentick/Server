@@ -1,0 +1,43 @@
+@page "/security/settings/add-two-factor"
+@attribute [Authorize]
+
+@layout SecurityShell
+
+@using AuthServer.Shared.Security
+
+@inject AuthServer.Shared.Security.Settings.SettingsClient SettingsClient
+
+<h2>Add second factor</h2>
+
+<form class="mb-4 pb-4">
+  <div class="form-group col-12 col-md-6 p-0">
+    <input type="text" class="form-control bg-secondary" placeholder="Name of device">
+  </div>
+  <div id="qrCode"></div>
+  <br />
+  <div class="form-group col-12 col-md-6 p-0">
+    <input type="text" class="form-control bg-secondary" placeholder="Verification code">
+  </div>
+  <button type="submit" class="btn btn-secondary-dark">Add device</button>
+</form>
+
+@code {
+    #nullable enable
+    private string? CurrentPassword;
+    private string? NewPassword;
+    private string? ConfirmNewPassword;
+
+    private async Task SubmitChangePasswordForm() 
+    {
+      if (NewPassword != ConfirmNewPassword) {
+        return;
+      }
+
+      ChangePasswordRequest request = new ChangePasswordRequest{
+        CurrentPassword = CurrentPassword,
+        NewPassword = NewPassword
+      };
+      
+      await SettingsClient.ChangePasswordAsync(request);
+    }
+}

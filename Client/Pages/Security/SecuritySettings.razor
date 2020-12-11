@@ -1,0 +1,87 @@
+@page "/security/settings/"
+@attribute [Authorize]
+
+@layout SecurityShell
+
+@using AuthServer.Shared.Security
+
+@inject AuthServer.Shared.Security.Settings.SettingsClient SettingsClient
+
+<h2>Change password</h2>
+
+<form class="mb-4 pb-4" @onsubmit="@SubmitChangePasswordForm">
+  <div class="form-group col-12 col-md-6 p-0">
+    <input type="password" class="form-control bg-secondary" @bind="@CurrentPassword" placeholder="Current password">
+  </div>
+  <div class="form-group col-12 col-md-6 p-0">
+    <input type="password" class="form-control bg-secondary" @bind="@NewPassword" placeholder="New password">
+  </div>
+  <div class="form-group col-12 col-md-6 p-0">
+    <input type="password" class="form-control bg-secondary" @bind="@ConfirmNewPassword" placeholder="Confirm new password">
+  </div>
+  <button type="submit" class="btn btn-secondary-dark">Update password</button>
+</form>
+
+<h2>Two-factor authentication</h2>
+<div class="d-flex flex-lg-row flex-column justify-content-between">
+    <div class="d-flex flex-column pr-4">
+        <h5>Authentication app</h5>
+        <p>Use an application on your phone to get two-factor authentication codes when prompted.</p>
+    </div>
+    <a href="/security/settings/add-two-factor" class="btn btn-secondary-dark mb-lg-0 mb-3">Add a new app</a>
+</div>
+
+<div class="table-responsive mb-2">
+  <table class="table table-hover table-bordered mb-4 table-secondary table-striped">
+    <thead class="bg-secondary-dark"
+      <tr>
+        <th scope="col" class="border-0">Name</th>
+        <th scope="col" class="border-0">Added</th>
+        <th scope="col" class="border-0">Last used</th>
+        <th scope="col" class="border-0">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Android phone</td>
+        <td>29.12.2015 at 4:12 AM</td>
+        <td>29.12.2015 at 4:12 AM</td>
+        <td><a href="#" class="btn btn-secondary-dark">Remove</a></td>
+      </tr>
+      <tr>
+        <td>Android phone</td>
+        <td>29.12.2015 at 4:12 AM</td>
+        <td>29.12.2015 at 4:12 AM</td>
+        <td><a href="#" class="btn btn-secondary-dark">Remove</a></td>
+      </tr>
+      <tr>
+        <td>Android phone</td>
+        <td>29.12.2015 at 4:12 AM</td>
+        <td>29.12.2015 at 4:12 AM</td>
+        <td><a href="#" class="btn btn-secondary-dark">Remove</a></td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+@code {
+    #nullable enable
+    private string? CurrentPassword;
+    private string? NewPassword;
+    private string? ConfirmNewPassword;
+
+    private async Task SubmitChangePasswordForm() 
+    {
+      if (NewPassword != ConfirmNewPassword) {
+        return;
+      }
+
+      ChangePasswordRequest request = new ChangePasswordRequest{
+        CurrentPassword = CurrentPassword,
+        NewPassword = NewPassword
+      };
+      
+      await SettingsClient.ChangePasswordAsync(request);
+    }
+}

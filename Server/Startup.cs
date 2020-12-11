@@ -23,8 +23,8 @@ using AuthServer.Server.GRPC.Admin;
 using AuthServer.Server.Services.Ldap;
 using AuthServer.Server.Services.Crypto;
 using AuthServer.Server.Services.TLS;
-using Hangfire.Dashboard;
 using AuthServer.Server.Services.Authentication.Filter;
+using AuthServer.Server.Services.Authentication.TwoFactorAuthenticators;
 
 namespace AuthServer.Server
 {
@@ -65,13 +65,14 @@ namespace AuthServer.Server
             services.AddDataProtection().PersistKeysToDbContext<KeyStorageDbContext>();
 
             // Identity
+            services.AddScoped<TotpAuthenticatorProvider>();
             services.AddScoped<CookieAuthenticationEventListener>();
             services.AddIdentity<AppUser, IdentityRole<Guid>>(config =>
             {
                 config.SignIn.RequireConfirmedEmail = true;
             })
                 .AddEntityFrameworkStores<AuthDbContext>()
-                .AddDefaultTokenProviders();
+                .AddTokenProvider<TotpAuthenticatorProvider>(TotpAuthenticatorProvider.ProviderName);
             services
                 .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie();
