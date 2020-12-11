@@ -8,7 +8,6 @@ using AuthServer.Shared.Security;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using NodaTime;
 
 namespace AuthServer.Server.GRPC.Security

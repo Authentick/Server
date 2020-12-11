@@ -81,6 +81,7 @@ namespace AuthServer.Server.Models
         public string SharedSecret { get; set; } = null!;
         public Instant CreationTime { get; set; }
         public Instant LastUsedTime { get; set; }
+        public AppUser User { get; set; } = null!; 
     }
 
     public class AppUser : IdentityUser<Guid>
