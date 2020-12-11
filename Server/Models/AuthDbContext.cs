@@ -18,6 +18,7 @@ namespace AuthServer.Server.Models
         public DbSet<LdapAppUserCredentials> LdapAppUserCredentials { get; set; } = null!;
         public DbSet<UserGroup> UserGroup { get; set; } = null!;
         public DbSet<SystemSetting> SystemSettings { get; set; } = null!;
+        public DbSet<UserTotpDevice> UserTotpDevices { get; set; } = null!;
     }
 
     public class SystemSetting
@@ -73,9 +74,19 @@ namespace AuthServer.Server.Models
         public ICollection<AuthApp> AuthApps { get; set; } = null!;
     }
 
+    public class UserTotpDevice
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = null!;
+        public string SharedSecret { get; set; } = null!;
+        public Instant CreationTime { get; set; }
+        public Instant LastUsedTime { get; set; }
+    }
+
     public class AppUser : IdentityUser<Guid>
     {
         public ICollection<AuthSession> Sessions { get; set; } = null!;
         public ICollection<UserGroup> Groups { get; set; } = null!;
+        public ICollection<UserTotpDevice> TotpDevices { get; set; } = null!;
     }
 }
