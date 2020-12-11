@@ -1,13 +1,10 @@
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
-using AuthServer.Server.Services.Email;
 using AuthServer.Server.Services.User;
 using AuthServer.Shared;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using Hangfire;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;

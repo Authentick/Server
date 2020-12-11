@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
+using AuthServer.Server.Services.Authentication.TwoFactorAuthenticators.Implementation;
 using AuthServer.Server.Services.User;
 using AuthServer.Shared.Security;
 using Google.Protobuf.WellKnownTypes;
@@ -68,6 +69,19 @@ namespace AuthServer.Server.GRPC.Security
             }
 
             return new ChangePasswordReply { Success = false };
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return base.Equals(obj);
+        }
+
+        public override Task<NewAuthenticatorSecret> GetNewAuthenticatorSecret(Empty request, ServerCallContext context)
+        {
+            return Task.FromResult(new NewAuthenticatorSecret
+            {
+                Secret = Base32.ToBase32(Rfc6238AuthenticationService.GenerateRandomKey()),
+            });
         }
 
         public override async Task<TwoFactorListReply> ListAuthenticatorApps(Empty request, ServerCallContext context)

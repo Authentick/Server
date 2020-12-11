@@ -7,10 +7,15 @@ option csharp_namespace = "AuthServer.Shared.Security";
 
 service Settings {
   rpc ChangePassword (ChangePasswordRequest) returns (ChangePasswordReply);
+  rpc GetNewAuthenticatorSecret (google.protobuf.Empty) returns (NewAuthenticatorSecret);
   rpc ListAuthenticatorApps (google.protobuf.Empty) returns (TwoFactorListReply);
   rpc ListAuthenticatorKeys (google.protobuf.Empty) returns (TwoFactorListReply);
   rpc RemoveAuthenticator (RemoveAuthenticatorRequest) returns (RemoveAuthenticatorReply);
   rpc AddNewAuthenticatorApp (AddNewAuthenticatorAppRequest) returns (AddNewAuthenticatorAppReply);
+}
+
+message NewAuthenticatorSecret {
+  string secret = 1;
 }
 
 message ChangePasswordRequest {

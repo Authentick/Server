@@ -13,7 +13,7 @@ namespace AuthServer.Server.Services.Authentication.TwoFactorAuthenticators
     class TotpAuthenticatorProvider : AuthenticatorTokenProvider<AppUser>
     {
         private readonly AuthDbContext _authDbContext;
-        public static readonly string ProviderName = "TotpAuthenticator";
+        public static readonly string ProviderName = "Authenticator";
 
         public TotpAuthenticatorProvider(AuthDbContext authDbContext)
         {
@@ -33,6 +33,7 @@ namespace AuthServer.Server.Services.Authentication.TwoFactorAuthenticators
         public override async Task<bool> ValidateAsync(string purpose, string token, UserManager<AppUser> manager, AppUser user)
         {
             int code;
+
             if (!int.TryParse(token, out code))
             {
                 return false;
@@ -60,6 +61,7 @@ namespace AuthServer.Server.Services.Authentication.TwoFactorAuthenticators
                     }
                 }
             }
+
             return false;
         }
     }
