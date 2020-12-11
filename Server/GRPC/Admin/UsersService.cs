@@ -21,6 +21,22 @@ namespace AuthServer.Server.GRPC.Admin
             _userManager = userManager;
         }
 
+        public override async Task<CreateUserResponse> CreateUser(CreateUserRequest request, ServerCallContext context)
+        {
+            AppUser user = new AppUser
+            {
+                UserName = request.Username,
+                Email = request.Email,
+                EmailConfirmed = true,
+            };
+            await _userManager.CreateAsync(user, request.Password);
+
+            return new CreateUserResponse
+            {
+                Success = true,
+            };
+        }
+
         public override Task<UserListReply> ListUsers(Empty request, ServerCallContext context)
         {
             IEnumerable<AppUser> users = _userManager.GetAllUsers();
@@ -34,6 +50,11 @@ namespace AuthServer.Server.GRPC.Admin
             }
 
             return Task.FromResult(reply);
+        }
+
+        public override string? ToString()
+        {
+            return base.ToString();
         }
     }
 }
