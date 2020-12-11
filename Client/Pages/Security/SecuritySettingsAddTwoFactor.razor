@@ -1,0 +1,68 @@
+@page "/security/settings/add-two-factor"
+@attribute [Authorize]
+
+@layout SecurityShell
+
+@using AuthServer.Shared.Security
+@using QRCoder
+
+@inject AuthServer.Shared.Security.Settings.SettingsClient SettingsClient
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<h2>Add second factor</h2>
+
+<form class="mb-4 pb-4" @onsubmit="SubmitAddTwoFactorForm">
+  <div class="form-group col-12 col-md-6 p-0">
+    <input @bind="@_deviceName" type="text" class="form-control bg-secondary" placeholder="Name of device">
+  </div>
+  @if(_qrCodeImage != null) {
+    <div>Secret is: @_secret</div>
+    <img src="data:image/png;base64,@_qrCodeImage" style="width: 150px;" />
+  }
+  <br />
+  <button type="submit" class="btn btn-secondary-dark">Add device</button>
+</form>
+
+@code {
+  #nullable enable
+  private string? _secret;
+  private string? _deviceName;
+  private string? _qrCodeImage;
+
+  protected override async Task OnInitializedAsync()
+  {
+    _secret = (await SettingsClient.GetNewAuthenticatorSecretAsync(new Google.Protobuf.WellKnownTypes.Empty())).Secret;
+    BuildImage();
+  }
+
+  private void BuildImage()
+  {
+    QRCoder.PayloadGenerator.OneTimePassword generator = new QRCoder.PayloadGenerator.OneTimePassword()
+    {
+      Secret = _secret,
+      Issuer = "Gatekeeper",
+    };
+    string payload = generator.ToString();
+    QRCodeGenerator qrGenerator = new QRCodeGenerator();
+    QRCodeData qrCodeData = qrGenerator.CreateQrCode(payload, QRCodeGenerator.ECCLevel.Q);
+    PngByteQRCode qrCode = new PngByteQRCode(qrCodeData);
+
+    byte[] qrCodeAsPngByteArr = qrCode.GetGraphic(20);
+    _qrCodeImage = Convert.ToBase64String(qrCodeAsPngByteArr);
+  }
+
+  private async Task SubmitAddTwoFactorForm()
+  {
+    if (_deviceName != null && _secret != null)
+    {
+      AddNewAuthenticatorAppRequest request = new AddNewAuthenticatorAppRequest
+      {
+        Name = _deviceName,
+        SharedSecret = _secret,
+      };
+
+      await SettingsClient.AddNewAuthenticatorAppAsync(request);
+    }
+  }
+}

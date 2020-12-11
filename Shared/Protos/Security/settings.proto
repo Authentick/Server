@@ -1,15 +1,21 @@
 syntax = "proto3";
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 
 option csharp_namespace = "AuthServer.Shared.Security";
 
 service Settings {
   rpc ChangePassword (ChangePasswordRequest) returns (ChangePasswordReply);
+  rpc GetNewAuthenticatorSecret (google.protobuf.Empty) returns (NewAuthenticatorSecret);
   rpc ListAuthenticatorApps (google.protobuf.Empty) returns (TwoFactorListReply);
   rpc ListAuthenticatorKeys (google.protobuf.Empty) returns (TwoFactorListReply);
   rpc RemoveAuthenticator (RemoveAuthenticatorRequest) returns (RemoveAuthenticatorReply);
   rpc AddNewAuthenticatorApp (AddNewAuthenticatorAppRequest) returns (AddNewAuthenticatorAppReply);
+}
+
+message NewAuthenticatorSecret {
+  string secret = 1;
 }
 
 message ChangePasswordRequest {
@@ -28,8 +34,8 @@ message TwoFactorListReply {
 message TwoFactorDevice {
   string id = 1;
   string name = 2;
-  string added = 3;
-  string lastUsed = 4;
+  google.protobuf.Timestamp added = 3;
+  google.protobuf.Timestamp lastUsed = 4;
 }
 
 message RemoveAuthenticatorRequest {

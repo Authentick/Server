@@ -1,0 +1,39 @@
+@page "/login/mfa"
+
+@layout LoggedOutLayout
+
+@inject AuthServer.Shared.Auth.AuthClient AuthClient
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@using AuthServer.Shared
+
+<div class="h-100 pt-0 pt-md-4">
+    <h1>Provide second factor</h1>
+
+    <form class="d-flex flex-column justify-content-start h-100 col-12 col-md-8 pl-0" @onsubmit="@SubmitForm" method="post">
+        <div class="pt-3">
+            <input type="text" class="form-control w-100 mt-2" required name="code" @bind="@Code" placeholder="Code"/>
+        </div>
+
+        <button type="submit" class="btn btn-success mt-3">Log in</button>
+    </form>
+</div>
+
+@code {
+    #nullable enable
+    private string? Code;
+
+    private async Task SubmitForm()
+    {
+        VerifyAuthenticatorTokenRequest request = new VerifyAuthenticatorTokenRequest {
+            Token = Code,
+        };   
+
+        VerifyAuthenticatorReply reply = await AuthClient.VerifyAuthenticatorTokenAsync(request);
+
+        if(reply.Success) {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+}
