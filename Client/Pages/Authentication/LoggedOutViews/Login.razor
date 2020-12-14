@@ -52,6 +52,9 @@
             case LoginStateEnum.TwoFactorRequired:
                 NavigationManager.NavigateTo("/login/mfa");
                 break;
+            case LoginStateEnum.Blocked:
+                NavigationManager.NavigateTo("/login/blocked");
+                break;
             case LoginStateEnum.Success:
                 ((Util.AuthStateProvider) AuthenticationStateProvider).StateHasChanged();
                 NavigationManager.NavigateTo("/");

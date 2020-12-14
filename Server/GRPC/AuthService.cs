@@ -1,13 +1,17 @@
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
+using AuthServer.Server.Services.Authentication;
 using AuthServer.Server.Services.User;
 using AuthServer.Shared;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Primitives;
 
 namespace AuthServer.Server.GRPC
 {
@@ -16,42 +20,92 @@ namespace AuthServer.Server.GRPC
         private readonly UserManager _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly AuthDbContext _authDbContext;
+        private readonly BruteforceManager _bruteforceManager;
 
         public AuthService(
             UserManager userManager,
             SignInManager<AppUser> signInManager,
-            AuthDbContext authDbContext
+            AuthDbContext authDbContext,
+            BruteforceManager bruteforceManager
             )
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _authDbContext = authDbContext;
+            _bruteforceManager = bruteforceManager;
         }
 
         public override async Task<LoginReply> Login(LoginRequest request, ServerCallContext context)
         {
-            AppUser user = await _userManager.FindByNameAsync(request.UserId);
+            AppUser? user = await _userManager.FindByNameAsync(request.UserId);
+            HttpContext httpContext = context.GetHttpContext();
 
+            IPAddress? ip = httpContext.Connection.RemoteIpAddress;
+            if (ip == null)
+            {
+                return new LoginReply { State = LoginStateEnum.Failed };
+            }
+
+            StringValues userAgent;
+            httpContext.Request.Headers.TryGetValue("User-Agent", out userAgent);
+
+            if (userAgent.Count != 1)
+            {
+                return new LoginReply { State = LoginStateEnum.Failed };
+            }
+
+            bool isUserBlocked = false;
             if (user != null)
             {
-                Microsoft.AspNetCore.Identity.SignInResult result =
-                    await _signInManager.PasswordSignInAsync(user, request.Password, true, false);
-
-                if (result.Succeeded)
-                {
-                    return new LoginReply
-                    {
-                        State = LoginStateEnum.Success
-                    };
-                }
-                else if (result.RequiresTwoFactor)
-                {
-                    return new LoginReply
-                    {
-                        State = LoginStateEnum.TwoFactorRequired
-                    };
-                }
+                isUserBlocked = await _bruteforceManager.IsUserBlockedAsync(user);
             }
+            bool isIpBlocked = await _bruteforceManager.IsIpBlockedAsync(ip);
+
+            if (isUserBlocked || isIpBlocked)
+            {
+                return new LoginReply
+                {
+                    State = LoginStateEnum.Blocked,
+                };
+            }
+
+            if (user == null)
+            {
+                await _bruteforceManager.MarkInvalidLoginAttemptAsync(
+                    ip,
+                    userAgent[0],
+                    request.UserId
+                );
+
+                return new LoginReply
+                {
+                    State = LoginStateEnum.Failed
+                };
+            }
+
+            Microsoft.AspNetCore.Identity.SignInResult result =
+                await _signInManager.PasswordSignInAsync(user, request.Password, false, false);
+
+            if (result.Succeeded)
+            {
+                return new LoginReply
+                {
+                    State = LoginStateEnum.Success
+                };
+            }
+            else if (result.RequiresTwoFactor)
+            {
+                return new LoginReply
+                {
+                    State = LoginStateEnum.TwoFactorRequired
+                };
+            }
+
+            await _bruteforceManager.MarkInvalidLoginAttemptAsync(
+                ip,
+                userAgent[0],
+                request.UserId
+            );
 
             return new LoginReply
             {
