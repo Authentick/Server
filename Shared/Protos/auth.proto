@@ -31,6 +31,7 @@ enum LoginStateEnum {
   failed = 0;
   success = 1;
   twoFactorRequired = 2;
+  blocked = 3;
 }
 
 message VerifyEmailRequest {

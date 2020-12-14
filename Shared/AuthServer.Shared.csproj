@@ -20,7 +20,7 @@
   <ItemGroup>
     <Protobuf Include="Protos\install.proto" />
     <Protobuf Include="Protos\typeahead.proto" />
-    <Protobuf Include="Protos\Auth.proto" />
+    <Protobuf Include="Protos\auth.proto" />
     <Protobuf Include="Protos\Admin\apps.proto" />
     <Protobuf Include="Protos\Admin\groups.proto" />
     <Protobuf Include="Protos\Admin\users.proto" />
