@@ -100,6 +100,7 @@ namespace AuthServer.Server
 
             // Authentication
             services.AddScoped<SessionManager>();
+            services.AddScoped<BruteforceManager>();
 
             // Crypto
             services.AddScoped<SecureRandom>();
