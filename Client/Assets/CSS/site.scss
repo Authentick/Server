@@ -14,7 +14,7 @@ p {
   transform: translate(-50%, -50%); 
 }
 
-.circle {
+.loading-circle {
   display: inline-block;
   position: relative;
   background-color: $main-theme-color;
@@ -42,19 +42,19 @@ p {
   }
 }
 
-.circle-1 {
+.loading-circle-1 {
   animation-delay: 0.1s;
 }
 
-.circle-2 {
+.loading-circle-2 {
   animation-delay: 0.2s;
 }
 
-.circle-3 {
+.loading-circle-3 {
   animation-delay: 0.3s;
 }
 
-.circle-4 {
+.loading-circle-4 {
   animation-delay: 0.4s;
 }
 
