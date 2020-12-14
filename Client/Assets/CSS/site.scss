@@ -7,6 +7,50 @@ p {
   margin-bottom: 0.5rem;
 }
 
+.loader {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%); 
+}
+
+.circle {
+  display: inline-block;
+  background-color: $main-theme-color;
+  border-radius: 50%;
+  animation: loader 1s cubic-bezier(.17,.67,1,-0.02) infinite;
+  transform-origin: bottom center;
+  position: relative;
+  width: 20px;
+  height: 20px;
+}
+@keyframes loader {
+  0% {
+    transform: translateY(0px);
+    background-color: $light-gray;
+  }
+  50% {
+    transform: translateY(70px);
+    background-color:$main-theme-color;
+  }
+  100% {
+    transform: translateY(0px);
+    background-color: $light-gray;
+  }
+}
+.circle-1 {
+  animation-delay: 0.1s;
+}
+.circle-2 {
+  animation-delay: 0.2s;
+}
+.circle-3 {
+  animation-delay: 0.3s;
+}
+.circle-4 {
+  animation-delay: 0.4s;
+}
+
 #blazor-error-ui {
   background: lightyellow;
   bottom: 0;
