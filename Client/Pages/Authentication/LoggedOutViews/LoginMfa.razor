@@ -33,6 +33,7 @@
         VerifyAuthenticatorReply reply = await AuthClient.VerifyAuthenticatorTokenAsync(request);
 
         if(reply.Success) {
+            ((Util.AuthStateProvider) AuthenticationStateProvider).StateHasChanged();
             NavigationManager.NavigateTo("/");
         }
     }
