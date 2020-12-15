@@ -22,6 +22,8 @@ namespace AuthServer.Server.Models
         public DbSet<UserTotpDevice> UserTotpDevices { get; set; } = null!;
         public DbSet<InvalidLoginAttempt> InvalidLoginAttempts { get; set; } = null!;
         public DbSet<InvalidTwoFactorAttempt> InvalidTwoFactorAttempts { get; set; } = null!;
+        public DbSet<OIDCSession> OIDCSessions { get; set; } = null!;
+        public DbSet<OIDCAppSettings> OIDCAppSettings { get; set; } = null!;
     }
 
     public class SystemSetting
@@ -36,6 +38,7 @@ namespace AuthServer.Server.Models
         public Guid Id { get; set; }
         public string Name { get; set; } = null!;
         public LdapAppSettings? LdapAppSettings { get; set; }
+        public OIDCAppSettings? OidcAppSettings { get; set; }
         public ICollection<UserGroup> UserGroups { get; set; } = null!;
     }
 
@@ -57,6 +60,26 @@ namespace AuthServer.Server.Models
         public LdapAppSettings LdapAppSettings { get; set; } = null!;
         public AppUser User { get; set; } = null!;
         public string HashedPassword { get; set; } = null!;
+    }
+
+    public class OIDCAppSettings
+    {
+        public Guid Id { get; set; }
+        public Guid AuthAppId { get; set; }
+        public AuthApp AuthApp { get; set; } = null!;
+        public ICollection<OIDCSession> OIDCSessions { get; set; } = null!;
+        public string ClientId { get; set; } = null!;
+        public string ClientSecret { get; set; } = null!;
+        public string Audience { get; set; } = null!;
+    }
+
+    public class OIDCSession
+    {
+        public Guid Id { get; set; }
+        public OIDCAppSettings OIDCAppSettings { get; set; } = null!;
+        public AppUser User { get; set; } = null!;
+        public Instant CreationTime { get; set; }
+        public Instant? ExpiredTime { get; set; }
     }
 
     public class AuthSession
