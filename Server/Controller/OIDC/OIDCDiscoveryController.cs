@@ -25,10 +25,10 @@ namespace AuthServer.Server.Controller.OIDC
                 Issuer = "https://" + host.Host,
                 AuthorizationEndpoint = "https://" + host.Host + "/connect/authorize",
                 TokenEndpoint = "https://" + host.Host + "/connect/token",
-                JwksUri = "https://" + host.Host + "/jwks.json",
+                JwksUri = "https://" + host.Host + "/.well-known/jwks.json",
                 ResponseTypesSupported = new List<string>() { "code" },
                 SubjectTypesSupported = new List<string>() { "pairwise" },
-                IdTokenSigningAlgValuesSupported = new List<string>() { "HS256" },
+                IdTokenSigningAlgValuesSupported = new List<string>() { "RS256" },
             };
         }
 

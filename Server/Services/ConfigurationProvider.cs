@@ -3,7 +3,7 @@ using AuthServer.Server.Models;
 
 namespace AuthServer.Server.Services
 {
-    class ConfigurationProvider
+    public class ConfigurationProvider
     {
         private readonly AuthDbContext _authDbContext;
 

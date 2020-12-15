@@ -25,6 +25,7 @@ using AuthServer.Server.Services.Crypto;
 using AuthServer.Server.Services.TLS;
 using AuthServer.Server.Services.Authentication.Filter;
 using AuthServer.Server.Services.Authentication.TwoFactorAuthenticators;
+using AuthServer.Server.Services.Crypto.OIDC;
 
 namespace AuthServer.Server
 {
@@ -105,6 +106,7 @@ namespace AuthServer.Server
             // Crypto
             services.AddScoped<SecureRandom>();
             services.AddScoped<Hasher>();
+            services.AddScoped<OIDCKeyManager>();
 
             // Configuration
             services.AddScoped<Services.ConfigurationProvider>();
