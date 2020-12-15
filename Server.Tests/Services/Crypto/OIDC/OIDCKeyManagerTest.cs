@@ -3,7 +3,7 @@ using AuthServer.Server.Services;
 using AuthServer.Server.Services.Crypto.OIDC;
 using Xunit;
 
-namespace AuthServer.Server.Tests.Services.Authentication.Session
+namespace AuthServer.Server.Tests.Services.Crypto.OIDC
 {
     public class OIDCKeyManagerTest : IClassFixture<SharedDatabaseFixture>
     {
