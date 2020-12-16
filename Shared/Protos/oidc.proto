@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+
+option csharp_namespace = "AuthServer.Shared";
+
+service OIDCUserService {
+    rpc GrantApplication(GrantApplicationRequest) returns (GrantApplicationReply);
+}
+
+service OIDCAdminService {
+    rpc AddOIDCToApplication(AddOIDCToApplicationRequest) returns (AddOIDCToApplicationReply);
+}
+
+message GrantApplicationRequest {
+    string app_id = 1;
+    string redirect_uri = 2;
+}
+
+message GrantApplicationReply {
+    bool success = 1;
+    google.protobuf.StringValue access_token = 2;
+}
+
+message AddOIDCToApplicationRequest {
+    string app_id = 1;
+    string client_id = 2;
+    string client_secret = 3;
+    string audience = 4;
+    string redirect_url = 5;
+}
+
+message AddOIDCToApplicationReply {
+    bool success = 1;
+}

@@ -71,6 +71,7 @@ namespace AuthServer.Server.Models
         public string ClientId { get; set; } = null!;
         public string ClientSecret { get; set; } = null!;
         public string Audience { get; set; } = null!;
+        public string RedirectUrl { get; set; } = null!;
     }
 
     public class OIDCSession
