@@ -1,47 +1,66 @@
-<h4 class="text-lg">Choose Authorization Services</h4>
+<h4 class="text-lg">Choose Authentication Method</h4>
+
+<p>To integrate Gatekeeper with another application, you need to configure how the authentication process will work.</p>
 
 <form @onsubmit="@SubmitForm">
-    <p>Choose how your users should authenticate towards your custom app.</p>
+
     <div class="form-check">
-        <input disabled type="checkbox" name="iap_auth" class="form-check-input" @bind="@IAP_Auth">
-        <label for="iap_auth" class="form-check-label">Identity Aware Proxy (Recommended)<br />Use Gatekeeper as a
-            Reverse Proxy. No traffic will be forwarded unless the user passes the authorization check.</label>
-    </div>
-    <div class="form-check">
-        <input disabled type="checkbox" name="oidc_auth" class="form-check-input" @bind="@OIDC_Auth">
-        <label for="oidc_auth" class="form-check-label">OIDC (Recommended)<br />Use OpenID connect.<br /> Note: Can be
-            combined with Identity Aware Proxy for additional security.</label>
-    </div>
-    <div class="form-check">
-        <input type="checkbox" name="ldap_auth" class="form-check-input" @bind="@LDAP_Auth">
-        <label for="ldap_auth" class="form-check-label">LDAP<br />Uses an application specific password created by
-            Gatekeeper.<br />Note: Use only if your application doesn’t support Identity Aware Proxy or OIDC.</label>
+        @foreach(AuthenticationMethodsProvider.IAuthMethod method in _authMethods)
+        {
+            <input class="form-check-input" @onclick="(() => SetActiveMethod(method))" type="radio" id="@method.Name" name="certificateSelectionStep" value="@method.Name">
+            <label class="form-check-label" for="@method.Name">
+                @method.Name
+                @if (_selectedMethod == method) {
+                    <br />
+                    @method.Description
+                    <br />
+
+                    @foreach(string advantage in method.Advantages) 
+                    {
+                        <div class="pt-1">
+                            <span class="material-icons text-green align-middle">add_circle</span> @advantage<br/>
+                        </div>
+                    }
+
+                    @foreach(string disadvantage in method.Disadvantages) 
+                    {
+                        <div class="pt-1">
+                            <span class="material-icons text-red align-middle">remove_circle</span> @disadvantage<br/>
+                        </div>
+                    }
+                }
+            </label>
+
+            <br/>
+        }
     </div>
 
-    <h4 class="text-lg pt-2">Choose Identity Services</h4>
-    <div class="form-check">
-        <input disabled type="checkbox" name="scim_directory" class="form-check-input" @bind="@SCIM_Directory">
-        <label for="scim_directory" class="form-check-label">SCIM (Recommended)<br />Synchronize users using the SCIM
-            protocol.</label>
-    </div>
-    <div class="form-check">
-        <input type="checkbox" name="ldap_directory" class="form-check-input" @bind="@LDAP_Directory">
-        <label for="ldap_directory" class="form-check-label">LDAP<br />Synchronize users using the LDAP
-            protocol.</label>
-    </div>
-
-    <button type="submit" class="btn btn-secondary-dark mt-4">Next</button>
+    <button type="submit" class="btn btn-secondary-dark mt-4 @((_selectedMethod == null) ? "disabled" : "")">Next</button>
 </form>
 
 @code {
     [Parameter]
     public EventCallback<AuthIdentityChoiceStep> OnNextStepCallback { get; set; }
 
+    private AuthenticationMethodsProvider.IAuthMethod? _selectedMethod;
+
     private bool IAP_Auth;
     private bool OIDC_Auth;
     private bool LDAP_Auth;
     private bool SCIM_Directory;
     private bool LDAP_Directory;
+
+    private IEnumerable<AuthenticationMethodsProvider.IAuthMethod> _authMethods = new List<AuthenticationMethodsProvider.IAuthMethod>();
+
+    protected override void OnInitialized() 
+    {
+        _authMethods = (new AuthenticationMethodsProvider()).GetAuthMethods();
+    }
+
+    private void SetActiveMethod(AuthenticationMethodsProvider.IAuthMethod method) 
+    {
+        _selectedMethod = method;
+    }
 
     public async Task SubmitForm()
     {
