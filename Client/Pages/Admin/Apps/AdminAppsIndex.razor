@@ -7,17 +7,40 @@
 
 @inject AuthServer.Shared.Admin.AdminApps.AdminAppsClient AppsClient
 
-<h2 class="text-lg">Installed apps</h2>
+<div class="d-flex flex-lg-row flex-column justify-content-between pb-2">
+    <h2 class="text-lg">Applications</h2>
+    <a href="/admin/apps/setup/custom" class="btn btn-secondary-dark mb-lg-0 mb-3">Add a new app</a>
+</div>
 
 @if(appsReply != null) {
-    foreach(AppListEntry entry in appsReply.Apps) {
-        <div><a href="/admin/apps/details/@entry.Id">@entry.Name</a></div>
-    }
+    <div class="table-responsive mb-2">
+        <table class="table table-hover table-bordered mb-4 table-secondary table-striped">
+            <thead class="bg-secondary-dark">
+                <tr>
+                    <th scope="col" class="border-0">Application Name</th>
+                    <th scope="col" class="border-0">Application URL</th>
+                    <th scope="col" class="border-0">Type</th>
+                    <th scope="col" class="border-0">Users assigned</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+
+            @foreach(AppListEntry entry in appsReply.Apps) {
+                <tr>
+                    <td><a href="/admin/apps/details/@entry.Id">@entry.Name</a></td>
+                    <td><a href="/admin/apps/details/@entry.Id">@entry.Name</a></td>
+                    <td><a href="/admin/apps/details/@entry.Id">@entry.Name</a></td>
+                    <td><a href="/admin/apps/details/@entry.Id">@entry.Name</a></td>
+                    <td><a href="/admin/apps/details/@entry.Id">Edit</a></td>
+                    <td><a href="/admin/apps/details/@entry.Id">Delete</a></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
 }
-
-<h2 class="text-lg">Setup new app</h2>
-
-<a class="btn btn-secondary-dark" href="admin/apps/setup/custom">Custom setup</a>
 
 @code {
     private AppListReply? appsReply;
