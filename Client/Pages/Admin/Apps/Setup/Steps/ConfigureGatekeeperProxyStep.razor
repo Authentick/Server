@@ -1,0 +1,21 @@
+@implements IStep
+
+<h2>Configure Gatekeeper Proxy</h2>
+
+<p>Gatekeeper Proxy will act as an Identity Aware Proxy in front of your application.</p>
+<p><strong>Note:</strong> You will have to point the chosen domain name to Gatekeeper Proxy.</p>
+
+<br />
+
+<div class="form-group col-12 col-md-6 p-0">
+    <input type="text" class="form-control bg-secondary" placeholder="Public Domain Name..." />
+</div>
+
+<div class="form-group col-12 col-md-6 p-0">
+    <input type="text" class="form-control bg-secondary" placeholder="Internal Target IP" />
+</div>
+
+@code {
+    [Parameter]
+    public SetupAppStateMachine StateMachine { get; set; }
+}

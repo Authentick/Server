@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace AuthServer.Client.Pages.Admin.Apps.Setup.Steps
 {
-    class DirectoryMethodsProvider
+    public class DirectoryMethodsProvider
     {
         public IEnumerable<IDirectoryMethod> GetDirectoryMethods()
         {

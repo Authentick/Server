@@ -1,27 +1,49 @@
-@page "/admin/apps/setup/custom"
+@page "/admin/apps/setup/"
 @attribute [Authorize]
 
 @layout AdminShell
 
 @using AuthServer.Client.Pages.Admin.Apps.Setup.Steps
 
-<h2>Setup custom app</h2>
+@RenderCurrentStep()
 
-@switch(currentStep) {
-    case 1:
-        <AdminAppsSetupStep1 OnNextStepCallback="StepOneCallback" />
-        break;
-    case 2:
-        <AdminAppsSetupStep2 />
-        break;
-}
-
+<button type="submit" class="col-sm-5 btn btn-secondary-dark" @onclick="RevertToPreviousStep" disabled="@(!(SetupAppStateMachine.HasPreviousStep()))">Previous step</button>
+<button type="submit" class="col-sm-5 offset-sm-1 btn btn-secondary-dark" @onclick="ProceedToNextStep" disabled="@(!(SetupAppStateMachine.HasNextStep()))">Next step</button>
 
 @code {
-    private int currentStep = 1;
+    private SetupAppStateMachine SetupAppStateMachine = null!;
+    private IStep? CurrentStep;
 
-    private void StepOneCallback(AuthIdentityChoiceStep step) {
-        currentStep = 2;
+    protected override void OnInitialized() 
+    {
+        SetupAppStateMachine = new SetupAppStateMachine();
+        SetupAppStateMachine.Initialize();
+        SetupAppStateMachine.OnChange += StateHasChanged;
+        SetCurrentStep();
     }
 
+    private void SetCurrentStep() {
+        CurrentStep = SetupAppStateMachine.GetCurrentStep();
+    }
+
+    private void RevertToPreviousStep() {
+        SetupAppStateMachine.GoBack(CurrentStep);
+        SetCurrentStep();
+    }
+
+    private void ProceedToNextStep() {
+        SetupAppStateMachine.FinishStep(CurrentStep);
+        SetCurrentStep();
+    }
+
+    private RenderFragment RenderCurrentStep() => builder =>
+    {
+        if(CurrentStep != null) 
+        {
+            builder.OpenComponent(0, CurrentStep.GetType());
+            builder.AddAttribute(1, "StateMachine", SetupAppStateMachine);
+            builder.AddComponentReferenceCapture(2, capturedRef => { CurrentStep = (IStep)capturedRef; });
+            builder.CloseComponent();
+        }
+    };
 }

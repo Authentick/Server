@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace AuthServer.Client.Pages.Admin.Apps.Setup.Steps
 {
-    class AuthenticationMethodsProvider
+    public class AuthenticationMethodsProvider
     {
         public IEnumerable<IAuthMethod> GetAuthMethods()
         {
