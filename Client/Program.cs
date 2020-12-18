@@ -32,6 +32,7 @@ namespace AuthServer.Client
 
             builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
             builder.Services.AddScoped<InstallationStateProvider>();
+            builder.Services.AddScoped<MobileNavigationStateProvider>();
 
             builder.Services.AddOptions();
             builder.Services.AddAuthorizationCore();

@@ -1,19 +1,23 @@
 @inherits MainLayout
 
-<div class="sidebar d-flex">
+@implements IDisposable
+
+@inject Util.MobileNavigationStateProvider MobileNavigationStateProvider
+
+<div class="sidebar d-flex flex-lg-row flex-column-reverse @_customClass">
     <div class="sidebar__first bg-primary text-secondary d-flex flex-column justify-content-between py-lg-4 py-3">
         <div class="d-flex flex-lg-column flex-row justify-content-center align-items-center">
             <img  class="d-none d-lg-block" src="/img/logo.svg" />
             <div class="d-flex flex-lg-column flex-row justify-content-center align-items-center w-100">
-                <NavLink class="sidebar__icon d-flex justify-content-center flex-column align-items-center  mt-lg-5 mt-0 w-100" href="apps" Match="NavLinkMatch.Prefix">
+                <NavLink @onclick="@SetNavActive" class="sidebar__icon d-flex justify-content-center flex-column align-items-center  mt-lg-5 mt-0 w-100" href="apps" Match="NavLinkMatch.Prefix">
                     <span class="material-icons md-icon-24">apps</span>
                     <span>Apps</span>
                 </NavLink>
-                <NavLink class="sidebar__icon d-flex justify-content-center flex-column align-items-center mt-lg-4 mt-0 w-100" href="security" Match="NavLinkMatch.Prefix">
+                <NavLink @onclick="@SetNavActive" class="sidebar__icon d-flex justify-content-center flex-column align-items-center mt-lg-4 mt-0 w-100" href="security" Match="NavLinkMatch.Prefix">
                     <span class="material-icons md-icon-24">security</span>
                     <span>Security</span>
                 </NavLink>
-                <NavLink class="sidebar__icon d-flex justify-content-center flex-column align-items-center mt-lg-4 mt-0 w-100" href="admin" Match="NavLinkMatch.Prefix">
+                <NavLink @onclick="@SetNavActive" class="sidebar__icon d-flex justify-content-center flex-column align-items-center mt-lg-4 mt-0 w-100" href="admin" Match="NavLinkMatch.Prefix">
                     <span class="material-icons md-icon-24">settings</span>
                     <span>Admin</span>
                 </NavLink>
@@ -23,12 +27,12 @@
             <img src="img/unsplash/profile.jpg" class="avatar avatar__sm"> 
         </div>
     </div>
-    <div class="sidebar__second d-lg-flex d-none flex-column text-black py-3">
+    <div class="sidebar__second d-lg-flex flex-column text-black py-3 @_visibleSidebarClass">
         @Sidebar
     </div>
 </div>
-<div class="content w-100 h-100">
-    <div class="p-4">
+<div class="content w-100 h-100 @_visibleContentClass d-lg-flex">
+    <div class="p-4 w-100 h-100">
         @Content
     </div>
 </div>
@@ -47,4 +51,42 @@
 
     [Parameter]
     public RenderFragment? Content { get; set; }
+    
+    private string _visibleSidebarClass = "";
+    private string _visibleContentClass = "";
+    private string _customClass = "";
+
+    protected override void OnInitialized() 
+    {
+        MobileNavigationStateProvider.ActiveContentChanged += ActiveContentChanged;
+        ActiveContentChanged(MobileNavigationStateProvider.GetActiveContent());
+    }
+    
+    private void SetNavActive() 
+    {
+        MobileNavigationStateProvider.SetSidebarActive();
+    }
+
+    public void Dispose()
+    {
+        MobileNavigationStateProvider.ActiveContentChanged -= ActiveContentChanged;
+    }
+    
+    protected void ActiveContentChanged(Util.MobileNavigationStateProvider.ActiveContentEnum activeContent) 
+    {
+        switch(activeContent) {
+            case Util.MobileNavigationStateProvider.ActiveContentEnum.Content:
+                _visibleSidebarClass = "d-none";
+                _visibleContentClass = "";
+                _customClass = "";
+                break;
+            case Util.MobileNavigationStateProvider.ActiveContentEnum.Sidebar:
+                _visibleSidebarClass = "";
+                _visibleContentClass = "d-none";
+                _customClass = "h-100";
+                break;
+        }
+
+        StateHasChanged();
+    }
 }
