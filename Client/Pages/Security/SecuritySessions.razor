@@ -31,7 +31,7 @@
             <td>@session.LastActive</td>
             <td>
               <button @onclick="@(async () => await InvalidateSession(session))"
-                class="btn btn-secondary-dark">Invalidate</button>
+                class="btn btn-secondary-dark btn-delete">Invalidate</button>
             </td>
           </tr>
         }
