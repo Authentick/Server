@@ -1,6 +1,7 @@
 @inject NavigationManager NavigationManager 
+@inject Util.MobileNavigationStateProvider MobileNavigationStateProvider
 
-<a href="@Uri" class="py-2 sidebar__menu-item px-3 @(_isActive ? "active" : "")">
+<a href="@Uri" @onclick="@ActiveContent" class="py-2 sidebar__menu-item px-3 @(_isActive ? "active" : "")">
     @Name
 </a>
 
@@ -17,6 +18,11 @@
     {
         NavigationManager.LocationChanged += HandleLocationChanged;
         HandleLocationChanged(null, null);
+    }
+
+    private void ActiveContent() 
+    {
+        MobileNavigationStateProvider.SetContentActive();
     }
 
     private void HandleLocationChanged(object? sender, LocationChangedEventArgs? e)
