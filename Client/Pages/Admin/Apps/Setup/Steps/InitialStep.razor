@@ -1,0 +1,12 @@
+@implements IStep
+
+<h2>Application details</h2>
+
+<div class="form-group col-12 col-md-6 p-0">
+    <input type="text" class="form-control bg-secondary" placeholder="Name" />
+</div>
+
+@code {
+    [Parameter]
+    public SetupAppStateMachine StateMachine { get; set; }
+}

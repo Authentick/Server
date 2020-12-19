@@ -33,8 +33,42 @@ message RemoveGroupFromAppReply {
 
 message AddNewAppRequest {
   string name = 1;
-  bool has_ldap_directory = 2;
-  bool has_ldap_auth = 3;
+  AuthChoice auth_choice = 2;
+  DirectoryChoice directory_choice = 3;
+
+  oneof auth_setting {
+    OIDCSetting oidc_setting = 4;
+    ProxySetting proxy_setting = 5;
+  }
+
+  SCIMSetting scim_setting = 6;
+  repeated string group_ids = 7;
+
+  message OIDCSetting {
+    string redirect_uri = 1;
+  }
+
+  message ProxySetting {
+    string public_hostname = 1;
+    string internal_hostname = 2;
+  }
+
+  message SCIMSetting {
+    string hostname = 1;
+  }
+
+  enum AuthChoice {
+    UNKNOWN_AUTH = 0;
+    LDAP_AUTH = 1;
+    OIDC_AUTH = 2;
+    PROXY_AUTH = 3;
+  }
+
+  enum DirectoryChoice {
+    NONE_DIRECTORY = 0;
+    LDAP_DIRECTORY = 1;
+    SCIM_DIRECTORY = 2;
+  }
 }
 
 message AddNewAppReply {

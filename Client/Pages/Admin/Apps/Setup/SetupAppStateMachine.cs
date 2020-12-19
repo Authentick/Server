@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AuthServer.Client.Pages.Admin.Apps.Setup.Steps;
+using AuthServer.Shared.Admin;
 
 namespace AuthServer.Client.Pages.Admin.Apps.Setup
 {
@@ -10,17 +11,17 @@ namespace AuthServer.Client.Pages.Admin.Apps.Setup
         IStep? _currentStep;
         private Stack<IStep> PreviousSteps = new Stack<IStep>();
         private IStep? NextStep;
-        //   private SetupInstanceRequest _setupInstanceRequest = new SetupInstanceRequest();
+        private AddNewAppRequest _addNewAppRequest = new AddNewAppRequest();
 
         internal void Initialize()
         {
             _currentStep = new ChooseAuthMethodStep();
         }
 
-        /*  internal SetupInstanceRequest GetSetupInstanceRequest()
-          {
-              return _setupInstanceRequest;
-          }*/
+        internal AddNewAppRequest GetAddNewAppRequest()
+        {
+            return _addNewAppRequest;
+        }
 
         public void FinishStep(IStep step)
         {

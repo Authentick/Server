@@ -24,6 +24,8 @@ namespace AuthServer.Server.Models
         public DbSet<InvalidTwoFactorAttempt> InvalidTwoFactorAttempts { get; set; } = null!;
         public DbSet<OIDCSession> OIDCSessions { get; set; } = null!;
         public DbSet<OIDCAppSettings> OIDCAppSettings { get; set; } = null!;
+        public DbSet<ProxyAppSettings> ProxyAppSettings { get; set; } = null!;
+        public DbSet<SCIMAppSettings> SCIMAppSettings { get; set; } = null!;
     }
 
     public class SystemSetting
@@ -37,9 +39,44 @@ namespace AuthServer.Server.Models
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = null!;
+        public DirectoryMethodEnum DirectoryMethod { get; set; }
+        public AuthMethodEnum AuthMethod { get; set; }
         public LdapAppSettings? LdapAppSettings { get; set; }
         public OIDCAppSettings? OidcAppSettings { get; set; }
+        public ProxyAppSettings? ProxyAppSettings { get; set; }
+        public SCIMAppSettings? ScimAppSettings { get; set; }
         public ICollection<UserGroup> UserGroups { get; set; } = null!;
+
+        public enum DirectoryMethodEnum
+        {
+            NONE = 0,
+            LDAP = 1,
+            SCIM = 2,
+        }
+
+        public enum AuthMethodEnum
+        {
+            LDAP = 1,
+            OIDC = 2,
+            PROXY = 3,
+        }
+    }
+
+    public class SCIMAppSettings
+    {
+        public Guid Id { get; set; }
+        public Guid AuthAppId { get; set; }
+        public AuthApp AuthApp { get; set; } = null!;
+        public string Hostname { get; set; } = null!;
+    }
+
+    public class ProxyAppSettings
+    {
+        public Guid Id { get; set; }
+        public Guid AuthAppId { get; set; }
+        public AuthApp AuthApp { get; set; } = null!;
+        public string InternalHostname { get; set; } = null!;
+        public string PublicHostname { get; set; } = null!;
     }
 
     public class LdapAppSettings

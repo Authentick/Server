@@ -56,26 +56,96 @@ namespace AuthServer.Server.GRPC.Admin
             };
             _authDbContext.Add(app);
 
-            if (request.HasLdapAuth || request.HasLdapDirectory)
+            switch (request.DirectoryChoice)
             {
-                string assembledBaseDn = "dc=" + app.Id;
-                string password = _ldapSettingsDataProtector.Protect(_secureRandom.GetRandomString(16));
+                case AddNewAppRequest.Types.DirectoryChoice.NoneDirectory:
+                    app.DirectoryMethod = AuthApp.DirectoryMethodEnum.NONE;
+                    break;
 
+                case AddNewAppRequest.Types.DirectoryChoice.LdapDirectory:
+                    app.DirectoryMethod = AuthApp.DirectoryMethodEnum.LDAP;
+                    break;
+
+                case AddNewAppRequest.Types.DirectoryChoice.ScimDirectory:
+                    app.DirectoryMethod = AuthApp.DirectoryMethodEnum.SCIM;
+                    break;
+            }
+
+            switch (request.AuthChoice)
+            {
+                case AddNewAppRequest.Types.AuthChoice.LdapAuth:
+                    app.AuthMethod = AuthApp.AuthMethodEnum.LDAP;
+                    break;
+
+                case AddNewAppRequest.Types.AuthChoice.OidcAuth:
+                    app.AuthMethod = AuthApp.AuthMethodEnum.OIDC;
+                    break;
+
+                case AddNewAppRequest.Types.AuthChoice.ProxyAuth:
+                    app.AuthMethod = AuthApp.AuthMethodEnum.PROXY;
+                    break;
+            }
+
+            if (app.AuthMethod == AuthApp.AuthMethodEnum.LDAP || app.DirectoryMethod == AuthApp.DirectoryMethodEnum.LDAP)
+            {
                 LdapAppSettings ldapAppSettings = new LdapAppSettings
                 {
                     AuthApp = app,
-                    BaseDn = assembledBaseDn,
-                    BindUser = "cn=BindUser," + assembledBaseDn,
-                    BindUserPassword = password,
-                    UseForAuthentication = request.HasLdapAuth,
-                    UseForIdentity = request.HasLdapDirectory,
+                    UseForAuthentication = (app.AuthMethod == AuthApp.AuthMethodEnum.LDAP),
+                    UseForIdentity = (app.DirectoryMethod == AuthApp.DirectoryMethodEnum.LDAP),
                 };
                 _authDbContext.Add(ldapAppSettings);
+                app.LdapAppSettings = ldapAppSettings;
+            }
+
+            if (app.AuthMethod == AuthApp.AuthMethodEnum.PROXY)
+            {
+                ProxyAppSettings proxyAppSettings = new ProxyAppSettings
+                {
+                    AuthApp = app,
+                    InternalHostname = request.ProxySetting.InternalHostname,
+                    PublicHostname = request.ProxySetting.PublicHostname,
+                };
+                _authDbContext.Add(proxyAppSettings);
+                app.ProxyAppSettings = proxyAppSettings;
+            }
+
+            if (app.AuthMethod == AuthApp.AuthMethodEnum.OIDC)
+            {
+                OIDCAppSettings oidcAppSettings = new OIDCAppSettings
+                {
+                    RedirectUrl = request.OidcSetting.RedirectUri,
+                    AuthApp = app,
+                };
+                _authDbContext.Add(oidcAppSettings);
+                app.OidcAppSettings = oidcAppSettings;
+            }
+
+            if (app.DirectoryMethod == AuthApp.DirectoryMethodEnum.SCIM)
+            {
+                SCIMAppSettings scimAppSettings = new SCIMAppSettings
+                {
+                    AuthApp = app,
+                    Hostname = request.ScimSetting.Hostname,
+                };
+                _authDbContext.Add(scimAppSettings);
+                app.ScimAppSettings = scimAppSettings;
+            }
+
+            foreach (string groupId in request.GroupIds)
+            {
+                Guid groupIdGuid = new Guid(groupId);
+                UserGroup group = await _authDbContext.UserGroup
+                    .SingleAsync(g => g.Id == groupIdGuid);
+                app.UserGroups.Add(group);
             }
 
             await _authDbContext.SaveChangesAsync();
 
-            return new AddNewAppReply { Success = true };
+            return new AddNewAppReply
+            {
+                Success = true,
+            };
         }
 
         public override Task<AppDetailReply> GetAppDetails(AppDetailRequest request, ServerCallContext context)
