@@ -19,9 +19,33 @@ namespace AuthServer.Server.GRPC
             _authDbContext = authDbContext;
         }
 
+        public override async Task<SearchGroupReply> SearchGroup(SearchGroupRequest request, ServerCallContext context)
+        {
+            List<UserGroup> groups = await _authDbContext.UserGroup
+                .AsNoTracking()
+                .Where(u => u.Name.Contains(request.SearchParameter))
+                .ToListAsync();
+
+            SearchGroupReply reply = new SearchGroupReply();
+
+            foreach (UserGroup group in groups)
+            {
+                SearchGroupEntry entry = new SearchGroupEntry
+                {
+                    Id = group.Id.ToString(),
+                    Name = group.Name,
+                };
+
+                reply.Entries.Add(entry);
+            }
+
+            return reply;
+        }
+
         public override async Task<SearchUserReply> SearchUser(SearchUserRequest request, ServerCallContext context)
         {
             List<AppUser> users = await _authDbContext.Users
+                .AsNoTracking()
                 .Where(u => u.UserName.Contains(request.SearchParameter))
                 .ToListAsync();
 
@@ -39,6 +63,11 @@ namespace AuthServer.Server.GRPC
             }
 
             return reply;
+        }
+
+        public override string? ToString()
+        {
+            return base.ToString();
         }
     }
 }
