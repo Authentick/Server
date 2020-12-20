@@ -1,4 +1,5 @@
 @implements IStep
+@implements IDisposable
 
 <h2>Configure Gatekeeper Proxy</h2>
 
@@ -7,15 +8,58 @@
 
 <br />
 
-<div class="form-group col-12 col-md-6 p-0">
-    <input type="text" class="form-control bg-secondary" placeholder="Public Domain Name..." />
-</div>
+<EditForm EditContext="@editContext">
+    <DataAnnotationsValidator />
 
-<div class="form-group col-12 col-md-6 p-0">
-    <input type="text" class="form-control bg-secondary" placeholder="Internal Target IP" />
-</div>
+    <InputText @bind-Value="gatekeeperProxySettings.PublicDomainName" class="form-control bg-secondary"
+        placeholder="Public hostname (e.g. example.com)" />
+    <br />
+
+    <InputText @bind-Value="gatekeeperProxySettings.InternalDomainName" type="email" class="form-control bg-secondary"
+        placeholder="Internal hostname (e.g. 192.168.1.5)" />
+</EditForm>
 
 @code {
     [Parameter]
-    public SetupAppStateMachine StateMachine { get; set; }
+    public SetupAppStateMachine StateMachine { get; set; } = null!;
+
+    internal GatekeeperProxySettings gatekeeperProxySettings = new GatekeeperProxySettings();
+    private EditContext? editContext;
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(gatekeeperProxySettings);
+        editContext.OnFieldChanged += HandleFieldChanged;
+    }
+
+    public void Dispose()
+    {
+        if(editContext != null) {
+            editContext.OnFieldChanged -= HandleFieldChanged;
+        }
+    }
+    private void HandleFieldChanged(object sender, FieldChangedEventArgs e)
+    {
+        if (editContext != null)
+        {
+            bool formValid = editContext.Validate();
+            if (formValid)
+            {
+                StateMachine.SetNextStep(new ChooseDirectoryMethodStep());
+            }
+            else
+            {
+                StateMachine.SetNextStep(null);
+            }
+        }
+    }
+
+    internal class GatekeeperProxySettings
+    {
+        [Required]
+        public string? PublicDomainName { get; set; }
+
+        [Required]
+        public string? InternalDomainName { get; set; }
+    }
 }

@@ -1,6 +1,41 @@
 @implements IStep
 
-<h2>Specify groups with access</h2>C
+@using AuthServer.Client.Shared.Components.Typeahead
+
+<h2>Specify groups with access</h2>
 
 <p>Configure which groups will have access to this application.</p>
 
+<form @onsubmit="@AddGroupToAppSubmit">
+    <div class="form-group col-12 col-md-8 p-0 d-flex flex-column flex-md-row">
+        <div class="d-flex flex-column mb-3 mb-md-0 mr-0 mr-md-3 w-100">
+            <GroupTypeahead OnSelectCallback="@GroupSelected" />
+        </div>
+        
+        <button type="submit" class="btn btn-secondary-dark w-100" disabled="@(SelectedGroupId == null)">Add group to app</button>
+    </div>
+</form>
+
+@code {
+    [Parameter]
+    public SetupAppStateMachine StateMachine { get; set; } = null!;
+
+    private string? SelectedGroupId;
+    protected override void OnInitialized() {
+        // Note: This is a hack around the fact that the next button will only available
+        // if a next step is set. See AdminAppsSetupIndex.razor for reference.
+
+        StateMachine.SetNextStep(new FinalizeStep());
+    }
+
+    private void GroupSelected(string? groupId) 
+    {
+        SelectedGroupId = groupId;
+    }
+
+
+    private async Task AddGroupToAppSubmit() 
+    {
+        SelectedGroupId = null;
+    }
+}

@@ -15,7 +15,7 @@ namespace AuthServer.Client.Pages.Admin.Apps.Setup
 
         internal void Initialize()
         {
-            _currentStep = new ChooseAuthMethodStep();
+            _currentStep = new InitialStep();
         }
 
         internal AddNewAppRequest GetAddNewAppRequest()
@@ -27,7 +27,9 @@ namespace AuthServer.Client.Pages.Admin.Apps.Setup
         {
             switch (step)
             {
-
+                case InitialStep initialStep:
+                    _addNewAppRequest.Name = initialStep.Name;
+                    break;
             }
 
             PreviousSteps.Push(step);

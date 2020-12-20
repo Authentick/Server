@@ -37,7 +37,7 @@
 
 @code {
     [Parameter]
-    public SetupAppStateMachine StateMachine { get; set; }
+    public SetupAppStateMachine StateMachine { get; set; } = null!;
 
     private AuthenticationMethodsProvider.IAuthMethod? _selectedMethod;
     private IEnumerable<AuthenticationMethodsProvider.IAuthMethod> _authMethods = new List<AuthenticationMethodsProvider.IAuthMethod>();

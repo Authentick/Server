@@ -1,0 +1,64 @@
+@using AuthServer.Shared
+
+@inject AuthServer.Shared.Typeahead.TypeaheadClient TypeaheadClient
+
+<input type="text" class="form-control bg-secondary" @bind-value="Username" @bind-value:event="oninput"  @onkeyup="@SearchKeyUpEvent" placeholder="Group Id..." />
+<div class="typeahead-dropdown list-group">
+    @if(SearchGroupReply != null) {
+        foreach(SearchGroupEntry entry in SearchGroupReply.Entries) {
+            <span @onclick="@(() => SelectedEntry(entry))" class="list-group-item text-decoration-none">@entry.Name</span>
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<string?> OnSelectCallback { get; set; }
+
+    private string Username = "";
+    private SearchGroupReply? SearchGroupReply;
+    private System.Timers.Timer? SearchTimer;
+    private bool WasEntrySelected;
+
+    protected override void OnInitialized()
+    {
+        SearchTimer = new System.Timers.Timer(500);
+        SearchTimer.Elapsed += ExecuteSearchUsers;
+        SearchTimer.AutoReset = false;
+    }
+
+    private async Task SelectedEntry(SearchGroupEntry entry) 
+    {
+        SearchGroupReply = null;
+        Username = entry.Name;
+        await OnSelectCallback.InvokeAsync(entry.Id);
+        WasEntrySelected = true;
+    }
+
+    private async Task SearchKeyUpEvent() {
+        if(SearchTimer != null) 
+        {
+            SearchTimer.Stop();
+            SearchTimer.Start();     
+        }
+        
+        if(WasEntrySelected) 
+        {
+            await OnSelectCallback.InvokeAsync(null);
+            WasEntrySelected = false;
+        }
+    }
+
+    private void ExecuteSearchUsers(Object source, System.Timers.ElapsedEventArgs e) {
+        InvokeAsync(async () => {
+            SearchGroupRequest request = new SearchGroupRequest 
+            {
+                SearchParameter = Username,
+            };
+            
+            SearchGroupReply = await TypeaheadClient.SearchGroupAsync(request);
+            StateHasChanged();
+        });
+    }
+
+}

@@ -3,10 +3,26 @@
 <h2>Configure OpenID Connect</h2>
 
 <div class="form-group col-12 col-md-6 p-0">
-    <input type="text" class="form-control bg-secondary" placeholder="Redirect URL" />
+    <input type="text" @onchange="@RedirectUrlChanged" class="form-control bg-secondary" placeholder="Redirect URL" />
 </div>
 
 @code {
     [Parameter]
-    public SetupAppStateMachine StateMachine { get; set; }
+    public SetupAppStateMachine StateMachine { get; set; } = null!;
+
+    public string? RedirectUrl { get; set; }
+
+    private void RedirectUrlChanged(ChangeEventArgs e)
+    {
+        if (e.Value != null)
+        {
+            RedirectUrl = (string)e.Value;
+            StateMachine.SetNextStep(new ChooseDirectoryMethodStep());
+        }
+        else
+        {
+            RedirectUrl = null;
+            StateMachine.SetNextStep(null);
+        }
+    }
 }

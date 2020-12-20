@@ -37,7 +37,7 @@
 
 @code {
     [Parameter]
-    public SetupAppStateMachine StateMachine { get; set; }
+    public SetupAppStateMachine StateMachine { get; set; } = null!;
 
     private DirectoryMethodsProvider.IDirectoryMethod? _selectedMethod;
     private IEnumerable<DirectoryMethodsProvider.IDirectoryMethod> _authMethods = new List<DirectoryMethodsProvider.IDirectoryMethod>();
@@ -45,13 +45,24 @@
     protected override void OnInitialized() 
     {
         _authMethods = (new DirectoryMethodsProvider()).GetDirectoryMethods();
-        StateMachine.SetNextStep(null);
     }
 
     private void SetActiveMethod(DirectoryMethodsProvider.IDirectoryMethod method) 
     {
         _selectedMethod = method;
 
-        // StateMachine.SetNextStep(new EmailCustomSettingsStep());
+        switch(method) {
+            case DirectoryMethodsProvider.NoDirectoryServiceMethod:
+                StateMachine.SetNextStep(new ConfigureAccessGroupsStep());
+                break;
+            
+            case DirectoryMethodsProvider.LDAPDirectoryServiceMethod:
+                StateMachine.SetNextStep(new ConfigureAccessGroupsStep());
+                break;
+            
+            case DirectoryMethodsProvider.SCIMDirectoryServiceMethod:
+                StateMachine.SetNextStep(new ConfigureScimStep());
+                break;
+        }
     }
 }
