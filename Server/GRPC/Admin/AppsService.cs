@@ -136,8 +136,9 @@ namespace AuthServer.Server.GRPC.Admin
             {
                 Guid groupIdGuid = new Guid(groupId);
                 UserGroup group = await _authDbContext.UserGroup
+                    .Include(g => g.AuthApps)
                     .SingleAsync(g => g.Id == groupIdGuid);
-                app.UserGroups.Add(group);
+                group.AuthApps.Add(app);
             }
 
             await _authDbContext.SaveChangesAsync();

@@ -38,6 +38,7 @@
 @code {
     [Parameter]
     public SetupAppStateMachine StateMachine { get; set; } = null!;
+    public AuthServer.Shared.Admin.AddNewAppRequest.Types.DirectoryChoice DirectoryChoice;
 
     private DirectoryMethodsProvider.IDirectoryMethod? _selectedMethod;
     private IEnumerable<DirectoryMethodsProvider.IDirectoryMethod> _authMethods = new List<DirectoryMethodsProvider.IDirectoryMethod>();
@@ -53,14 +54,17 @@
 
         switch(method) {
             case DirectoryMethodsProvider.NoDirectoryServiceMethod:
+                DirectoryChoice = AuthServer.Shared.Admin.AddNewAppRequest.Types.DirectoryChoice.NoneDirectory;
                 StateMachine.SetNextStep(new ConfigureAccessGroupsStep());
                 break;
             
             case DirectoryMethodsProvider.LDAPDirectoryServiceMethod:
+                DirectoryChoice = AuthServer.Shared.Admin.AddNewAppRequest.Types.DirectoryChoice.LdapDirectory;
                 StateMachine.SetNextStep(new ConfigureAccessGroupsStep());
                 break;
             
             case DirectoryMethodsProvider.SCIMDirectoryServiceMethod:
+                DirectoryChoice = AuthServer.Shared.Admin.AddNewAppRequest.Types.DirectoryChoice.ScimDirectory;
                 StateMachine.SetNextStep(new ConfigureScimStep());
                 break;
         }

@@ -38,6 +38,7 @@
 @code {
     [Parameter]
     public SetupAppStateMachine StateMachine { get; set; } = null!;
+    public AuthServer.Shared.Admin.AddNewAppRequest.Types.AuthChoice AuthChoice;
 
     private AuthenticationMethodsProvider.IAuthMethod? _selectedMethod;
     private IEnumerable<AuthenticationMethodsProvider.IAuthMethod> _authMethods = new List<AuthenticationMethodsProvider.IAuthMethod>();
@@ -53,12 +54,15 @@
 
         switch(method) {
             case AuthenticationMethodsProvider.LDAPAuthMethod:
+                AuthChoice = AuthServer.Shared.Admin.AddNewAppRequest.Types.AuthChoice.LdapAuth;
                 StateMachine.SetNextStep(new ChooseDirectoryMethodStep());
                 break;
             case AuthenticationMethodsProvider.OpenIDConnectAuthMethod:
+                AuthChoice = AuthServer.Shared.Admin.AddNewAppRequest.Types.AuthChoice.OidcAuth;
                 StateMachine.SetNextStep(new ConfigureOpenIDConnectStep());
                 break;
             case AuthenticationMethodsProvider.GatekeeperProxyAuthMethod:
+                AuthChoice = AuthServer.Shared.Admin.AddNewAppRequest.Types.AuthChoice.ProxyAuth;
                 StateMachine.SetNextStep(new ConfigureGatekeeperProxyStep());
                 break;
             default:

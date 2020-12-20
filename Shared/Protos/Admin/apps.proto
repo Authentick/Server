@@ -55,6 +55,7 @@ message AddNewAppRequest {
 
   message SCIMSetting {
     string hostname = 1;
+    string credentials = 2;
   }
 
   enum AuthChoice {

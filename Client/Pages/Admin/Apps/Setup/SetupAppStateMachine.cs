@@ -30,6 +30,35 @@ namespace AuthServer.Client.Pages.Admin.Apps.Setup
                 case InitialStep initialStep:
                     _addNewAppRequest.Name = initialStep.Name;
                     break;
+                case ChooseAuthMethodStep chooseAuthMethodStep:
+                    _addNewAppRequest.AuthChoice = chooseAuthMethodStep.AuthChoice;
+                    break;
+                case ChooseDirectoryMethodStep chooseDirectoryMethodStep:
+                    _addNewAppRequest.DirectoryChoice = chooseDirectoryMethodStep.DirectoryChoice;
+                    break;
+                case ConfigureAccessGroupsStep configureAccessGroupsStep:
+                    _addNewAppRequest.GroupIds.AddRange(configureAccessGroupsStep.SelectedGroups);
+                    break;
+                case ConfigureGatekeeperProxyStep configureGatekeeperProxyStep:
+                    _addNewAppRequest.ProxySetting = new AddNewAppRequest.Types.ProxySetting
+                    {
+                        InternalHostname = configureGatekeeperProxyStep.gatekeeperProxySettings.InternalDomainName,
+                        PublicHostname = configureGatekeeperProxyStep.gatekeeperProxySettings.PublicDomainName,
+                    };
+                    break;
+                case ConfigureOpenIDConnectStep configureOpenIDConnectStep:
+                    _addNewAppRequest.OidcSetting = new AddNewAppRequest.Types.OIDCSetting
+                    {
+                        RedirectUri = configureOpenIDConnectStep.RedirectUrl,
+                    };
+                    break;
+                case ConfigureScimStep configureScimStep:
+                    _addNewAppRequest.ScimSetting = new AddNewAppRequest.Types.SCIMSetting
+                    {
+                        Hostname = configureScimStep.scimSettings.BaseDomain,
+                        Credentials = configureScimStep.scimSettings.Credentials,
+                    };
+                    break;
             }
 
             PreviousSteps.Push(step);

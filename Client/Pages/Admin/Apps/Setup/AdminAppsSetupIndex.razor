@@ -3,12 +3,18 @@
 
 @layout AdminShell
 
-@using AuthServer.Client.Pages.Admin.Apps.Setup.Steps
+@inject AuthServer.Shared.Admin.AdminApps.AdminAppsClient AdminAppsClient
+
+@using AuthServer.Shared.Admin
 
 @RenderCurrentStep()
 
 <button type="submit" class="col-sm-5 btn btn-secondary-dark" @onclick="RevertToPreviousStep" disabled="@(!(SetupAppStateMachine.HasPreviousStep()))">Previous step</button>
-<button type="submit" class="col-sm-5 offset-sm-1 btn btn-secondary-dark" @onclick="ProceedToNextStep" disabled="@(!(SetupAppStateMachine.HasNextStep()))">Next step</button>
+@if(CurrentStep != null && CurrentStep.GetType() == typeof(Steps.FinalizeStep)) {
+    <button type="submit" class="col-sm-5 offset-sm-1 btn btn-secondary-dark" @onclick="SetupApp" disabled="@(!(SetupAppStateMachine.HasNextStep()))">Finish setup</button>
+} else {
+    <button type="submit" class="col-sm-5 offset-sm-1 btn btn-secondary-dark" @onclick="ProceedToNextStep" disabled="@(!(SetupAppStateMachine.HasNextStep()))">Next step</button>
+}
 
 @code {
     private SetupAppStateMachine SetupAppStateMachine = null!;
@@ -22,16 +28,25 @@
         SetCurrentStep();
     }
 
-    private void SetCurrentStep() {
+    private async Task SetupApp() 
+    {
+        AddNewAppRequest request = SetupAppStateMachine.GetAddNewAppRequest();
+        AddNewAppReply reply = await AdminAppsClient.AddNewAppAsync(request);
+    }
+
+    private void SetCurrentStep() 
+    {
         CurrentStep = SetupAppStateMachine.GetCurrentStep();
     }
 
-    private void RevertToPreviousStep() {
+    private void RevertToPreviousStep() 
+    {
         SetupAppStateMachine.GoBack(CurrentStep);
         SetCurrentStep();
     }
 
-    private void ProceedToNextStep() {
+    private void ProceedToNextStep() 
+    {
         SetupAppStateMachine.FinishStep(CurrentStep);
         SetCurrentStep();
     }

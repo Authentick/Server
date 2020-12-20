@@ -28,9 +28,6 @@
 
     protected override void OnInitialized()
     {
-        // Note: This is a hack around the fact that the next button will only available
-        // if a next step is set. See AdminAppsSetupIndex.razor for reference.
-
         StateMachine.SetNextStep(new FinalizeStep());
     }
 
