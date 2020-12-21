@@ -1,9 +1,11 @@
 .btn {
   height: 40px;
+  white-space: nowrap;
 }
 
 .btn-sm-100 {
   width: 100%;
+  white-space: nowrap;
 
   @include media-breakpoint-up(md) {
     width: auto;

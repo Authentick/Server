@@ -3,11 +3,56 @@
 
 @layout ProfileShell
 
-<h2>Profile</h2>
+@using AuthServer.Shared
 
-<h3>Name</h3>
-<input type="text" disabled value="Lukas Reschke" />
+@inject UserProfile.UserProfileClient UserProfileClient
 
-<h3>Email</h3>
-<input type="text" disabled value="lukas@statuscode.ch" />
+@if(UserReply != null) {
+    <div class="d-flex flex-column justify-content-center"> 
+        <div class="d-flex flex-column flex-lg-row">
+            <div class="d-flex flex-column justify-content-center align-items-center mb-3 mb-lg-0 mr-0 mr-lg-5">
+                <img src="img/unsplash/profile.jpg" class="avatar avatar__lg">
+                <a href="#" class="btn btn-secondary-dark mt-3">Upload new photo</a>
+            </div>
+            
+            <div class="user-profile__details form-group d-flex flex-row flex-wrap justify-content-center justify-content-lg-start">
+                <div class="px-4 pb-lg-5 pb-3 width-md-100">
+                    <span class="text-md font-weight-bold">Name</span>
+                    <input type="text" class="form-control bg-secondary" disabled value="@UserReply.Username" />
+                </div>
+                <div class="px-4 pb-lg-5 pb-3 width-md-100">
+                    <span class="text-md font-weight-bold">Username</span>
+                    <input type="text" class="form-control bg-secondary" disabled value="@UserReply.Username" />
+                </div>
+                <div class="px-4 pb-lg-5 pb-3 width-md-100">
+                    <span class="text-md font-weight-bold">Email</span>
+                    <input type="text" class="form-control bg-secondary" disabled value="@UserReply.Email" />
+                </div>
+                <div class="px-4 pb-lg-5 pb-3 width-md-100">
+                    <span class="text-md font-weight-bold">Language</span>
+                    <input type="text" class="form-control bg-secondary" disabled value="English" />
+                </div>
 
+            </div>
+        </div>
+    </div>
+     @if(UserReply.GroupNames.Count > 0) {
+        <div class="d-flex flex-column px-4 px-lg-0 mt-0 mt-lg-4">
+            <span class="text-md font-weight-bold">Your groups</span>
+                @foreach (string name in UserReply.GroupNames)
+                {
+                    <div>@name</div>
+                }
+            
+        </div>
+     }
+}
+
+@code {
+    private UserReply? UserReply;
+
+    protected override async Task OnInitializedAsync()
+    {
+        UserReply = await UserProfileClient.GetUserAsync(new Google.Protobuf.WellKnownTypes.Empty());
+    }
+}

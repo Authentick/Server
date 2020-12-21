@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "AuthServer.Shared";
+
+service UserProfile {
+  rpc GetUser (google.protobuf.Empty) returns (UserReply);
+}
+
+message UserReply {
+  string username = 1;
+  string language = 2;
+  string picture = 3;
+  repeated string group_names = 4;
+  string email = 5;
+}
