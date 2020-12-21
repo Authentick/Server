@@ -1,0 +1,38 @@
+@implements IStep
+
+@using AuthServer.Client.Shared.Components.Typeahead
+
+<h2>Specify groups with access</h2>
+
+<p>Configure which groups will have access to this application.</p>
+
+<ul>
+    @foreach (string id in SelectedGroups)
+    {
+        <li>@id</li>
+    }
+</ul>
+
+<div class="form-group col-12 col-md-8 p-0 d-flex flex-column flex-md-row">
+    <div class="d-flex flex-column mb-3 mb-md-0 mr-0 mr-md-3 w-100">
+        <GroupTypeahead OnSelectCallback="@GroupSelected" />
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public SetupAppStateMachine StateMachine { get; set; } = null!;
+
+    private string? SelectedGroupId;
+    public List<string> SelectedGroups = new List<string>();
+
+    protected override void OnInitialized()
+    {
+        StateMachine.SetNextStep(new FinalizeStep());
+    }
+
+    private void GroupSelected(string groupId)
+    {
+        SelectedGroups.Add(groupId);
+    }
+}

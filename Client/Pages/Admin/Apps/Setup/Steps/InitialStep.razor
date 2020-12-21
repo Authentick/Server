@@ -1,0 +1,35 @@
+@implements IStep
+
+<h2>Application details</h2>
+
+<div class="form-group col-12 col-md-6 p-0">
+    <input type="text" @onchange="@NameChanged" class="form-control bg-secondary" placeholder="Name" />
+</div>
+
+@code {
+    [Parameter]
+    public SetupAppStateMachine StateMachine { get; set; } = null!;
+
+    public string? Name { get; set; }
+
+    private void NameChanged(ChangeEventArgs e)
+    {
+        if (e.Value != null)
+        {
+            Name = (string)e.Value;
+        }
+        else
+        {
+            Name = null;
+        }
+
+        if (String.IsNullOrEmpty(Name))
+        {
+            StateMachine.SetNextStep(null);
+        }
+        else
+        {
+            StateMachine.SetNextStep(new ChooseAuthMethodStep());
+        }
+    }
+}

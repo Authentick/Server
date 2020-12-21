@@ -1,0 +1,19 @@
+@page "/connect/authorize"
+
+@attribute [Authorize]
+
+@layout LoggedOutLayout
+
+@inject NavigationManager NavigationManager
+
+<div class="h-100 pt-0 pt-md-4">
+    <h1>Login to $name</h1>
+    <button class="btn">Proceed</button>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync() 
+    {
+        NavigationManager.NavigateTo("https://openidconnect.net/callback?code=MyMagicCode&state=a2e95ab1ad7a178b7d22593261e250ea18c9e28b");
+    }
+}

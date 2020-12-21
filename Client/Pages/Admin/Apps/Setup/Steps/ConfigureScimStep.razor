@@ -1,0 +1,60 @@
+@implements IStep
+@implements IDisposable
+
+<h2>SCIM details</h2>
+
+<EditForm EditContext="@editContext">
+    <DataAnnotationsValidator />
+
+    <InputText @bind-Value="scimSettings.Endpoint" class="form-control bg-secondary"
+        placeholder="Endpoint" />
+    <br />
+
+    <InputText @bind-Value="scimSettings.Credentials" type="email" class="form-control bg-secondary"
+        placeholder="Credentials" />
+</EditForm>
+
+@code {
+    [Parameter]
+    public SetupAppStateMachine StateMachine { get; set; } = null!;
+    internal ScimSettings scimSettings = new ScimSettings();
+    private EditContext? editContext;
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(scimSettings);
+        editContext.OnFieldChanged += HandleFieldChanged;
+    }
+
+    public void Dispose()
+    {
+        if(editContext != null) {
+            editContext.OnFieldChanged -= HandleFieldChanged;
+        }
+    }
+
+    private void HandleFieldChanged(object sender, FieldChangedEventArgs e)
+    {
+        if (editContext != null)
+        {
+            bool formValid = editContext.Validate();
+            if (formValid)
+            {
+                StateMachine.SetNextStep(new ConfigureAccessGroupsStep());
+            }
+            else
+            {
+                StateMachine.SetNextStep(null);
+            }
+        }
+    }
+
+    internal class ScimSettings
+    {
+        [Required]
+        public string? Endpoint { get; set; }
+
+        [Required]
+        public string? Credentials { get; set; }
+    }
+}

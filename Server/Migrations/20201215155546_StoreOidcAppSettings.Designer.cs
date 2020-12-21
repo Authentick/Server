@@ -4,6 +4,7 @@ using System.Net;
 using AuthServer.Server.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AuthServer.Server.Migrations
 {
     [DbContext(typeof(AuthDbContext))]
-    partial class AuthDbContextModelSnapshot : ModelSnapshot
+    [Migration("20201215155546_StoreOidcAppSettings")]
+    partial class StoreOidcAppSettings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -121,12 +123,6 @@ namespace AuthServer.Server.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
-
-                    b.Property<int>("AuthMethod")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("DirectoryMethod")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -305,10 +301,6 @@ namespace AuthServer.Server.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("RedirectUrl")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.HasIndex("AuthAppId")
@@ -342,56 +334,6 @@ namespace AuthServer.Server.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("OIDCSessions");
-                });
-
-            modelBuilder.Entity("AuthServer.Server.Models.ProxyAppSettings", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("AuthAppId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("InternalHostname")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("PublicHostname")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AuthAppId")
-                        .IsUnique();
-
-                    b.ToTable("ProxyAppSettings");
-                });
-
-            modelBuilder.Entity("AuthServer.Server.Models.SCIMAppSettings", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("AuthAppId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Credentials")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Endpoint")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AuthAppId")
-                        .IsUnique();
-
-                    b.ToTable("SCIMAppSettings");
                 });
 
             modelBuilder.Entity("AuthServer.Server.Models.SystemSetting", b =>
@@ -696,28 +638,6 @@ namespace AuthServer.Server.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("AuthServer.Server.Models.ProxyAppSettings", b =>
-                {
-                    b.HasOne("AuthServer.Server.Models.AuthApp", "AuthApp")
-                        .WithOne("ProxyAppSettings")
-                        .HasForeignKey("AuthServer.Server.Models.ProxyAppSettings", "AuthAppId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AuthApp");
-                });
-
-            modelBuilder.Entity("AuthServer.Server.Models.SCIMAppSettings", b =>
-                {
-                    b.HasOne("AuthServer.Server.Models.AuthApp", "AuthApp")
-                        .WithOne("ScimAppSettings")
-                        .HasForeignKey("AuthServer.Server.Models.SCIMAppSettings", "AuthAppId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AuthApp");
-                });
-
             modelBuilder.Entity("AuthServer.Server.Models.UserTotpDevice", b =>
                 {
                     b.HasOne("AuthServer.Server.Models.AppUser", "User")
@@ -796,10 +716,6 @@ namespace AuthServer.Server.Migrations
                     b.Navigation("LdapAppSettings");
 
                     b.Navigation("OidcAppSettings");
-
-                    b.Navigation("ProxyAppSettings");
-
-                    b.Navigation("ScimAppSettings");
                 });
 
             modelBuilder.Entity("AuthServer.Server.Models.OIDCAppSettings", b =>

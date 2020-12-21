@@ -4,10 +4,24 @@ option csharp_namespace = "AuthServer.Shared";
 
 service Typeahead {
   rpc SearchUser (SearchUserRequest) returns (SearchUserReply);
+  rpc SearchGroup (SearchGroupRequest) returns (SearchGroupReply);
 }
 
 message SearchUserRequest {
   string search_parameter = 1;
+}
+
+message SearchGroupRequest {
+  string search_parameter = 1;
+}
+
+message SearchGroupReply {
+  repeated SearchGroupEntry entries = 1;
+}
+
+message SearchGroupEntry {
+  string id = 1;
+  string name = 2;
 }
 
 message SearchUserReply {

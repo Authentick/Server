@@ -33,8 +33,43 @@ message RemoveGroupFromAppReply {
 
 message AddNewAppRequest {
   string name = 1;
-  bool has_ldap_directory = 2;
-  bool has_ldap_auth = 3;
+  AuthChoice auth_choice = 2;
+  DirectoryChoice directory_choice = 3;
+
+  oneof auth_setting {
+    OIDCSetting oidc_setting = 4;
+    ProxySetting proxy_setting = 5;
+  }
+
+  SCIMSetting scim_setting = 6;
+  repeated string group_ids = 7;
+
+  message OIDCSetting {
+    string redirect_uri = 1;
+  }
+
+  message ProxySetting {
+    string public_hostname = 1;
+    string internal_hostname = 2;
+  }
+
+  message SCIMSetting {
+    string endpoint = 1;
+    string credentials = 2;
+  }
+
+  enum AuthChoice {
+    UNKNOWN_AUTH = 0;
+    LDAP_AUTH = 1;
+    OIDC_AUTH = 2;
+    PROXY_AUTH = 3;
+  }
+
+  enum DirectoryChoice {
+    NONE_DIRECTORY = 0;
+    LDAP_DIRECTORY = 1;
+    SCIM_DIRECTORY = 2;
+  }
 }
 
 message AddNewAppReply {
@@ -48,6 +83,9 @@ message AppListReply {
 message AppListEntry {
   string id = 1;
   string name = 2;
+  AddNewAppRequest.AuthChoice auth_choice = 3;
+  AddNewAppRequest.DirectoryChoice directory_choice = 4;
+  int32 groups_assigned = 5;
 }
 
 message AppDetailRequest {
@@ -57,10 +95,44 @@ message AppDetailRequest {
 message AppDetailReply {
   string id = 1;
   string name = 2;
-  string ldap_dn = 3;
-  string ldap_bind_credentials = 4;
-  repeated GrantedAppGroup groups = 5;
-  string ldap_bind_credentials_password = 6;
+  repeated GrantedAppGroup groups = 3;
+
+  oneof auth_setting {
+    OidcAuthSetting oidc_auth_setting = 4;
+    ProxyAuthSetting proxy_auth_setting = 5;
+    LdapAuthSetting ldap_auth_setting = 6; 
+  }
+
+  oneof directory_setting {
+    LdapDirectorySetting ldap_directory_setting = 7;
+    ScimDirectorySetting scim_directory_setting = 8;
+  }
+
+  message OidcAuthSetting {
+    string client_id = 1;
+    string client_secret = 2;
+    string redirect_uri = 3;
+  }
+
+  message ProxyAuthSetting {
+    string internal_hostname = 1;
+    string public_hostname = 2;
+  }
+
+  message LdapAuthSetting {
+    string base_dn = 1;
+  }
+
+  message LdapDirectorySetting {
+    string base_dn = 1;
+    string username = 2;
+    string password = 3;
+  }
+
+  message ScimDirectorySetting {
+    string endpoint = 1;
+    string credentials = 2;
+  }
 }
 
 message GrantedAppGroup {

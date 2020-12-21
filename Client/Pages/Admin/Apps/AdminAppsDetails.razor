@@ -12,13 +12,35 @@
     <div>
         <h1>Configure @appDetailReply.Name</h1>
 
-        <p>Your LDAP bind credentials:</p>
-        <p>@appDetailReply.LdapBindCredentials</p>
-        <p>@appDetailReply.LdapBindCredentialsPassword</p>
+        <h2>Auth setting</h2>
+        @switch(appDetailReply.AuthSettingCase) {
+            case AppDetailReply.AuthSettingOneofCase.LdapAuthSetting:
+                <span>Base DN: @appDetailReply.LdapAuthSetting.BaseDn</span>
+                break;
 
-        <p>Your LDAP Base DN:</p>
-        <p>@appDetailReply.LdapDn</p>
+            case AppDetailReply.AuthSettingOneofCase.OidcAuthSetting:
+                <span>Client ID: @appDetailReply.OidcAuthSetting.ClientId</span>
+                break;
 
+            case AppDetailReply.AuthSettingOneofCase.ProxyAuthSetting:
+                <span>Internal hostname: @appDetailReply.ProxyAuthSetting.InternalHostname</span>
+                break;
+        }
+
+        <h2>Directory settings</h2>
+        @switch(appDetailReply.DirectorySettingCase) {
+            case AppDetailReply.DirectorySettingOneofCase.LdapDirectorySetting:
+                <span>Base DN: @appDetailReply.LdapDirectorySetting.BaseDn</span>
+                break;
+            case AppDetailReply.DirectorySettingOneofCase.ScimDirectorySetting:
+                <span>SCIM</span>
+                break;
+            case AppDetailReply.DirectorySettingOneofCase.None:
+                <span>None configured</span>
+                break;
+        }
+
+        <h2>Groups with access</h2>
         <p>Groups:</p>
 
         @foreach (GrantedAppGroup group in appDetailReply.Groups)
