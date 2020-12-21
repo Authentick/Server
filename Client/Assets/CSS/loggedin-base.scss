@@ -67,3 +67,12 @@
   overflow: auto;
   max-height: 100vh;
 }
+
+.width-md-100 {
+  width: 100%;
+  white-space: nowrap;
+
+  @include media-breakpoint-up(lg) {
+    width: auto;
+  }
+}
