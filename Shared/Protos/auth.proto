@@ -8,6 +8,7 @@ option csharp_namespace = "AuthServer.Shared";
 service Auth {
   rpc WhoAmI (google.protobuf.Empty) returns (WhoAmIReply);
   rpc Login (LoginRequest) returns (LoginReply);
+  rpc Logout (google.protobuf.Empty) returns (google.protobuf.Empty);
   rpc VerifyEmail (VerifyEmailRequest) returns (VerifyEmailReply);
   rpc VerifyAuthenticatorToken (VerifyAuthenticatorTokenRequest) returns (VerifyAuthenticatorReply);
 }
