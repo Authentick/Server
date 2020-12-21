@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuthServer.Server.GRPC.Admin
 {
-    [Authorize]
+    [Authorize(Policy="SuperAdministrator")]
     public class GroupsService : AuthServer.Shared.Admin.Groups.GroupsBase
     {
         private readonly AuthDbContext _authDbContext;

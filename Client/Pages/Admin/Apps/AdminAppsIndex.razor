@@ -1,5 +1,5 @@
 @page "/admin/apps"
-@attribute [Authorize]
+@attribute [Authorize(Policy = "SuperAdministrator")]
 
 @layout AdminShell
 

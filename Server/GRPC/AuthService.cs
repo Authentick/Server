@@ -155,7 +155,7 @@ namespace AuthServer.Server.GRPC
 
         public override async Task<WhoAmIReply> WhoAmI(Empty request, ServerCallContext context)
         {
-            string? userId = _userManager.GetUserId(context.GetHttpContext().User);
+            AppUser? user = await _userManager.GetUserAsync(context.GetHttpContext().User);
 
             WhoAmIReply result = new WhoAmIReply();
 
@@ -163,10 +163,11 @@ namespace AuthServer.Server.GRPC
                 .SingleOrDefaultAsync(s => s.Name == "installer.is_installed" && s.Value == "true");
             result.IsInstalled = (installedSetting != null);
 
-            if (userId != null)
+            if (user != null)
             {
                 result.IsAuthenticated = true;
-                result.UserId = userId;
+                result.UserId = user.Id.ToString();
+                result.Roles.AddRange(await _userManager.GetRolesAsync(user));
             }
             else
             {

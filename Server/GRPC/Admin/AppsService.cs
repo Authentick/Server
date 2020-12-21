@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuthServer.Server.GRPC.Admin
 {
-    [Authorize]
+    [Authorize(Policy="SuperAdministrator")]
     public class AppsService : AuthServer.Shared.Admin.AdminApps.AdminAppsBase
     {
         private readonly AuthDbContext _authDbContext;

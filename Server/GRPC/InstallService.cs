@@ -88,6 +88,7 @@ namespace AuthServer.Server.GRPC
             };
 
             await _userManager.CreateAsync(user, request.AccountData.Password);
+            await _userManager.AddToRoleAsync(user, "admin");
 
             SystemSetting installSetting = new SystemSetting
             {
@@ -120,7 +121,7 @@ namespace AuthServer.Server.GRPC
                 Value = request.SmtpSettings.Port.ToString(),
             };
 
-            if (request.TlsData.Domain != null)
+            if (request.TlsData != null)
             {
                 BackgroundJob.Enqueue<IRequestAcmeCertificateJob>(job => job.Request(request.TlsData.ContactEmail, request.TlsData.Domain));
             }

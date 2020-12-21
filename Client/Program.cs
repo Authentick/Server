@@ -35,7 +35,10 @@ namespace AuthServer.Client
             builder.Services.AddScoped<MobileNavigationStateProvider>();
 
             builder.Services.AddOptions();
-            builder.Services.AddAuthorizationCore();
+            builder.Services.AddAuthorizationCore(options =>
+            {
+                options.AddPolicy("SuperAdministrator", policy => policy.RequireRole(new string[1] { "admin" }));
+            });
 
             await builder.Build().RunAsync();
         }

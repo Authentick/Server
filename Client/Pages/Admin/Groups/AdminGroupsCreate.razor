@@ -1,5 +1,5 @@
 @page "/admin/groups/create"
-@attribute [Authorize]
+@attribute [Authorize(Policy = "SuperAdministrator")]
 
 @layout AdminShell
 

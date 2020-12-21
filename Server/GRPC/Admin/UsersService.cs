@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace AuthServer.Server.GRPC.Admin
 {
-    [Authorize]
+    [Authorize(Policy="SuperAdministrator")]
     public class UsersService : AuthServer.Shared.Admin.Users.UsersBase
     {
         private readonly UserManager _userManager;

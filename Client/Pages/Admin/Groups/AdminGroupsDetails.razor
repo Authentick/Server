@@ -1,5 +1,5 @@
 @page "/admin/groups/details/{Id:guid}"
-@attribute [Authorize]
+@attribute [Authorize(Policy = "SuperAdministrator")]
 
 @layout AdminShell
 

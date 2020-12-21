@@ -1,4 +1,4 @@
 @page "/admin/alerts"
-@attribute [Authorize]
+@attribute [Authorize(Policy = "SuperAdministrator")]
 
 @layout AdminShell

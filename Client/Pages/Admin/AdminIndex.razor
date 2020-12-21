@@ -1,4 +1,5 @@
 @page "/admin"
+@attribute [Authorize(Policy = "SuperAdministrator")]
 
 @inject NavigationManager NavigationManager
 

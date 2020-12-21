@@ -26,6 +26,7 @@ using AuthServer.Server.Services.TLS;
 using AuthServer.Server.Services.Authentication.Filter;
 using AuthServer.Server.Services.Authentication.TwoFactorAuthenticators;
 using AuthServer.Server.Services.Crypto.OIDC;
+using System.Threading.Tasks;
 
 namespace AuthServer.Server
 {
@@ -82,6 +83,10 @@ namespace AuthServer.Server
                 options.Cookie.Name = "asid";
                 options.LoginPath = "/login";
                 options.EventsType = typeof(CookieAuthenticationEventListener);
+            });
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("SuperAdministrator", policy => policy.RequireRole(new string[1] { "admin" }));
             });
 
             // TLS
@@ -216,6 +221,20 @@ namespace AuthServer.Server
             }
 
             keyStorageDbContext.Database.Migrate();
+
+            CreateAdminRole(serviceScope.ServiceProvider).GetAwaiter().GetResult();
+        }
+
+        private static async Task CreateAdminRole(IServiceProvider serviceProvider)
+        {
+            RoleManager<IdentityRole<Guid>> roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+            UserManager userManager = serviceProvider.GetRequiredService<UserManager>();
+
+            bool adminRoleExists = await roleManager.RoleExistsAsync("admin");
+            if (!adminRoleExists)
+            {
+                await roleManager.CreateAsync(new IdentityRole<Guid>("admin"));
+            }
         }
     }
 }
