@@ -1,8 +1,10 @@
+using System;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using AuthServer.Server.Services.Authentication;
+using AuthServer.Server.Services.Authentication.Session;
 using AuthServer.Server.Services.User;
 using AuthServer.Shared;
 using Google.Protobuf.WellKnownTypes;
@@ -21,18 +23,21 @@ namespace AuthServer.Server.GRPC
         private readonly SignInManager<AppUser> _signInManager;
         private readonly AuthDbContext _authDbContext;
         private readonly BruteforceManager _bruteforceManager;
+        private readonly SessionManager _sessionManager;
 
         public AuthService(
             UserManager userManager,
             SignInManager<AppUser> signInManager,
             AuthDbContext authDbContext,
-            BruteforceManager bruteforceManager
+            BruteforceManager bruteforceManager,
+            SessionManager sessionManager
             )
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _authDbContext = authDbContext;
             _bruteforceManager = bruteforceManager;
+            _sessionManager = sessionManager;
         }
 
         public override async Task<LoginReply> Login(LoginRequest request, ServerCallContext context)
@@ -111,6 +116,17 @@ namespace AuthServer.Server.GRPC
             {
                 State = LoginStateEnum.Failed
             };
+        }
+
+        public override async Task<Empty> Logout(Empty request, ServerCallContext context)
+        {
+            AppUser user = await _userManager.GetUserAsync(context.GetHttpContext().User);
+
+            Guid currentSessionId = _sessionManager.GetCurrentSessionId(context.GetHttpContext().User);
+            _sessionManager.ExpireSession(user, currentSessionId);
+            await _signInManager.SignOutAsync();
+
+            return new Empty();
         }
 
         public override async Task<VerifyAuthenticatorReply> VerifyAuthenticatorToken(VerifyAuthenticatorTokenRequest request, ServerCallContext context)
