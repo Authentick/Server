@@ -17,10 +17,12 @@
                     <span class="material-icons md-icon-24">security</span>
                     <span>Security</span>
                 </NavLink>
-                <NavLink @onclick="@SetNavActive" class="sidebar__icon d-flex justify-content-center flex-column align-items-center mt-lg-4 mt-0 w-100" href="admin" Match="NavLinkMatch.Prefix">
-                    <span class="material-icons md-icon-24">settings</span>
-                    <span>Admin</span>
-                </NavLink>
+                <AuthorizeView Policy="SuperAdministrator">
+                    <NavLink @onclick="@SetNavActive" class="sidebar__icon d-flex justify-content-center flex-column align-items-center mt-lg-4 mt-0 w-100" href="admin" Match="NavLinkMatch.Prefix">
+                        <span class="material-icons md-icon-24">settings</span>
+                        <span>Admin</span>
+                    </NavLink>
+                </AuthorizeView>
             </div>
         </div>
         <div class="d-lg-flex d-none justify-content-center">

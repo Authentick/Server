@@ -1,4 +1,4 @@
 @page "/admin/settings"
-@attribute [Authorize]
+@attribute [Authorize(Policy = "SuperAdministrator")]
 
 @layout AdminShell

@@ -29,6 +29,10 @@ namespace AuthServer.Client.Util
             if (identityResult.IsAuthenticated)
             {
                 claims.Add(new Claim(ClaimTypes.Name, identityResult.UserId));
+                foreach (string role in identityResult.Roles)
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, role));
+                }
             }
 
             ClaimsIdentity identity = new ClaimsIdentity();
