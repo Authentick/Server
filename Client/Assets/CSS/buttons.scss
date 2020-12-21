@@ -9,3 +9,15 @@
     width: auto;
   }
 }
+
+.btn-delete:hover {
+  background-color: $watermelon;
+  color: white;
+  border-color: $watermelon;
+}
+
+.btn-add:hover {
+  background-color: $dark-green;
+  color: white;
+  border-color: $dark-green;
+}
