@@ -6,8 +6,8 @@
 <EditForm EditContext="@editContext">
     <DataAnnotationsValidator />
 
-    <InputText @bind-Value="scimSettings.BaseDomain" class="form-control bg-secondary"
-        placeholder="Base domain" />
+    <InputText @bind-Value="scimSettings.Endpoint" class="form-control bg-secondary"
+        placeholder="Endpoint" />
     <br />
 
     <InputText @bind-Value="scimSettings.Credentials" type="email" class="form-control bg-secondary"
@@ -52,7 +52,7 @@
     internal class ScimSettings
     {
         [Required]
-        public string? BaseDomain { get; set; }
+        public string? Endpoint { get; set; }
 
         [Required]
         public string? Credentials { get; set; }

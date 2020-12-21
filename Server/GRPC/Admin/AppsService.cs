@@ -88,12 +88,20 @@ namespace AuthServer.Server.GRPC.Admin
 
             if (app.AuthMethod == AuthApp.AuthMethodEnum.LDAP || app.DirectoryMethod == AuthApp.DirectoryMethodEnum.LDAP)
             {
+                string assembledBaseDn = "dc=" + app.Id;
+                string bindUserPassword = _ldapSettingsDataProtector.Protect(_secureRandom.GetRandomString(16));
+                string bindUser = "cn=BindUser," + assembledBaseDn;
+
                 LdapAppSettings ldapAppSettings = new LdapAppSettings
                 {
                     AuthApp = app,
                     UseForAuthentication = (app.AuthMethod == AuthApp.AuthMethodEnum.LDAP),
                     UseForIdentity = (app.DirectoryMethod == AuthApp.DirectoryMethodEnum.LDAP),
+                    BaseDn = assembledBaseDn,
+                    BindUser = bindUser,
+                    BindUserPassword = bindUserPassword,
                 };
+
                 _authDbContext.Add(ldapAppSettings);
                 app.LdapAppSettings = ldapAppSettings;
             }
@@ -116,6 +124,9 @@ namespace AuthServer.Server.GRPC.Admin
                 {
                     RedirectUrl = request.OidcSetting.RedirectUri,
                     AuthApp = app,
+                    ClientId = Guid.NewGuid().ToString(),
+                    ClientSecret = _secureRandom.GetRandomString(32),
+                    Audience = "FIX_ME",
                 };
                 _authDbContext.Add(oidcAppSettings);
                 app.OidcAppSettings = oidcAppSettings;
@@ -126,7 +137,8 @@ namespace AuthServer.Server.GRPC.Admin
                 SCIMAppSettings scimAppSettings = new SCIMAppSettings
                 {
                     AuthApp = app,
-                    Hostname = request.ScimSetting.Hostname,
+                    Endpoint = request.ScimSetting.Endpoint,
+                    Credentials = request.ScimSetting.Credentials,
                 };
                 _authDbContext.Add(scimAppSettings);
                 app.ScimAppSettings = scimAppSettings;
@@ -149,21 +161,68 @@ namespace AuthServer.Server.GRPC.Admin
             };
         }
 
-        public override Task<AppDetailReply> GetAppDetails(AppDetailRequest request, ServerCallContext context)
+        public override async Task<AppDetailReply> GetAppDetails(AppDetailRequest request, ServerCallContext context)
         {
-            AuthApp app = _authDbContext.AuthApp
+            AuthApp app = await _authDbContext.AuthApp
                 .Include(a => a.LdapAppSettings)
                 .Include(a => a.UserGroups)
-                .Single(f => f.Id == new Guid(request.Id));
+                .Include(a => a.LdapAppSettings)
+                .Include(a => a.OidcAppSettings)
+                .Include(a => a.ProxyAppSettings)
+                .Include(a => a.ScimAppSettings)
+                .SingleAsync(f => f.Id == new Guid(request.Id));
 
             AppDetailReply reply = new AppDetailReply
             {
                 Id = app.Id.ToString(),
-                LdapBindCredentials = (app.LdapAppSettings != null) ? app.LdapAppSettings.BindUser : "",
-                LdapBindCredentialsPassword = (app.LdapAppSettings != null) ? _ldapSettingsDataProtector.Unprotect(app.LdapAppSettings.BindUserPassword) : "",
-                LdapDn = (app.LdapAppSettings != null) ? app.LdapAppSettings.BaseDn : "",
                 Name = app.Name,
             };
+
+            switch (app.DirectoryMethod)
+            {
+                case AuthApp.DirectoryMethodEnum.NONE:
+                    break;
+                case AuthApp.DirectoryMethodEnum.LDAP:
+                    reply.LdapDirectorySetting = new AppDetailReply.Types.LdapDirectorySetting
+                    {
+                        BaseDn = app.LdapAppSettings.BaseDn,
+                        Password = app.LdapAppSettings.BindUserPassword,
+                        Username = app.LdapAppSettings.BindUser,
+                    };
+                    break;
+                case AuthApp.DirectoryMethodEnum.SCIM:
+                    reply.ScimDirectorySetting = new AppDetailReply.Types.ScimDirectorySetting
+                    {
+                        Credentials = app.ScimAppSettings.Credentials,
+                        Endpoint = app.ScimAppSettings.Endpoint,
+                    };
+                    break;
+            }
+
+            switch (app.AuthMethod)
+            {
+                case AuthApp.AuthMethodEnum.LDAP:
+                    reply.LdapAuthSetting = new AppDetailReply.Types.LdapAuthSetting
+                    {
+                        BaseDn = app.LdapAppSettings.BaseDn,
+                    };
+                    break;
+                case AuthApp.AuthMethodEnum.OIDC:
+                    reply.OidcAuthSetting = new AppDetailReply.Types.OidcAuthSetting
+                    {
+                        ClientId = app.OidcAppSettings.ClientId,
+                        ClientSecret = app.OidcAppSettings.ClientSecret,
+                        RedirectUri = app.OidcAppSettings.RedirectUrl,
+                    };
+                    break;
+                case AuthApp.AuthMethodEnum.PROXY:
+                    reply.ProxyAuthSetting = new AppDetailReply.Types.ProxyAuthSetting
+                    {
+                        InternalHostname = app.ProxyAppSettings.InternalHostname,
+                        PublicHostname = app.ProxyAppSettings.PublicHostname,
+                    };
+                    break;
+            }
 
             foreach (UserGroup group in app.UserGroups)
             {
@@ -175,27 +234,65 @@ namespace AuthServer.Server.GRPC.Admin
                 reply.Groups.Add(appGroup);
             }
 
-            return Task.FromResult(reply);
+            return reply;
         }
 
-        public override Task<AppListReply> ListApps(Empty request, ServerCallContext context)
+        public override async Task<AppListReply> ListApps(Empty request, ServerCallContext context)
         {
             AppListReply reply = new AppListReply();
 
-            IEnumerable<AuthApp> apps = _authDbContext.AuthApp.ToList();
+            IEnumerable<AuthApp> apps = await _authDbContext.AuthApp
+                .Include(a => a.UserGroups)
+                .ToListAsync();
 
             foreach (AuthApp app in apps)
             {
+                AddNewAppRequest.Types.AuthChoice authChoice;
+                AddNewAppRequest.Types.DirectoryChoice directoryChoice;
+
+                switch (app.DirectoryMethod)
+                {
+                    case AuthApp.DirectoryMethodEnum.NONE:
+                        directoryChoice = AddNewAppRequest.Types.DirectoryChoice.NoneDirectory;
+                        break;
+                    case AuthApp.DirectoryMethodEnum.LDAP:
+                        directoryChoice = AddNewAppRequest.Types.DirectoryChoice.LdapDirectory;
+                        break;
+                    case AuthApp.DirectoryMethodEnum.SCIM:
+                        directoryChoice = AddNewAppRequest.Types.DirectoryChoice.ScimDirectory;
+                        break;
+                    default:
+                        throw new Exception("Unexpected directory method");
+                }
+
+                switch (app.AuthMethod)
+                {
+                    case AuthApp.AuthMethodEnum.LDAP:
+                        authChoice = AddNewAppRequest.Types.AuthChoice.LdapAuth;
+                        break;
+                    case AuthApp.AuthMethodEnum.OIDC:
+                        authChoice = AddNewAppRequest.Types.AuthChoice.OidcAuth;
+                        break;
+                    case AuthApp.AuthMethodEnum.PROXY:
+                        authChoice = AddNewAppRequest.Types.AuthChoice.ProxyAuth;
+                        break;
+                    default:
+                        throw new Exception("Unexpected app method");
+                }
+
                 AppListEntry entry = new AppListEntry
                 {
                     Id = app.Id.ToString(),
                     Name = app.Name,
+                    GroupsAssigned = app.UserGroups.Count(),
+                    AuthChoice = authChoice,
+                    DirectoryChoice = directoryChoice,
                 };
 
                 reply.Apps.Add(entry);
             }
 
-            return Task.FromResult(reply);
+            return reply;
         }
 
         public override async Task<RemoveGroupFromAppReply> RemoveGroupFromApp(RemoveGroupFromAppRequest request, ServerCallContext context)

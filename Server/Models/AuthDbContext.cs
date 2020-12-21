@@ -67,7 +67,8 @@ namespace AuthServer.Server.Models
         public Guid Id { get; set; }
         public Guid AuthAppId { get; set; }
         public AuthApp AuthApp { get; set; } = null!;
-        public string Hostname { get; set; } = null!;
+        public string Endpoint { get; set; } = null!;
+        public string Credentials { get; set; } = null!;
     }
 
     public class ProxyAppSettings

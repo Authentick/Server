@@ -55,7 +55,7 @@ namespace AuthServer.Client.Pages.Admin.Apps.Setup
                 case ConfigureScimStep configureScimStep:
                     _addNewAppRequest.ScimSetting = new AddNewAppRequest.Types.SCIMSetting
                     {
-                        Hostname = configureScimStep.scimSettings.BaseDomain,
+                        Endpoint = configureScimStep.scimSettings.Endpoint,
                         Credentials = configureScimStep.scimSettings.Credentials,
                     };
                     break;

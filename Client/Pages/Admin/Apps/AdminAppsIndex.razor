@@ -18,10 +18,9 @@
             <thead class="bg-secondary-dark">
                 <tr>
                     <th scope="col" class="border-0">Application Name</th>
-                    <th scope="col" class="border-0">Application URL</th>
-                    <th scope="col" class="border-0">Type</th>
-                    <th scope="col" class="border-0">Users assigned</th>
-                    <th></th>
+                    <th scope="col" class="border-0">Auth Type</th>
+                    <th scope="col" class="border-0">Directory Type</th>
+                    <th scope="col" class="border-0">Groups assigned</th>
                     <th></th>
                 </tr>
             </thead>
@@ -29,12 +28,11 @@
 
             @foreach(AppListEntry entry in appsReply.Apps) {
                 <tr>
-                    <td><a href="/admin/apps/details/@entry.Id">@entry.Name</a></td>
-                    <td><a href="/admin/apps/details/@entry.Id">@entry.Name</a></td>
-                    <td><a href="/admin/apps/details/@entry.Id">@entry.Name</a></td>
-                    <td><a href="/admin/apps/details/@entry.Id">@entry.Name</a></td>
+                    <td>@entry.Name</td>
+                    <td>@entry.AuthChoice</td>
+                    <td>@entry.DirectoryChoice</td>
+                    <td>@entry.GroupsAssigned</td>
                     <td><a href="/admin/apps/details/@entry.Id">Edit</a></td>
-                    <td><a href="/admin/apps/details/@entry.Id">Delete</a></td>
                 </tr>
             }
             </tbody>
