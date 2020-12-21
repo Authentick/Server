@@ -189,6 +189,7 @@ namespace AuthServer.Server
                 endpoints.MapGrpcService<GRPC.Apps.AppsService>();
                 endpoints.MapGrpcService<InstallService>();
                 endpoints.MapGrpcService<OIDCUserService>();
+                endpoints.MapGrpcService<UserProfileService>();
                 endpoints.MapFallbackToPage("/_Host");
             });
         }

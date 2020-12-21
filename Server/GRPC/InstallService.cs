@@ -120,7 +120,7 @@ namespace AuthServer.Server.GRPC
                 Value = request.SmtpSettings.Port.ToString(),
             };
 
-            if (request.TlsData.Domain != null)
+            if (request.TlsData != null)
             {
                 BackgroundJob.Enqueue<IRequestAcmeCertificateJob>(job => job.Request(request.TlsData.ContactEmail, request.TlsData.Domain));
             }
