@@ -30,7 +30,9 @@
         <h2>Directory settings</h2>
         @switch(appDetailReply.DirectorySettingCase) {
             case AppDetailReply.DirectorySettingOneofCase.LdapDirectorySetting:
-                <span>Base DN: @appDetailReply.LdapDirectorySetting.BaseDn</span>
+                <p>Base DN: @appDetailReply.LdapDirectorySetting.BaseDn</p>
+                <p>Bind user: @appDetailReply.LdapDirectorySetting.Username</p>
+                <p>Bind password: @appDetailReply.LdapDirectorySetting.Password</p>
                 break;
             case AppDetailReply.DirectorySettingOneofCase.ScimDirectorySetting:
                 <span>SCIM</span>
