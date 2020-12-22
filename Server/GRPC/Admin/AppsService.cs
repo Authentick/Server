@@ -186,7 +186,7 @@ namespace AuthServer.Server.GRPC.Admin
                     reply.LdapDirectorySetting = new AppDetailReply.Types.LdapDirectorySetting
                     {
                         BaseDn = app.LdapAppSettings.BaseDn,
-                        Password = app.LdapAppSettings.BindUserPassword,
+                        Password = _ldapSettingsDataProtector.Unprotect(app.LdapAppSettings.BindUserPassword),
                         Username = app.LdapAppSettings.BindUser,
                     };
                     break;

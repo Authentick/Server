@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using AuthServer.Server.Services.Crypto;
@@ -69,11 +70,14 @@ namespace AuthServer.Server.GRPC.Apps
 
         public override async Task<Shared.Apps.AppListReply> ListApps(Empty request, ServerCallContext context)
         {
-            AppListReply reply = new AppListReply();
-
+            Guid userId = new Guid(_userManager.GetUserId(context.GetHttpContext().User));
+            
             IEnumerable<AuthApp> authApps = await _authDbContext.AuthApp
+                .AsNoTracking()
+                .Where(a => a.UserGroups.Any(u => u.Members.Any(m => m.Id == userId)))
                 .ToListAsync();
 
+            AppListReply reply = new AppListReply();
             foreach (AuthApp app in authApps)
             {
                 reply.Apps.Add(new AppListEntry

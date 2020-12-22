@@ -30,37 +30,19 @@ namespace AuthServer.Server.GRPC
         {
             AppUser currentUser = await _userManager.GetUserAsync(context.GetHttpContext().User);
 
-            List<UserGroup> currentUserGroups = await _authDbContext.UserGroup
-                .AsNoTracking()
-                .Where(u => u.Members.Contains(currentUser))
-                .ToListAsync();
-
-            AuthApp app = await _authDbContext.AuthApp
-                .AsNoTracking()
-                .Include(a => a.OidcAppSettings)
-                .SingleAsync(a => a.Id == new Guid(request.AppId) && a.UserGroups.Any());
-
-            if (app.OidcAppSettings == null)
-            {
-                return new GrantApplicationReply
-                {
-                    Success = false,
-                };
-            }
-
-            if (app.OidcAppSettings.RedirectUrl != request.RedirectUri)
-            {
-                return new GrantApplicationReply
-                {
-                    Success = false
-                };
-            }
+            OIDCAppSettings settings = await _authDbContext.OIDCAppSettings
+                .Where(u => u.ClientId == request.AppId)
+               // FIXME: add this condition
+               // .Where(u => u.RedirectUrl == request.RedirectUri)
+                .Where(u => u.AuthApp.UserGroups.Any(u => u.Members.Contains(currentUser)))
+                .SingleAsync();
 
             OIDCSession session = new OIDCSession
             {
                 CreationTime = SystemClock.Instance.GetCurrentInstant(),
-                OIDCAppSettings = app.OidcAppSettings,
+                OIDCAppSettings = settings,
                 User = currentUser,
+                Nonce = request.Nonce,
             };
             _authDbContext.Add(session);
             await _authDbContext.SaveChangesAsync();

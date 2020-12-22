@@ -5,15 +5,59 @@
 @layout LoggedOutLayout
 
 @inject NavigationManager NavigationManager
+@inject AuthServer.Shared.OIDCUserService.OIDCUserServiceClient OIDCUserServiceClient
+
+@using AuthServer.Shared
+@using Microsoft.AspNetCore.WebUtilities
 
 <div class="h-100 pt-0 pt-md-4">
-    <h1>Login to $name</h1>
-    <button class="btn">Proceed</button>
+    <h1>Login to @_clientId</h1>
+    <button @onclick="@Proceed" class="btn">Proceed</button>
 </div>
 
 @code {
-    protected override async Task OnInitializedAsync() 
+    private string _clientId = "";
+    private string _redirectUri = "";
+    private string _state = "";
+    private string _nonce = "";
+
+    protected override void OnInitialized()
     {
-        NavigationManager.NavigateTo("https://openidconnect.net/callback?code=MyMagicCode&state=a2e95ab1ad7a178b7d22593261e250ea18c9e28b");
+        var query = new Uri(NavigationManager.Uri).Query;
+
+        if (QueryHelpers.ParseQuery(query).TryGetValue("client_id", out var client_id))
+        {
+            _clientId = client_id;
+        }
+
+
+        if (QueryHelpers.ParseQuery(query).TryGetValue("redirect_uri", out var redirect_uri))
+        {
+            _redirectUri = redirect_uri;
+        }
+
+        if (QueryHelpers.ParseQuery(query).TryGetValue("state", out var state))
+        {
+            _state = state;
+        }
+
+        if (QueryHelpers.ParseQuery(query).TryGetValue("nonce", out var nonce))
+        {
+            _nonce = nonce;
+        }
+    }
+
+    private async Task Proceed() {
+        GrantApplicationRequest grantApplicationRequest = new GrantApplicationRequest
+        {
+            AppId = _clientId,
+            RedirectUri = _redirectUri,
+            Nonce = _nonce,
+        };
+
+        GrantApplicationReply grantApplicationReply = await OIDCUserServiceClient.GrantApplicationAsync(grantApplicationRequest);
+        
+        NavigationManager.NavigateTo(_redirectUri + "?state=" + _state + "&code=" + grantApplicationReply.AccessToken);
     }
 }
+
