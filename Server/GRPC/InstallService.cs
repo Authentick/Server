@@ -121,12 +121,22 @@ namespace AuthServer.Server.GRPC
                 Value = request.SmtpSettings.Port.ToString(),
             };
 
+            SystemSetting tlsCertificateSetting = new SystemSetting
+            {
+                Name = "tls.acme.support",
+            };
+
             if (request.TlsData != null)
             {
+                tlsCertificateSetting.Value = "true";
                 BackgroundJob.Enqueue<IRequestAcmeCertificateJob>(job => job.Request(request.TlsData.ContactEmail, request.TlsData.Domain));
             }
+            else
+            {
+                tlsCertificateSetting.Value = "false";
+            }
 
-            _authDbContext.AddRange(installSetting, smtpHostnameSetting, smtpUsernameSetting, smtpPasswordSetting, smtpSenderAddress);
+            _authDbContext.AddRange(installSetting, smtpHostnameSetting, smtpUsernameSetting, smtpPasswordSetting, smtpSenderAddress, tlsCertificateSetting);
             await _authDbContext.SaveChangesAsync();
 
             return new SetupInstanceReply
