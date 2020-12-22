@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text.Json.Serialization;
 using AuthServer.Server.Services.Crypto.OIDC;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AuthServer.Server.Controller.OIDC
 {
@@ -31,8 +32,8 @@ namespace AuthServer.Server.Controller.OIDC
                         Use = "sig",
                         KeyType = "RSA",
                         Algorithm = "RS256",
-                        PublicExponent = Convert.ToBase64String(rsaParameters.Exponent),
-                        PublicModulus = Convert.ToBase64String(rsaParameters.Modulus),
+                        PublicExponent = Base64UrlEncoder.Encode(rsaParameters.Exponent),
+                        PublicModulus = Base64UrlEncoder.Encode(rsaParameters.Modulus),
                     },
                 },
             };

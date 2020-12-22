@@ -19,7 +19,9 @@
                 break;
 
             case AppDetailReply.AuthSettingOneofCase.OidcAuthSetting:
-                <span>Client ID: @appDetailReply.OidcAuthSetting.ClientId</span>
+                <p>Client ID: @appDetailReply.OidcAuthSetting.ClientId</p>
+                <p>Client Secret: @appDetailReply.OidcAuthSetting.ClientSecret</p>
+                <p>Redirect URI: @appDetailReply.OidcAuthSetting.RedirectUri</p>
                 break;
 
             case AppDetailReply.AuthSettingOneofCase.ProxyAuthSetting:

@@ -117,6 +117,7 @@ namespace AuthServer.Server.Models
         public Guid Id { get; set; }
         public OIDCAppSettings OIDCAppSettings { get; set; } = null!;
         public AppUser User { get; set; } = null!;
+        public string Nonce { get; set; } = null!;
         public Instant CreationTime { get; set; }
         public Instant? ExpiredTime { get; set; }
     }

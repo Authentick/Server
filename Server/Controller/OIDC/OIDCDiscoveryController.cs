@@ -19,16 +19,18 @@ namespace AuthServer.Server.Controller.OIDC
         public DiscoveryDocument GetDocument()
         {
             HostString host = _contextAccessor.HttpContext.Request.Host;
+            string protocolString = (_contextAccessor.HttpContext.Request.IsHttps) ? "https" : "http";
 
             return new DiscoveryDocument
             {
-                Issuer = "https://" + host.Host,
-                AuthorizationEndpoint = "https://" + host.Host + "/connect/authorize",
-                TokenEndpoint = "https://" + host.Host + "/connect/token",
-                JwksUri = "https://" + host.Host + "/.well-known/jwks.json",
+                Issuer = protocolString + "://" + host.Host,
+                AuthorizationEndpoint = protocolString + "://" + host.Host + "/connect/authorize",
+                TokenEndpoint = protocolString + "://" + host.Host + "/connect/token",
+                JwksUri = protocolString + "://" + host.Host + "/.well-known/jwks.json",
                 ResponseTypesSupported = new List<string>() { "code" },
                 SubjectTypesSupported = new List<string>() { "pairwise" },
                 IdTokenSigningAlgValuesSupported = new List<string>() { "RS256" },
+                TokenEndpointAuthMethodsSupported = new List<string>() { "client_secret_post" },
             };
         }
 
@@ -54,6 +56,9 @@ namespace AuthServer.Server.Controller.OIDC
 
             [JsonPropertyName("id_token_signing_alg_values_supported")]
             public IEnumerable<string> IdTokenSigningAlgValuesSupported { get; set; } = null!;
+
+            [JsonPropertyName("token_endpoint_auth_methods_supported")]
+            public IEnumerable<string> TokenEndpointAuthMethodsSupported { get; set; } = null!;
         }
     }
 }
