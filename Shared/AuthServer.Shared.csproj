@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <Protobuf Include="Protos\auth.proto" />
+    <Protobuf Include="Protos\connectivity_check.proto" />
     <Protobuf Include="Protos\install.proto" />
     <Protobuf Include="Protos\oidc.proto" />
     <Protobuf Include="Protos\userprofile.proto" />

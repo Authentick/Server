@@ -98,6 +98,7 @@ namespace AuthServer.Server
             services.AddGrpc();
             services.AddControllersWithViews();
             services.AddRazorPages();
+            services.AddHttpClient();
 
             // Email
             services.AddScoped<IEmailSender, SmtpEmailSender>();
@@ -202,6 +203,7 @@ namespace AuthServer.Server
                 endpoints.MapGrpcService<InstallService>();
                 endpoints.MapGrpcService<OIDCUserService>();
                 endpoints.MapGrpcService<UserProfileService>();
+                endpoints.MapGrpcService<ConnectivityServiceCheck>();
                 endpoints.MapFallbackToPage("/_Host");
             });
         }

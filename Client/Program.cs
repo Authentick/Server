@@ -31,6 +31,7 @@ namespace AuthServer.Client
             builder.Services.AddScoped(services => { return new AuthServer.Shared.Install.InstallClient(GetGrpcChannel(services)); });
             builder.Services.AddScoped(services => { return new AuthServer.Shared.UserProfile.UserProfileClient(GetGrpcChannel(services)); });
             builder.Services.AddScoped(services => { return new AuthServer.Shared.OIDCUserService.OIDCUserServiceClient(GetGrpcChannel(services)); });
+            builder.Services.AddScoped(services => { return new AuthServer.Shared.ConnectivityCheckService.ConnectivityCheckServiceClient(GetGrpcChannel(services)); });
 
             builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
             builder.Services.AddScoped<InstallationStateProvider>();
