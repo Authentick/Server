@@ -27,6 +27,7 @@ using AuthServer.Server.Services.Authentication.Filter;
 using AuthServer.Server.Services.Authentication.TwoFactorAuthenticators;
 using AuthServer.Server.Services.Crypto.OIDC;
 using System.Threading.Tasks;
+using AuthServer.Server.Services.ReverseProxy;
 
 namespace AuthServer.Server
 {
@@ -133,7 +134,10 @@ namespace AuthServer.Server
             }).AddEntityFramework();
 
             // Reverse Proxy
-            services.AddReverseProxy().LoadFromConfig(Configuration.GetSection("ReverseProxy"));
+            services.AddSingleton<ProxyHttpClientProvider>();
+            services.AddSingleton<MemorySingletonProxyConfigProvider>();
+            services.AddScoped<MemoryPopulator>();
+            services.AddHttpProxy();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -158,6 +162,9 @@ namespace AuthServer.Server
 
             // Routing
             app.UseRouting();
+
+            // Reverse Proxy
+            app.UseMiddleware<ReverseProxyMiddleware>();
 
             // GRPC
             app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true });
@@ -224,6 +231,13 @@ namespace AuthServer.Server
             keyStorageDbContext.Database.Migrate();
 
             CreateAdminRole(serviceScope.ServiceProvider).GetAwaiter().GetResult();
+            PopulateReverseProxyConfig(serviceScope.ServiceProvider).GetAwaiter().GetResult();
+        }
+
+        private static async Task PopulateReverseProxyConfig(IServiceProvider serviceProvider)
+        {
+            MemoryPopulator populator = serviceProvider.GetRequiredService<MemoryPopulator>();
+            await populator.PopulateFromDatabase();
         }
 
         private static async Task CreateAdminRole(IServiceProvider serviceProvider)
