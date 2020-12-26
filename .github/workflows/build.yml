@@ -32,7 +32,8 @@ jobs:
         verbose: true
     - name: Perform Percy Tests
       run: ./test.sh
-      working-directory: ./Server.Tests.Visual 
+      working-directory: ./Server.Tests.Visual
+      timeout-minutes: 5
       env:
         PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
 
