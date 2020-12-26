@@ -26,6 +26,7 @@ namespace AuthServer.Server.Services.ReverseProxy
             foreach (ProxyAppSettings setting in proxySettings)
             {
                MemorySingletonProxyConfigProvider.Route  route = new MemorySingletonProxyConfigProvider.Route(
+                   setting.Id,
                    setting.InternalHostname, 
                    setting.PublicHostname);
                 _proxyConfigProvider.AddRoute(route);
