@@ -29,7 +29,7 @@
         editContext.OnFieldChanged += HandleFieldChanged;
 
         StateMachine.SetNextStep(null);
-        StateMachine.SetPreviousStep(new EmailSelectionStep());
+        StateMachine.SetPreviousStep(new CertificateSelectionStep());
     }
 
     private void HandleFieldChanged(object sender, FieldChangedEventArgs e)

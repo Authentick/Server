@@ -30,6 +30,11 @@ jobs:
         directory: TestResults/
         fail_ci_if_error: true
         verbose: true
+    - name: Perform Percy Tests
+      run: ./test.sh
+      working-directory: ./Server.Tests.Visual 
+      env:
+        PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
 
     services:
       postgres:
