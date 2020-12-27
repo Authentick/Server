@@ -33,11 +33,13 @@ async function testInstaller(page, percySnapshot) {
     await page.type('input:nth-of-type(3)', 'test', {delay: 100});
     await page.type('input:nth-of-type(4)', 'test', {delay: 100});
     await page.type('input:nth-of-type(5)', 'test@example.com', {delay: 100});
+    await page.click('body');
     await page.click(nextButton);
     await percySnapshot('installer-create-account-step', config);
     await page.type('input:nth-of-type(1)', 'testuser', {delay: 100});
     await page.type('input:nth-of-type(2)', 'ins3cureTestUserPassw0rd!', {delay: 100});
     await page.type('input:nth-of-type(3)', 'test@example.com', {delay: 100});
+    await page.click('body');
     await page.click(nextButton);
 }
 
