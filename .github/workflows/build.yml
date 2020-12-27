@@ -22,7 +22,7 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release Server/AuthServer.Server.csproj
     - name: Test Server
-      run: dotnet test Server.Tests -p:ParallelizeTestCollection=false --collect:"XPlat Code Coverage" -r TestResults/ --settings Server.Tests/coverlet.runsettings
+      run: dotnet test Server.Tests --collect:"XPlat Code Coverage" -r TestResults/ --settings Server.Tests/coverlet.runsettings
     - name: Test Client
       run: dotnet test Client.Tests --collect:"XPlat Code Coverage" -r TestResults/
     - uses: codecov/codecov-action@v1
