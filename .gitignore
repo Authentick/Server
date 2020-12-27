@@ -35,6 +35,7 @@ msbuild.wrn
 
 # NPM
 Client/node_modules/
+Server.Tests.Visual/node_modules/
 
 # Generated CSS
 Client/wwwroot/css/

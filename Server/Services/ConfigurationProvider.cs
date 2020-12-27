@@ -27,7 +27,7 @@ namespace AuthServer.Server.Services
             }
             setting.Value = value;
 
-            _authDbContext.SaveChangesAsync();
+            _authDbContext.SaveChanges();
         }
 
         public bool TryGet(string key, out string value)
