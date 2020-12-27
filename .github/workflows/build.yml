@@ -25,17 +25,17 @@ jobs:
       run: dotnet test Server.Tests --collect:"XPlat Code Coverage" -r TestResults/ --settings Server.Tests/coverlet.runsettings
     - name: Test Client
       run: dotnet test Client.Tests --collect:"XPlat Code Coverage" -r TestResults/
-    - uses: codecov/codecov-action@v1
-      with:
-        directory: TestResults/
-        fail_ci_if_error: true
-        verbose: true
     - name: Perform Percy Tests
       run: ./test.sh
       working-directory: ./Server.Tests.Visual
       timeout-minutes: 5
       env:
         PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
+    - uses: codecov/codecov-action@v1
+      with:
+        directory: TestResults/
+        fail_ci_if_error: true
+        verbose: true
 
     services:
       postgres:
