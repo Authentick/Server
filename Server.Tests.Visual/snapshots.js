@@ -1,8 +1,17 @@
 const PercyScript = require('@percy/script');
-const config = { widths: [576, 768, 992, 1200] };
-const mobileOnlyConfig = { widths: [576, 768] };
+const config = { widths: [576, 1200] };
+const mobileOnlyConfig = { widths: [576] };
 
 PercyScript.run(async (page, percySnapshot) => {
+    page
+    .on('console', message =>
+      console.log(`${message.type().substr(0, 3).toUpperCase()} ${message.text()}`))
+    .on('pageerror', ({ message }) => console.log(message))
+    .on('response', response =>
+      console.log(`${response.status()} ${response.url()}`))
+    .on('requestfailed', request =>
+      console.log(`${request.failure().errorText} ${request.url()}`))
+
     await page.goto('http://localhost/');
     // ensure the page has loaded before capturing a snapshot
     await page.waitForSelector('.auth-base-root');
@@ -39,8 +48,9 @@ async function testInstaller(page, percySnapshot) {
     await page.type('input:nth-of-type(1)', 'testuser', {delay: 100});
     await page.type('input:nth-of-type(2)', 'ins3cureTestUserPassw0rd!', {delay: 100});
     await page.type('input:nth-of-type(3)', 'test@example.com', {delay: 100});
-    await page.click('body');
+    await page.keyboard.press('Tab');
     await page.click(nextButton);
+    await page.waitForTimeout(5000);
 }
 
 async function testLogin(page, percySnapshot) {
