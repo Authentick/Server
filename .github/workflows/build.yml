@@ -25,6 +25,11 @@ jobs:
       run: dotnet test Server.Tests -p:ParallelizeTestCollection=false --collect:"XPlat Code Coverage" -r TestResults/ --settings Server.Tests/coverlet.runsettings
     - name: Test Client
       run: dotnet test Client.Tests --collect:"XPlat Code Coverage" -r TestResults/
+    - uses: codecov/codecov-action@v1
+      with:
+        directory: TestResults/
+        fail_ci_if_error: true
+        verbose: true
     - uses: actions/setup-node@v1
     - name: NPM install
       run: npm install
@@ -40,11 +45,6 @@ jobs:
       timeout-minutes: 5
       env:
         PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
-    - uses: codecov/codecov-action@v1
-      with:
-        directory: TestResults/
-        fail_ci_if_error: true
-        verbose: true
 
     services:
       postgres:
