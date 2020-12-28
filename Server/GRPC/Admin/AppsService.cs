@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using AuthServer.Server.Services;
 using AuthServer.Server.Services.Crypto;
-using AuthServer.Server.Services.ReverseProxy;
+using AuthServer.Server.Services.ReverseProxy.Configuration;
 using AuthServer.Server.Services.TLS;
 using AuthServer.Shared.Admin;
 using Google.Protobuf.WellKnownTypes;

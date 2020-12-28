@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using AuthServer.Server.Services.ReverseProxy.Configuration;
 using AuthServer.Server.Services.TLS;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Net.Http.Headers;

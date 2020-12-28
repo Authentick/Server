@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace AuthServer.Server.Services.ReverseProxy
+namespace AuthServer.Server.Services.ReverseProxy.Configuration
 {
     public class MemorySingletonProxyConfigProvider
     {

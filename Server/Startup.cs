@@ -28,6 +28,7 @@ using AuthServer.Server.Services.Authentication.TwoFactorAuthenticators;
 using AuthServer.Server.Services.Crypto.OIDC;
 using System.Threading.Tasks;
 using AuthServer.Server.Services.ReverseProxy;
+using AuthServer.Server.Services.ReverseProxy.Configuration;
 
 namespace AuthServer.Server
 {
