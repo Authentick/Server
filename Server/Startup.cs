@@ -29,6 +29,7 @@ using AuthServer.Server.Services.Crypto.OIDC;
 using System.Threading.Tasks;
 using AuthServer.Server.Services.ReverseProxy;
 using AuthServer.Server.Services.ReverseProxy.Configuration;
+using AuthServer.Server.Services.ReverseProxy.Authentication;
 
 namespace AuthServer.Server
 {
@@ -139,6 +140,8 @@ namespace AuthServer.Server
             services.AddSingleton<ProxyHttpClientProvider>();
             services.AddSingleton<MemorySingletonProxyConfigProvider>();
             services.AddScoped<MemoryPopulator>();
+            services.AddScoped<AuthenticationManager>();
+            services.AddScoped<SingleSignOnHandler>();
             services.AddHttpProxy();
         }
 
@@ -205,6 +208,7 @@ namespace AuthServer.Server
                 endpoints.MapGrpcService<OIDCUserService>();
                 endpoints.MapGrpcService<UserProfileService>();
                 endpoints.MapGrpcService<ConnectivityServiceCheck>();
+                endpoints.MapGrpcService<SsoTokenService>();
                 endpoints.MapFallbackToPage("/_Host");
             });
         }

@@ -20,6 +20,7 @@ message SetupInstanceRequest {
   SetupAccountData account_data = 2;
   string auth_token = 3;
   SetupTlsData tls_data = 4;
+  google.protobuf.StringValue primary_domain = 5;
 }
 
 message StartSetupReply {

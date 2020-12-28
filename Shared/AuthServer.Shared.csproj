@@ -24,6 +24,7 @@
     <Protobuf Include="Protos\oidc.proto" />
     <Protobuf Include="Protos\userprofile.proto" />
     <Protobuf Include="Protos\typeahead.proto" />
+    <Protobuf Include="Protos\sso_token.proto" />
     <Protobuf Include="Protos\Admin\apps.proto" />
     <Protobuf Include="Protos\Admin\groups.proto" />
     <Protobuf Include="Protos\Admin\users.proto" />

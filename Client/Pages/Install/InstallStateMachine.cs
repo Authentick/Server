@@ -43,6 +43,8 @@ namespace AuthServer.Client.Pages.Install
                         Domain = tlsStep.letsEncryptCertificateSettings.DomainName,
                         ContactEmail = tlsStep.letsEncryptCertificateSettings.Email,
                     };
+
+                    _setupInstanceRequest.PrimaryDomain = tlsStep.letsEncryptCertificateSettings.DomainName;
                     break;
                 case AccountCreationStep accountCreationStep:
                     _setupInstanceRequest.AccountData = new SetupAccountData

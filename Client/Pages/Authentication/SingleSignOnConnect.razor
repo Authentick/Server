@@ -1,0 +1,39 @@
+@page "/auth/sso-connect"
+
+@layout LoggedOutLayout
+
+@inject AuthServer.Shared.SsoTokenService.SsoTokenServiceClient SsoTokenClient
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IJSRuntime JsRuntime;
+
+@using AuthServer.Shared
+@using Microsoft.AspNetCore.WebUtilities
+@using System.Security.Claims
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        string targetUrl;
+        
+        if (state.User.Identity.IsAuthenticated) {
+            var query = new Uri(NavigationManager.Uri).Query;
+            string proxyId = "";
+
+            if (QueryHelpers.ParseQuery(query).TryGetValue("id", out var query_id_parameter))
+            {
+                proxyId = query_id_parameter;
+            }
+            SsoTokenRequest request = new SsoTokenRequest{
+                ProxyId = proxyId,
+            };
+
+            targetUrl = (await SsoTokenClient.GetCurrentSessionTokenAsync(request)).RedirectUrl;
+            await JsRuntime.InvokeVoidAsync("blazorOpen", new string[2] { targetUrl, "_self" } );
+        } else {
+            targetUrl = "/login";
+            NavigationManager.NavigateTo(targetUrl);
+        }
+    }
+}

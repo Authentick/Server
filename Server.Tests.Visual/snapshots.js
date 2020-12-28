@@ -19,7 +19,20 @@ PercyScript.run(async (page, percySnapshot) => {
     await testInstaller(page, percySnapshot);
     await testLogin(page, percySnapshot);
     await testSecurity(page, percySnapshot);
+
+    // Single pages
+    await testAuthPages(page, percySnapshot);
 });
+
+async function testAuthPages(page, percySnapshot) {
+    await page.goto('http://localhost/login/mfa');
+    await page.waitForSelector('.auth-base-root');
+    await percySnapshot('login-mfa', config);
+
+    await page.goto('http://localhost/auth/403');
+    await page.waitForSelector('.auth-base-root');
+    await percySnapshot('403', config);
+}
 
 async function testInstaller(page, percySnapshot) {
     var nextButton = 'button:nth-of-type(2)';

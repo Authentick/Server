@@ -20,6 +20,7 @@ namespace AuthServer.Server.GRPC
         private readonly SecureRandom _secureRandom;
         private const string AUTH_KEY = "installer.auth_key";
         public const string INSTALLED_KEY = "installer.is_installed";
+        public const string PRIMARY_DOMAIN_KEY = "installer.domain";
         private readonly UserManager _userManager;
 
         public InstallService(
@@ -136,7 +137,13 @@ namespace AuthServer.Server.GRPC
                 tlsCertificateSetting.Value = "false";
             }
 
-            _authDbContext.AddRange(installSetting, smtpHostnameSetting, smtpUsernameSetting, smtpPasswordSetting, smtpSenderAddress, tlsCertificateSetting);
+            SystemSetting primaryDomainSetting = new SystemSetting
+            {
+                Name = PRIMARY_DOMAIN_KEY,
+                Value = (request.PrimaryDomain != null) ? request.PrimaryDomain : context.GetHttpContext().Request.Host.Host,
+            };
+
+            _authDbContext.AddRange(installSetting, smtpHostnameSetting, smtpUsernameSetting, smtpPasswordSetting, smtpSenderAddress, tlsCertificateSetting, primaryDomainSetting);
             await _authDbContext.SaveChangesAsync();
 
             return new SetupInstanceReply

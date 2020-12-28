@@ -36,6 +36,11 @@
         position="RenderPosition.BottomRight" 
         show-controls="true"
     />
+    <script>
+    window.blazorOpen = (url, format) => {
+        window.open(url, format);
+    };
+    </script>
     <script src="_framework/blazor.webassembly.js"></script>
 </body>
 

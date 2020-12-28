@@ -9,10 +9,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuthServer.Server.Services.ReverseProxy.Authentication
 {
-    class AuthenticationManager
+    public class AuthenticationManager
     {
         private readonly AuthDbContext _authDbContext;
         private readonly IDataProtector _gatekeeperProxySsoSessionProtector;
+        public const string AUTH_COOKIE = "gatekeeper.proxy.auth.cookie";
 
         public AuthenticationManager(
             AuthDbContext authDbContext,
@@ -23,12 +24,35 @@ namespace AuthServer.Server.Services.ReverseProxy.Authentication
             _gatekeeperProxySsoSessionProtector = dataProtectionProvider.CreateProtector("GATEKEEPER_PROXY_SSO");
         }
 
-        public bool IsAuthenticated(HttpContext contect)
-        {
-            return true;
+
+        public string GetTokenForId(Guid id) {
+            return _gatekeeperProxySsoSessionProtector.Protect(id.ToString());
         }
 
-        public async Task<bool> IsAuthorized(Guid sessionId, MemorySingletonProxyConfigProvider.Route route)
+        public bool IsAuthenticated(HttpContext context, out Guid? sessionId)
+        {
+            string? authCookie = context.Request.Cookies[AUTH_COOKIE];
+
+            if (authCookie == null)
+            {
+                sessionId = null;
+                return false;
+            }
+
+            try
+            {
+                string decryptedBlob = _gatekeeperProxySsoSessionProtector.Unprotect(authCookie);
+                sessionId = new Guid(decryptedBlob);
+                return true;
+            }
+            catch
+            {
+                sessionId = null;
+                return false;
+            }
+        }
+
+        public async Task<bool> IsAuthorizedAsync(Guid sessionId, MemorySingletonProxyConfigProvider.Route route)
         {
             ProxyAppSettings proxyAppSetting = await _authDbContext.ProxyAppSettings
                 .AsNoTracking()
@@ -41,11 +65,6 @@ namespace AuthServer.Server.Services.ReverseProxy.Authentication
             }
 
             return true;
-        }
-
-        public Guid GetSessionId()
-        {
-            return new Guid();
         }
     }
 }

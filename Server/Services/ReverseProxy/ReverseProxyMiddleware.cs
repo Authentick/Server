@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using AuthServer.Server.Services.ReverseProxy.Authentication;
 using AuthServer.Server.Services.ReverseProxy.Configuration;
 using AuthServer.Server.Services.TLS;
 using Microsoft.AspNetCore.Http;
@@ -34,7 +35,12 @@ namespace AuthServer.Server.Services.ReverseProxy
             _acmeChallengeSingleton = acmeChallengeSingleton;
         }
 
-        public async Task Invoke(HttpContext context)
+        public async Task Invoke(
+            HttpContext context,
+            AuthenticationManager authenticationManager,
+            SingleSignOnHandler singleSignOnHandler,
+            ConfigurationProvider configurationProvider
+            )
         {
             MemorySingletonProxyConfigProvider.Route? route = GetMatchingRoute(context);
 
@@ -54,6 +60,37 @@ namespace AuthServer.Server.Services.ReverseProxy
 
                 if (shouldHandle)
                 {
+                    configurationProvider.TryGet(AuthServer.Server.GRPC.InstallService.PRIMARY_DOMAIN_KEY, out string primaryDomain);
+
+                    bool isAuthRequest = singleSignOnHandler.IsAuthRequest(context);
+                    if (isAuthRequest)
+                    {
+                        singleSignOnHandler.Handle(context);
+                        return;
+                    }
+
+                    bool isAuthenticated = authenticationManager.IsAuthenticated(context, out Guid? sessionId);
+                    if (!isAuthenticated)
+                    {
+                        context.Response.Redirect("https://" + primaryDomain + "/auth/sso-connect?id=" + route.ProxySettingId.ToString());
+                        return;
+                    }
+                    else
+                    {
+                        if (sessionId == null)
+                        {
+                            // This should never happen
+                            return;
+                        }
+
+                        bool isAuthorized = await authenticationManager.IsAuthorizedAsync((Guid)sessionId, route);
+                        if (!isAuthorized)
+                        {
+                            context.Response.Redirect("https://" + primaryDomain + "/auth/403");
+                            return;
+                        }
+                    }
+
                     RequestProxyOptions proxyOptions = new RequestProxyOptions()
                     {
                         RequestTimeout = TimeSpan.FromSeconds(100),

@@ -17,7 +17,7 @@ namespace AuthServer.Server.Services.ReverseProxy.Configuration
             Routes.Add(route);
         }
 
-        internal class Route
+        public class Route
         {
             public readonly string InternalHostname;
             public readonly string PublicHostname;

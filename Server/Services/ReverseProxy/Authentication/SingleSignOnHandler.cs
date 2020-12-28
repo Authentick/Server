@@ -3,24 +3,22 @@ using Microsoft.AspNetCore.Http;
 
 namespace AuthServer.Server.Services.ReverseProxy.Authentication
 {
-    class AuthenticationHandler
+    class SingleSignOnHandler
     {
-        const string AUTH_PARAM_NAME = "GATEKEEPER_PROXY_SSO";
-        const string REDIRECT_PARAM_NAME = "GATEKEEPER_PROXY_SSO_REDIRECT";
+        public const string AUTH_PARAM_NAME = "gatekeeper_proxy_sso";
         private readonly IDataProtector _gatekeeperProxySsoSessionProtector;
 
-        public AuthenticationHandler(IDataProtectionProvider dataProtectionProvider)
+        public SingleSignOnHandler(IDataProtectionProvider dataProtectionProvider)
         {
             _gatekeeperProxySsoSessionProtector = dataProtectionProvider.CreateProtector("GATEKEEPER_PROXY_SSO");
         }
 
         public bool IsAuthRequest(HttpContext context) {
             HttpRequest request = context.Request;
-            if(request.Method.ToUpper() == "POST" && request.Path == "/gatekeeper-proxy-sso") {
-                bool hasAuthParam = request.Form.ContainsKey(AUTH_PARAM_NAME);
-                bool hasRedirectUri = request.Form.ContainsKey(REDIRECT_PARAM_NAME);
+            if(request.Method.ToUpper() == "GET" && request.Path == "/gatekeeper-proxy-sso") {
+                bool hasAuthParam = request.Query.ContainsKey(AUTH_PARAM_NAME);
                 
-                return hasAuthParam && hasRedirectUri;
+                return hasAuthParam;
             }
 
             return false;
@@ -28,19 +26,18 @@ namespace AuthServer.Server.Services.ReverseProxy.Authentication
 
         public void Handle(HttpContext context) {
             HttpRequest request = context.Request;
-            string authToken = request.Form[AUTH_PARAM_NAME];
+            string authToken = request.Query[AUTH_PARAM_NAME];
 
             string decryptedId = _gatekeeperProxySsoSessionProtector.Unprotect(authToken);
 
-            CookieOptions cookieOptions = new CookieOptions{
+            CookieOptions cookieOptions = new CookieOptions {
                 HttpOnly = true,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
                 Secure = true,
             };
 
-            context.Response.Cookies.Append("gatekeeper.proxy.sso", authToken, cookieOptions);
-            // FIXME: Open Redirect
-            context.Response.Redirect(request.Form[REDIRECT_PARAM_NAME]);
+            context.Response.Cookies.Append(AuthenticationManager.AUTH_COOKIE, authToken, cookieOptions);
+            context.Response.Redirect("/");
         }
     }
 }
