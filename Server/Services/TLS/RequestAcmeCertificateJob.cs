@@ -30,7 +30,7 @@ namespace AuthServer.Server.Services.TLS
             if (hasAcmeAccount)
             {
                 IKey accountKey = KeyFactory.FromPem(accountKeyString);
-                acmeContext = new AcmeContext(WellKnownServers.LetsEncryptStagingV2, accountKey);
+                acmeContext = new AcmeContext(WellKnownServers.LetsEncryptV2, accountKey);
             }
             else
             {

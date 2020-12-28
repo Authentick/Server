@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuthServer.Server.Services.ReverseProxy
 {
-    class MemoryPopulator
+    public class MemoryPopulator
     {
         private readonly AuthDbContext _authDbContext;
         private readonly MemorySingletonProxyConfigProvider _proxyConfigProvider;

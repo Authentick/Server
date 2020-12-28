@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AuthServer.Server.Services.ReverseProxy
 {
-    internal class MemorySingletonProxyConfigProvider
+    public class MemorySingletonProxyConfigProvider
     {
         private List<Route> Routes = new List<Route>();
 

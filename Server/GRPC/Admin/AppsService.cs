@@ -3,32 +3,42 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
+using AuthServer.Server.Services;
 using AuthServer.Server.Services.Crypto;
+using AuthServer.Server.Services.ReverseProxy;
+using AuthServer.Server.Services.TLS;
 using AuthServer.Shared.Admin;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthServer.Server.GRPC.Admin
 {
-    [Authorize(Policy="SuperAdministrator")]
+    [Authorize(Policy = "SuperAdministrator")]
     public class AppsService : AuthServer.Shared.Admin.AdminApps.AdminAppsBase
     {
         private readonly AuthDbContext _authDbContext;
         private readonly IDataProtector _ldapSettingsDataProtector;
         private readonly SecureRandom _secureRandom;
+        private readonly ConfigurationProvider _configurationProvider;
+        private readonly MemoryPopulator _memoryPopulator;
 
         public AppsService(
             AuthDbContext authDbContext,
             IDataProtectionProvider dataProtectionProvider,
-            SecureRandom secureRandom
+            SecureRandom secureRandom,
+            ConfigurationProvider configurationProvider,
+            MemoryPopulator memoryPopulator
             )
         {
             _authDbContext = authDbContext;
             _ldapSettingsDataProtector = dataProtectionProvider.CreateProtector("LdapSettingsDataProtector");
             _secureRandom = secureRandom;
+            _configurationProvider = configurationProvider;
+            _memoryPopulator = memoryPopulator;
         }
 
         public override async Task<AddGroupToAppReply> AddGroupToApp(AddGroupToAppRequest request, ServerCallContext context)
@@ -116,6 +126,13 @@ namespace AuthServer.Server.GRPC.Admin
                 };
                 _authDbContext.Add(proxyAppSettings);
                 app.ProxyAppSettings = proxyAppSettings;
+
+                _configurationProvider.TryGet("tls.acme.support", out string isAcmeSupported);
+                if (isAcmeSupported == "true")
+                {
+                    // FIXME: Passing an empty email is a hack here. The email is already passed in InstallService. Could be refactored.
+                    BackgroundJob.Enqueue<IRequestAcmeCertificateJob>(job => job.Request("", request.ProxySetting.PublicHostname));
+                }
             }
 
             if (app.AuthMethod == AuthApp.AuthMethodEnum.OIDC)
@@ -154,6 +171,8 @@ namespace AuthServer.Server.GRPC.Admin
             }
 
             await _authDbContext.SaveChangesAsync();
+            // fixme: this should be done outside a service
+            await _memoryPopulator.PopulateFromDatabase();
 
             return new AddNewAppReply
             {
