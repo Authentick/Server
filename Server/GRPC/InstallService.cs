@@ -18,8 +18,9 @@ namespace AuthServer.Server.GRPC
     {
         private readonly AuthDbContext _authDbContext;
         private readonly SecureRandom _secureRandom;
-        private readonly string AUTH_KEY = "installer.auth_key";
-        private readonly string INSTALLED_KEY = "installer.is_installed";
+        private const string AUTH_KEY = "installer.auth_key";
+        public const string INSTALLED_KEY = "installer.is_installed";
+        public const string PRIMARY_DOMAIN_KEY = "installer.domain";
         private readonly UserManager _userManager;
 
         public InstallService(
@@ -46,7 +47,7 @@ namespace AuthServer.Server.GRPC
         {
             SystemSetting? isInstalledSetting = await _authDbContext.SystemSettings
                .AsNoTracking()
-               .Where(s => s.Name == this.AUTH_KEY)
+               .Where(s => s.Name == AUTH_KEY)
                .SingleOrDefaultAsync();
 
             if (isInstalledSetting == null)
@@ -92,7 +93,7 @@ namespace AuthServer.Server.GRPC
 
             SystemSetting installSetting = new SystemSetting
             {
-                Name = this.INSTALLED_KEY,
+                Name = INSTALLED_KEY,
                 Value = "true",
             };
             SystemSetting smtpHostnameSetting = new SystemSetting
@@ -136,7 +137,13 @@ namespace AuthServer.Server.GRPC
                 tlsCertificateSetting.Value = "false";
             }
 
-            _authDbContext.AddRange(installSetting, smtpHostnameSetting, smtpUsernameSetting, smtpPasswordSetting, smtpSenderAddress, tlsCertificateSetting);
+            SystemSetting primaryDomainSetting = new SystemSetting
+            {
+                Name = PRIMARY_DOMAIN_KEY,
+                Value = (request.PrimaryDomain != null) ? request.PrimaryDomain : context.GetHttpContext().Request.Host.Host,
+            };
+
+            _authDbContext.AddRange(installSetting, smtpHostnameSetting, smtpUsernameSetting, smtpPasswordSetting, smtpSenderAddress, tlsCertificateSetting, primaryDomainSetting);
             await _authDbContext.SaveChangesAsync();
 
             return new SetupInstanceReply
@@ -161,7 +168,7 @@ namespace AuthServer.Server.GRPC
             string newAuthKey = _secureRandom.GetRandomString(16);
             SystemSetting authKeySetting = new SystemSetting
             {
-                Name = this.AUTH_KEY,
+                Name = AUTH_KEY,
                 Value = newAuthKey,
             };
             _authDbContext.Add(authKeySetting);

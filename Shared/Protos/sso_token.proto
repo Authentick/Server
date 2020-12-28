@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "AuthServer.Shared";
+
+service SsoTokenService {
+    rpc GetCurrentSessionToken(SsoTokenRequest) returns (SsoTokenReply);
+}
+
+message SsoTokenRequest {
+    string proxy_id = 1;
+}
+
+message SsoTokenReply {
+    string redirect_url = 1;
+}

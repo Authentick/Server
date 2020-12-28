@@ -10,18 +10,36 @@ namespace AuthServer.Server.Services.TLS
     class RequestAcmeCertificateJob : IRequestAcmeCertificateJob
     {
         private readonly AcmeChallengeSingleton _challengeSingleton;
+        private readonly ConfigurationProvider _configurationProvider;
+        const string ACCOUNT_KEYNAME = "tls.acme.accountKey";
 
-        public RequestAcmeCertificateJob(AcmeChallengeSingleton challengeSingleton)
+        public RequestAcmeCertificateJob(
+            AcmeChallengeSingleton challengeSingleton,
+            ConfigurationProvider configurationProvider)
         {
             _challengeSingleton = challengeSingleton;
+            _configurationProvider = configurationProvider;
         }
 
         public async Task Request(string contactEmail, string domainName)
         {
-            var acme = new AcmeContext(WellKnownServers.LetsEncryptV2);
-            var account = await acme.NewAccount(contactEmail, true);
+            bool hasAcmeAccount = _configurationProvider.TryGet(ACCOUNT_KEYNAME, out string accountKeyString);
 
-            var order = await acme.NewOrder(new[] { domainName });
+            AcmeContext acmeContext;
+            IAccountContext accountContext;
+            if (hasAcmeAccount)
+            {
+                IKey accountKey = KeyFactory.FromPem(accountKeyString);
+                acmeContext = new AcmeContext(WellKnownServers.LetsEncryptV2, accountKey);
+            }
+            else
+            {
+                acmeContext = new AcmeContext(WellKnownServers.LetsEncryptV2);
+                accountContext = await acmeContext.NewAccount(contactEmail, true);
+                _configurationProvider.Set(ACCOUNT_KEYNAME, acmeContext.AccountKey.ToPem());
+            }
+
+            var order = await acmeContext.NewOrder(new[] { domainName });
 
             var authorizations = await order.Authorization(domainName);
             var httpChallenge = await authorizations.Http();
@@ -48,7 +66,7 @@ namespace AuthServer.Server.Services.TLS
             var certChain = await order.Download();
 
             var pfxBuilder = certChain.ToPfx(certKey);
-            
+
             string targetLocation = CertificateLocationHelper.GetPath(domainName);
             File.WriteAllBytes(targetLocation, pfxBuilder.Build(domainName, ""));
         }

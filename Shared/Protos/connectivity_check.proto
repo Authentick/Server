@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option csharp_namespace = "AuthServer.Shared";
+
+service ConnectivityCheckService {
+    rpc IsPublicAccessible(IsPublicAccessibleRequest) returns (IsPublicAccessibleReply);
+}
+
+message IsPublicAccessibleRequest {
+    string hostname = 1;
+}
+
+message IsPublicAccessibleReply {
+    AccessibleReplyEnum state = 1;
+
+    enum AccessibleReplyEnum {
+        UNKNOWN = 0;
+        SUCCESS = 1;
+        FAILURE = 2;
+    }
+}
