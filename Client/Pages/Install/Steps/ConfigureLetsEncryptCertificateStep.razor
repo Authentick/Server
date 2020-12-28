@@ -1,6 +1,10 @@
 @implements IStep
 @implements IDisposable
 
+@using AuthServer.Shared
+
+@inject AuthServer.Shared.ConnectivityCheckService.ConnectivityCheckServiceClient ConnectivityCheckServiceClient
+
 <h1>Configure LetsEncrypt certificates</h1>
 
 <p>By proceeding you agree to the currently-in-effect <a href="https://letsencrypt.org/repository/">Subscriber Agreement.</a>.</p>
@@ -9,9 +13,12 @@
     <DataAnnotationsValidator />
     
     <InputText @bind-Value="letsEncryptCertificateSettings.DomainName" class="form-control bg-secondary" placeholder="Hostname (e.g. example.com)" />
+    @if(!_isValidPublicHostname) {
+        <p>Public hostname doesn't resolve to this host.</p>
+    }
     <br/>
 
-    <InputText @bind-Value="letsEncryptCertificateSettings.Email" type="email" class="form-control bg-secondary" placeholder="Sender address" />
+    <InputText @bind-Value="letsEncryptCertificateSettings.Email" type="email" class="form-control bg-secondary" placeholder="Contact email address" />
 </EditForm>
 
 @code {
@@ -22,25 +29,39 @@
 
     internal LetsEncryptCertificateSettings letsEncryptCertificateSettings = new LetsEncryptCertificateSettings();
     private EditContext? editContext;
+    private bool _isValidPublicHostname;
+    private EventHandler<Microsoft.AspNetCore.Components.Forms.FieldChangedEventArgs> HandleFieldChangedAction => async (s, e) => await HandleFieldChanged(s, e);
 
     protected override void OnInitialized()
     {
         editContext = new EditContext(letsEncryptCertificateSettings);
-        editContext.OnFieldChanged += HandleFieldChanged;
+        editContext.OnFieldChanged += HandleFieldChangedAction;
 
         StateMachine.SetNextStep(null);
         StateMachine.SetPreviousStep(new CertificateSelectionStep());
     }
 
-    private void HandleFieldChanged(object sender, FieldChangedEventArgs e)
+    private async Task HandleFieldChanged(object sender, FieldChangedEventArgs e)
     {
         if(editContext != null) 
         {
             bool formValid = editContext.Validate();
             if (formValid)
             {
-                StateMachine.SetNextStep(new EmailSelectionStep());
-            } 
+                 IsPublicAccessibleRequest request = new IsPublicAccessibleRequest{
+                    Hostname = letsEncryptCertificateSettings.DomainName,
+                };
+
+                IsPublicAccessibleReply reply = await ConnectivityCheckServiceClient.IsPublicAccessibleAsync(request);
+                
+                if(reply.State != IsPublicAccessibleReply.Types.AccessibleReplyEnum.Success) {
+                    _isValidPublicHostname = false;
+                    StateMachine.SetNextStep(null);
+                } else {
+                    _isValidPublicHostname = true;
+                    StateMachine.SetNextStep(new EmailSelectionStep());
+                }
+            }
             else
             {
                 StateMachine.SetNextStep(null);
@@ -50,7 +71,7 @@
 
     public void Dispose()
     {
-        editContext.OnFieldChanged -= HandleFieldChanged;
+        editContext.OnFieldChanged -= HandleFieldChangedAction;
     }
 
     internal class LetsEncryptCertificateSettings 

@@ -1,5 +1,7 @@
 using System.Linq;
+using System.Threading.Tasks;
 using AuthServer.Server.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace AuthServer.Server.Services
 {

@@ -4,24 +4,44 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using AuthServer.Server.Models;
+using AuthServer.Server.Services;
+using AuthServer.Server.Services.User;
 using AuthServer.Shared;
 using Grpc.Core;
-using Microsoft.AspNetCore.Authorization;
 
 namespace AuthServer.Server.GRPC
 {
-    [Authorize(Policy = "SuperAdministrator")]
     public class ConnectivityServiceCheck : AuthServer.Shared.ConnectivityCheckService.ConnectivityCheckServiceBase
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly UserManager _userManager;
+        private readonly ConfigurationProvider _configurationProvider;
 
-        public ConnectivityServiceCheck(IHttpClientFactory httpClientFactory)
+        public ConnectivityServiceCheck(
+            IHttpClientFactory httpClientFactory,
+            UserManager userManager,
+            ConfigurationProvider configurationProvider
+            )
         {
             _httpClientFactory = httpClientFactory;
+            _userManager = userManager;
+            _configurationProvider = configurationProvider;
         }
 
         public override async Task<IsPublicAccessibleReply> IsPublicAccessible(IsPublicAccessibleRequest request, ServerCallContext context)
         {
+            bool isInstalled = _configurationProvider.TryGet(InstallService.INSTALLED_KEY, out string installedValue);
+            if (isInstalled)
+            {
+                AppUser user = await _userManager.GetUserAsync(context.GetHttpContext().User);
+                bool isInRole = await _userManager.IsInRoleAsync(user, "admin");
+                if (!isInRole)
+                {
+                    throw new Exception("Unauthorized access");
+                }
+            }
+
             HttpClient client = _httpClientFactory.CreateClient();
             Guid challenge = Guid.NewGuid();
             ConnectivityCheckRequest connectivityCheckRequest = new ConnectivityCheckRequest
