@@ -1,10 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using AuthServer.Server.Services.Crypto;
 using AuthServer.Server.Services.ReverseProxy.Authentication;
 using AuthServer.Server.Services.ReverseProxy.Configuration;
 using AuthServer.Server.Services.TLS;
@@ -41,7 +40,8 @@ namespace AuthServer.Server.Services.ReverseProxy
             HttpContext context,
             AuthenticationManager authenticationManager,
             SingleSignOnHandler singleSignOnHandler,
-            ConfigurationProvider configurationProvider
+            ConfigurationProvider configurationProvider,
+            SecureRandom secureRandom
             )
         {
             MemorySingletonProxyConfigProvider.Route? route = GetMatchingRoute(context);
@@ -75,7 +75,22 @@ namespace AuthServer.Server.Services.ReverseProxy
 
                     if (!isAuthenticated)
                     {
-                        context.Response.Redirect("https://" + primaryDomain + "/auth/sso-connect?id=" + route.ProxySettingId.ToString());
+                        string csrf = secureRandom.GetRandomString(16);
+                        context.Response.Cookies.Append("gatekeeper.csrf", csrf);
+
+                        Dictionary<string, string> queryDictionary = new Dictionary<string, string>()
+                        {
+                            {"id", route.ProxySettingId.ToString()},
+                            {"csrf", csrf},
+                        };
+
+                        UriBuilder uriBuilder = new UriBuilder();
+                        uriBuilder.Scheme = "https";
+                        uriBuilder.Host = primaryDomain;
+                        uriBuilder.Path = "/auth/sso-connect";
+                        uriBuilder.Query = await ((new System.Net.Http.FormUrlEncodedContent(queryDictionary)).ReadAsStringAsync());
+
+                        context.Response.Redirect(uriBuilder.ToString(), false);
                         return;
                     }
                     else

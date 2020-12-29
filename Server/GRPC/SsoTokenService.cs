@@ -42,7 +42,8 @@ namespace AuthServer.Server.GRPC
 
             return new SsoTokenReply
             {
-                RedirectUrl = "https://" + setting.PublicHostname + "/gatekeeper-proxy-sso?" + SingleSignOnHandler.AUTH_PARAM_NAME + "=" + ssoToken,
+                TargetUrl = "https://" + setting.PublicHostname + "/gatekeeper-proxy-sso",
+                SsoToken = ssoToken,
             };
         }
     }

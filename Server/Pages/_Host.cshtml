@@ -38,8 +38,8 @@
         start-hidden="true"
     />
     <script>
-    window.blazorOpen = (url, format) => {
-        window.open(url, format);
+    window.submitForm = (identifier) => {
+        document.getElementById(identifier).submit();
     };
     </script>
     <script src="_framework/blazor.webassembly.js"></script>
