@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using AuthServer.Server.Services.Crypto;
 using AuthServer.Server.Services.ReverseProxy.Authentication;
 using AuthServer.Server.Services.ReverseProxy.Configuration;
 using AuthServer.Server.Services.TLS;
@@ -39,7 +40,8 @@ namespace AuthServer.Server.Services.ReverseProxy
             HttpContext context,
             AuthenticationManager authenticationManager,
             SingleSignOnHandler singleSignOnHandler,
-            ConfigurationProvider configurationProvider
+            ConfigurationProvider configurationProvider,
+            SecureRandom secureRandom
             )
         {
             MemorySingletonProxyConfigProvider.Route? route = GetMatchingRoute(context);
@@ -70,9 +72,25 @@ namespace AuthServer.Server.Services.ReverseProxy
                     }
 
                     bool isAuthenticated = authenticationManager.IsAuthenticated(context, out Guid? sessionId);
+
                     if (!isAuthenticated)
                     {
-                        context.Response.Redirect("https://" + primaryDomain + "/auth/sso-connect?id=" + route.ProxySettingId.ToString());
+                        string csrf = secureRandom.GetRandomString(16);
+                        context.Response.Cookies.Append("gatekeeper.csrf", csrf);
+
+                        Dictionary<string, string> queryDictionary = new Dictionary<string, string>()
+                        {
+                            {"id", route.ProxySettingId.ToString()},
+                            {"csrf", csrf},
+                        };
+
+                        UriBuilder uriBuilder = new UriBuilder();
+                        uriBuilder.Scheme = "https";
+                        uriBuilder.Host = primaryDomain;
+                        uriBuilder.Path = "/auth/sso-connect";
+                        uriBuilder.Query = await ((new System.Net.Http.FormUrlEncodedContent(queryDictionary)).ReadAsStringAsync());
+
+                        context.Response.Redirect(uriBuilder.ToString(), false);
                         return;
                     }
                     else
@@ -99,10 +117,19 @@ namespace AuthServer.Server.Services.ReverseProxy
                             requestTransforms: Array.Empty<RequestParametersTransform>(),
                             requestHeaderTransforms: new Dictionary<string, RequestHeaderTransform>()
                             {
-                            {
-                                HeaderNames.Host,
-                                new RequestHeaderValueTransform(string.Empty, append: false)
-                            }
+                                {
+                                    "X-Forwarded-For",
+                                    new RequestHeaderValueTransform(context.Connection.RemoteIpAddress.ToString(), append: false)
+                                },
+                                {
+                                    HeaderNames.Host,
+                                    new RequestHeaderValueTransform(String.Empty, append: false)
+                                },
+                                // FIXME: This is currently also sent as cookie. Remove this and only send it as header.
+                                {
+                                    "X-Gatekeeper-Jwt-Assertion",
+                                    new RequestHeaderValueTransform(context.Request.Cookies[AuthenticationManager.AUTH_COOKIE], append: false)
+                                },
                             },
                             responseHeaderTransforms: new Dictionary<string, ResponseHeaderTransform>(),
                             responseTrailerTransforms: new Dictionary<string, ResponseHeaderTransform>()

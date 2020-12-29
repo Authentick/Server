@@ -30,6 +30,7 @@ using System.Threading.Tasks;
 using AuthServer.Server.Services.ReverseProxy;
 using AuthServer.Server.Services.ReverseProxy.Configuration;
 using AuthServer.Server.Services.ReverseProxy.Authentication;
+using AuthServer.Server.Services.Crypto.JWT;
 
 namespace AuthServer.Server
 {
@@ -116,6 +117,7 @@ namespace AuthServer.Server
             services.AddScoped<SecureRandom>();
             services.AddScoped<Hasher>();
             services.AddScoped<OIDCKeyManager>();
+            services.AddScoped<JwtFactory>();
 
             // Configuration
             services.AddScoped<Services.ConfigurationProvider>();
@@ -150,6 +152,9 @@ namespace AuthServer.Server
         {
             UpdateDatabase(app);
 
+            // Reverse Proxy
+            app.UseMiddleware<ReverseProxyMiddleware>();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -167,9 +172,6 @@ namespace AuthServer.Server
 
             // Routing
             app.UseRouting();
-
-            // Reverse Proxy
-            app.UseMiddleware<ReverseProxyMiddleware>();
 
             // GRPC
             app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true });

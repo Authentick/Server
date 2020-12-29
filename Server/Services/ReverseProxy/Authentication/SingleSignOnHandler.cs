@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 
 namespace AuthServer.Server.Services.ReverseProxy.Authentication
@@ -6,19 +5,19 @@ namespace AuthServer.Server.Services.ReverseProxy.Authentication
     class SingleSignOnHandler
     {
         public const string AUTH_PARAM_NAME = "gatekeeper_proxy_sso";
-        private readonly IDataProtector _gatekeeperProxySsoSessionProtector;
-
-        public SingleSignOnHandler(IDataProtectionProvider dataProtectionProvider)
-        {
-            _gatekeeperProxySsoSessionProtector = dataProtectionProvider.CreateProtector("GATEKEEPER_PROXY_SSO");
-        }
 
         public bool IsAuthRequest(HttpContext context) {
             HttpRequest request = context.Request;
-            if(request.Method.ToUpper() == "GET" && request.Path == "/gatekeeper-proxy-sso") {
-                bool hasAuthParam = request.Query.ContainsKey(AUTH_PARAM_NAME);
-                
-                return hasAuthParam;
+            request.Cookies.TryGetValue("gatekeeper.csrf", out string? gatekeeperCsrfCookie);
+
+            if(
+                request.Method.ToUpper() == "POST" && 
+                request.Path == "/gatekeeper-proxy-sso" && 
+                request.Form.ContainsKey(AUTH_PARAM_NAME) &&
+                request.Form.ContainsKey("gatekeeper_proxy_csrf") &&
+                request.Form["gatekeeper_proxy_csrf"] == gatekeeperCsrfCookie
+                ) {                
+                return true;
             }
 
             return false;
@@ -26,9 +25,7 @@ namespace AuthServer.Server.Services.ReverseProxy.Authentication
 
         public void Handle(HttpContext context) {
             HttpRequest request = context.Request;
-            string authToken = request.Query[AUTH_PARAM_NAME];
-
-            string decryptedId = _gatekeeperProxySsoSessionProtector.Unprotect(authToken);
+            string authToken = request.Form[AUTH_PARAM_NAME];
 
             CookieOptions cookieOptions = new CookieOptions {
                 HttpOnly = true,

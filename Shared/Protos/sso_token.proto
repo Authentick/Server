@@ -13,5 +13,6 @@ message SsoTokenRequest {
 }
 
 message SsoTokenReply {
-    string redirect_url = 1;
+    string target_url = 1;
+    string sso_token = 2;
 }

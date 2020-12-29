@@ -5,13 +5,25 @@
 @inject AuthServer.Shared.SsoTokenService.SsoTokenServiceClient SsoTokenClient
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject IJSRuntime JsRuntime;
+@inject IJSRuntime JsRuntime
 
 @using AuthServer.Shared
 @using Microsoft.AspNetCore.WebUtilities
-@using System.Security.Claims
+
+<h1>SSO in progress</h1>
+
+@if(_ssoToken != null) {
+    <form id="sso-login-action" action="@_targetUrl" method="POST">
+        <input type="hidden" name="gatekeeper_proxy_csrf" value="@_csrfToken" />
+        <input type="hidden" name="gatekeeper_proxy_sso" value="@_ssoToken" />       
+    </form>
+}
 
 @code {
+    private string? _ssoToken;
+    private string? _targetUrl;
+    private string? _csrfToken;
+
     protected override async Task OnInitializedAsync()
     {
         var state = await AuthenticationStateProvider.GetAuthenticationStateAsync();
@@ -20,17 +32,29 @@
         if (state.User.Identity.IsAuthenticated) {
             var query = new Uri(NavigationManager.Uri).Query;
             string proxyId = "";
+            string csrf = "";
 
             if (QueryHelpers.ParseQuery(query).TryGetValue("id", out var query_id_parameter))
             {
                 proxyId = query_id_parameter;
             }
-            SsoTokenRequest request = new SsoTokenRequest{
+
+            if (QueryHelpers.ParseQuery(query).TryGetValue("csrf", out var query_csrf_parameter))
+            {
+                csrf = query_csrf_parameter;
+            }
+
+            SsoTokenRequest request = new SsoTokenRequest {
                 ProxyId = proxyId,
             };
 
-            targetUrl = (await SsoTokenClient.GetCurrentSessionTokenAsync(request)).RedirectUrl;
-            await JsRuntime.InvokeVoidAsync("blazorOpen", new string[2] { targetUrl, "_self" } );
+            SsoTokenReply reply = await SsoTokenClient.GetCurrentSessionTokenAsync(request);
+            _targetUrl = reply.TargetUrl;
+            _csrfToken = csrf;
+            _ssoToken = reply.SsoToken;
+            StateHasChanged();
+
+            await JsRuntime.InvokeVoidAsync("submitForm", new string[1]{"sso-login-action"});
         } else {
             targetUrl = "/login";
             NavigationManager.NavigateTo(targetUrl);
