@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -70,6 +72,7 @@ namespace AuthServer.Server.Services.ReverseProxy
                     }
 
                     bool isAuthenticated = authenticationManager.IsAuthenticated(context, out Guid? sessionId);
+
                     if (!isAuthenticated)
                     {
                         context.Response.Redirect("https://" + primaryDomain + "/auth/sso-connect?id=" + route.ProxySettingId.ToString());
@@ -99,10 +102,19 @@ namespace AuthServer.Server.Services.ReverseProxy
                             requestTransforms: Array.Empty<RequestParametersTransform>(),
                             requestHeaderTransforms: new Dictionary<string, RequestHeaderTransform>()
                             {
-                            {
-                                HeaderNames.Host,
-                                new RequestHeaderValueTransform(string.Empty, append: false)
-                            }
+                                {
+                                    "X-Forwarded-For",
+                                    new RequestHeaderValueTransform(context.Connection.RemoteIpAddress.ToString(), append: false)
+                                },
+                                {
+                                    HeaderNames.Host,
+                                    new RequestHeaderValueTransform(String.Empty, append: false)
+                                },
+                                // FIXME: This is currently also sent as cookie. Remove this and only send it as header.
+                                {
+                                    "X-Gatekeeper-Jwt-Assertion",
+                                    new RequestHeaderValueTransform(context.Request.Cookies[AuthenticationManager.AUTH_COOKIE], append: false)
+                                },
                             },
                             responseHeaderTransforms: new Dictionary<string, ResponseHeaderTransform>(),
                             responseTrailerTransforms: new Dictionary<string, ResponseHeaderTransform>()

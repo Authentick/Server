@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
+using AuthServer.Server.Services.Crypto.JWT;
 using AuthServer.Server.Services.ReverseProxy.Configuration;
-using Microsoft.AspNetCore.DataProtection;
+using JWT.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,21 +14,28 @@ namespace AuthServer.Server.Services.ReverseProxy.Authentication
     public class AuthenticationManager
     {
         private readonly AuthDbContext _authDbContext;
-        private readonly IDataProtector _gatekeeperProxySsoSessionProtector;
         public const string AUTH_COOKIE = "gatekeeper.proxy.auth.cookie";
+        private readonly JwtFactory _jwtFactory;
 
         public AuthenticationManager(
             AuthDbContext authDbContext,
-            IDataProtectionProvider dataProtectionProvider
+            JwtFactory jwtFactory
             )
         {
             _authDbContext = authDbContext;
-            _gatekeeperProxySsoSessionProtector = dataProtectionProvider.CreateProtector("GATEKEEPER_PROXY_SSO");
+            _jwtFactory = jwtFactory;
         }
 
 
-        public string GetTokenForId(Guid id) {
-            return _gatekeeperProxySsoSessionProtector.Protect(id.ToString());
+        public string GetToken(AppUser user, ProxyAppSettings setting, Guid sessionId) {
+            string token =  _jwtFactory.Build()
+                .Subject(user.Id.ToString())
+                .Id(sessionId)
+                .Audience(setting.InternalHostname)
+                .IssuedAt(DateTime.UtcNow)
+                .Encode();
+                
+            return token;
         }
 
         public bool IsAuthenticated(HttpContext context, out Guid? sessionId)
@@ -41,8 +50,11 @@ namespace AuthServer.Server.Services.ReverseProxy.Authentication
 
             try
             {
-                string decryptedBlob = _gatekeeperProxySsoSessionProtector.Unprotect(authCookie);
-                sessionId = new Guid(decryptedBlob);
+                Dictionary<string, object> decodedToken = _jwtFactory.Build()
+                    .MustVerifySignature()
+                    .Decode<Dictionary<string, object>>(authCookie);
+                
+                sessionId = new Guid((string)decodedToken["jti"]);
                 return true;
             }
             catch

@@ -6,12 +6,6 @@ namespace AuthServer.Server.Services.ReverseProxy.Authentication
     class SingleSignOnHandler
     {
         public const string AUTH_PARAM_NAME = "gatekeeper_proxy_sso";
-        private readonly IDataProtector _gatekeeperProxySsoSessionProtector;
-
-        public SingleSignOnHandler(IDataProtectionProvider dataProtectionProvider)
-        {
-            _gatekeeperProxySsoSessionProtector = dataProtectionProvider.CreateProtector("GATEKEEPER_PROXY_SSO");
-        }
 
         public bool IsAuthRequest(HttpContext context) {
             HttpRequest request = context.Request;
@@ -27,8 +21,6 @@ namespace AuthServer.Server.Services.ReverseProxy.Authentication
         public void Handle(HttpContext context) {
             HttpRequest request = context.Request;
             string authToken = request.Query[AUTH_PARAM_NAME];
-
-            string decryptedId = _gatekeeperProxySsoSessionProtector.Unprotect(authToken);
 
             CookieOptions cookieOptions = new CookieOptions {
                 HttpOnly = true,

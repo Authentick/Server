@@ -3,8 +3,7 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
-using AuthServer.Server.Services.Crypto.OIDC;
-using JWT.Algorithms;
+using AuthServer.Server.Services.Crypto.JWT;
 using JWT.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,16 +14,16 @@ namespace AuthServer.Server.Controller.OIDC
     [Route("connect/token")]
     public class OIDCTokenController : ControllerBase
     {
-        private readonly OIDCKeyManager _oidcKeyManager;
+        private readonly JwtFactory _jwtFactory;
         private readonly AuthDbContext _authDbContext;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public OIDCTokenController(
-            OIDCKeyManager oidcKeyManager,
+            JwtFactory jwtFactory,
             AuthDbContext authDbContext,
             IHttpContextAccessor httpContextAccessor)
         {
-            _oidcKeyManager = oidcKeyManager;
+            _jwtFactory = jwtFactory;
             _authDbContext = authDbContext;
             _httpContextAccessor = httpContextAccessor;
         }
@@ -40,14 +39,10 @@ namespace AuthServer.Server.Controller.OIDC
                 .Include(s => s.OIDCAppSettings)
                 .SingleAsync();
 
-            var rsaKey = _oidcKeyManager.GetKey();
-
             string protocolString = (_httpContextAccessor.HttpContext.Request.IsHttps ? "https://" : "http://");
             string issuer = protocolString + _httpContextAccessor.HttpContext.Request.Host;
-
-            var json = new JwtBuilder()
-                .WithAlgorithm(new RS256Algorithm(rsaKey, rsaKey))
-                // FIXME
+            JwtBuilder jwtBuilder = _jwtFactory.Build();
+            string json = jwtBuilder
                 .Issuer(issuer)
                 .Subject(session.User.Id.ToString())
                 .AddClaim(ClaimName.Nonce, session.Nonce)
