@@ -152,6 +152,9 @@ namespace AuthServer.Server
         {
             UpdateDatabase(app);
 
+            // Reverse Proxy
+            app.UseMiddleware<ReverseProxyMiddleware>();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -169,9 +172,6 @@ namespace AuthServer.Server
 
             // Routing
             app.UseRouting();
-
-            // Reverse Proxy
-            app.UseMiddleware<ReverseProxyMiddleware>();
 
             // GRPC
             app.UseGrpcWeb(new GrpcWebOptions { DefaultEnabled = true });
