@@ -11,6 +11,11 @@ service AdminApps {
   rpc AddGroupToApp (AddGroupToAppRequest) returns (AddGroupToAppReply); 
   rpc RemoveGroupFromApp (RemoveGroupFromAppRequest) returns
   (RemoveGroupFromAppReply);
+  rpc TriggerScimSync(ScimSyncRequest) returns (google.protobuf.Empty);
+}
+
+message ScimSyncRequest {
+  string app_id = 1;
 }
 
 message AddGroupToAppRequest {

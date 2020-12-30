@@ -6,6 +6,7 @@ using AuthServer.Server.Models;
 using AuthServer.Server.Services;
 using AuthServer.Server.Services.Crypto;
 using AuthServer.Server.Services.ReverseProxy.Configuration;
+using AuthServer.Server.Services.SCIM;
 using AuthServer.Server.Services.TLS;
 using AuthServer.Shared.Admin;
 using Google.Protobuf.WellKnownTypes;
@@ -25,13 +26,15 @@ namespace AuthServer.Server.GRPC.Admin
         private readonly SecureRandom _secureRandom;
         private readonly ConfigurationProvider _configurationProvider;
         private readonly MemoryPopulator _memoryPopulator;
+        private readonly ISyncHandler _syncHandler;
 
         public AppsService(
             AuthDbContext authDbContext,
             IDataProtectionProvider dataProtectionProvider,
             SecureRandom secureRandom,
             ConfigurationProvider configurationProvider,
-            MemoryPopulator memoryPopulator
+            MemoryPopulator memoryPopulator,
+            ISyncHandler syncHandler
             )
         {
             _authDbContext = authDbContext;
@@ -39,6 +42,7 @@ namespace AuthServer.Server.GRPC.Admin
             _secureRandom = secureRandom;
             _configurationProvider = configurationProvider;
             _memoryPopulator = memoryPopulator;
+            _syncHandler = syncHandler;
         }
 
         public override async Task<AddGroupToAppReply> AddGroupToApp(AddGroupToAppRequest request, ServerCallContext context)
@@ -329,6 +333,16 @@ namespace AuthServer.Server.GRPC.Admin
             await _authDbContext.SaveChangesAsync();
 
             return new RemoveGroupFromAppReply { Success = true };
+        }
+
+        public override async Task<Empty> TriggerScimSync(ScimSyncRequest request, ServerCallContext context)
+        {
+            SCIMAppSettings setting = await _authDbContext
+                .SCIMAppSettings
+                .SingleAsync(s => s.AuthAppId == new Guid(request.AppId));
+
+            await _syncHandler.FullSyncAsync(setting.Id);
+            return new Empty();
         }
     }
 }

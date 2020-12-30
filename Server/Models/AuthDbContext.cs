@@ -17,6 +17,12 @@ namespace AuthServer.Server.Models
         public DbSet<AuthApp> AuthApp { get; set; } = null!;
         public DbSet<LdapAppSettings> LdapAppSettings { get; set; } = null!;
         public DbSet<LdapAppUserCredentials> LdapAppUserCredentials { get; set; } = null!;
+
+        internal object AsNoTracking()
+        {
+            throw new NotImplementedException();
+        }
+
         public DbSet<UserGroup> UserGroup { get; set; } = null!;
         public DbSet<SystemSetting> SystemSettings { get; set; } = null!;
         public DbSet<UserTotpDevice> UserTotpDevices { get; set; } = null!;
@@ -26,6 +32,8 @@ namespace AuthServer.Server.Models
         public DbSet<OIDCAppSettings> OIDCAppSettings { get; set; } = null!;
         public DbSet<ProxyAppSettings> ProxyAppSettings { get; set; } = null!;
         public DbSet<SCIMAppSettings> SCIMAppSettings { get; set; } = null!;
+        public DbSet<ScimUserSyncState> ScimUserSyncStates { get; set; } = null!;
+        public DbSet<ScimGroupSyncState> ScimGroupSyncStates { get; set; } = null!;
     }
 
     public class SystemSetting
@@ -69,6 +77,26 @@ namespace AuthServer.Server.Models
         public AuthApp AuthApp { get; set; } = null!;
         public string Endpoint { get; set; } = null!;
         public string Credentials { get; set; } = null!;
+        public ICollection<ScimUserSyncState> ScimUserSyncStates { get; set; } = null!;
+        public ICollection<ScimGroupSyncState> ScimGroupSyncStates { get; set; } = null!;
+    }
+
+    public class ScimUserSyncState
+    {
+        public Guid Id { get; set; }
+        public Guid SCIMAppSettingsId { get;set; }
+        public SCIMAppSettings SCIMAppSettings { get; set; } = null!;
+        public AppUser User { get; set; } = null!;
+        public string ServiceId { get; set; } = null!;
+    }
+
+    public class ScimGroupSyncState
+    {
+        public Guid Id { get; set; }
+        public Guid SCIMAppSettingsId { get;set; }
+        public SCIMAppSettings SCIMAppSettings { get; set; } = null!;
+        public UserGroup UserGroup { get; set; } = null!;
+        public string ServiceId { get; set; } = null!;
     }
 
     public class ProxyAppSettings
@@ -138,6 +166,7 @@ namespace AuthServer.Server.Models
         public string Name { get; set; } = null!;
         public ICollection<AppUser> Members { get; set; } = null!;
         public ICollection<AuthApp> AuthApps { get; set; } = null!;
+        public ICollection<ScimGroupSyncState> ScimGroupSyncState { get; set; } = null!;
     }
 
     public class UserTotpDevice
@@ -157,6 +186,7 @@ namespace AuthServer.Server.Models
         public ICollection<UserTotpDevice> TotpDevices { get; set; } = null!;
         public ICollection<InvalidLoginAttempt> InvalidLoginAttempts { get; set; } = null!;
         public ICollection<InvalidTwoFactorAttempt> InvalidTwoFactorAttempts { get; set; } = null!;
+        public ICollection<ScimUserSyncState> ScimUserSyncState { get; set; } = null!;
     }
 
     public class InvalidLoginAttempt
