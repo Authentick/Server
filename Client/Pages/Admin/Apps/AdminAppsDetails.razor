@@ -38,7 +38,8 @@
                 <p>Bind password: @appDetailReply.LdapDirectorySetting.Password</p>
                 break;
             case AppDetailReply.DirectorySettingOneofCase.ScimDirectorySetting:
-                <span>SCIM</span>
+                <p>Endpoint: @appDetailReply.ScimDirectorySetting.Endpoint</p>
+                <p><button @onclick="TriggerScimSync">Trigger sync</button></p>
                 break;
             case AppDetailReply.DirectorySettingOneofCase.None:
                 <span>None configured</span>
@@ -76,6 +77,15 @@
         };
 
         appDetailReply = await AppsClient.GetAppDetailsAsync(request);
+    }
+
+    private async Task TriggerScimSync() {
+        ScimSyncRequest request = new ScimSyncRequest
+        {
+            AppId = Id.ToString(),
+        };
+
+        await AppsClient.TriggerScimSyncAsync(request);
     }
 
     private async Task AddGroupToApp()

@@ -31,6 +31,7 @@ using AuthServer.Server.Services.ReverseProxy;
 using AuthServer.Server.Services.ReverseProxy.Configuration;
 using AuthServer.Server.Services.ReverseProxy.Authentication;
 using AuthServer.Server.Services.Crypto.JWT;
+using AuthServer.Server.Services.SCIM;
 
 namespace AuthServer.Server
 {
@@ -125,6 +126,9 @@ namespace AuthServer.Server
             // LDAP
             services.AddScoped<LdapEventListener>();
             services.AddHostedService<LdapServerListener>();
+
+            // SCIM
+            services.AddScoped<ISyncHandler, SyncHandler>();
 
             // Hangfire
             SqlMapper.AddTypeHandler(new NodaDateTimeHandler());
