@@ -1,5 +1,5 @@
-using System;
 using System.IO;
+using AuthServer.Server.Services.FileStorage;
 
 namespace AuthServer.Server.Services.TLS
 {
@@ -7,15 +7,7 @@ namespace AuthServer.Server.Services.TLS
     {
         public static string GetPath(string domain)
         {
-            string? snapFolder = Environment.GetEnvironmentVariable("SNAP_USER_DATA");
-
-            if (snapFolder == null)
-            {
-                // FIXME: This is for development installations and not really great. This should not be the temp folder but 
-                // something more dedicated.
-                snapFolder = "/tmp";
-            }
-
+            string snapFolder = PathProvider.GetApplicationDataFolder();
             string targetHostName = domain.Replace("/", "").Replace("\\", "");
             return snapFolder + "/" + targetHostName + ".pfx";
         }
