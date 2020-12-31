@@ -10,11 +10,25 @@
 @if(appReply != null) {
     <h2>@appReply.Name</h2>
 
-    @if(newLdapPassword != null) {
-        <p>@newLdapPassword</p>
-    }
+    <h2>Access</h2>
+    <div class="alert alert-danger" role="alert">
+        <h4 class="alert-heading">Keep your Gatekeeper password safe</h4>
+        <p>Do not provide your Gatekeeper credentials to any other application. @appReply.Name does not need it to identify you.</p>
+    </div>
 
-    <button @onclick="@CreateLdapPassword">Create LDAP password</button>
+    @switch(appReply.AuthSettingCase) {
+        case GetAppDetailsReply.AuthSettingOneofCase.LdapAuth:
+            <p>@appReply.Name requires you to provide a username and application-specific password to authenticate.</p>
+            <button @onclick="@CreateLdapPassword">Generate application specific password</button>
+            @if(newLdapPassword != null) {
+                <p>@newLdapPassword</p>
+            }
+            break;
+        case GetAppDetailsReply.AuthSettingOneofCase.UrlAuth:
+            <p>@appReply.Name will be able to automatically log you in.</p>
+            <a href="@appReply.UrlAuth.Url" class="btn btn-primary">Proceed to @appReply.Name</a>
+            break;
+    }
 }
 
 @code {
@@ -22,7 +36,7 @@
     public Guid Id { get; set; }
 
     private GetAppDetailsReply? appReply;
-    private String newLdapPassword;
+    private string? newLdapPassword;
 
     protected override async Task OnInitializedAsync()
     {
