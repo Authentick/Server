@@ -36,7 +36,10 @@ namespace AuthServer.Server.GRPC.Apps
         public override async Task<CreateLdapCredentialReply> CreateLdapCredential(CreateLdapCredentialRequest request, ServerCallContext context)
         {
             Guid appId = new Guid(request.Id);
+            Guid userId = new Guid(_userManager.GetUserId(context.GetHttpContext().User));
+
             LdapAppSettings ldapAppSettings = await _authDbContext.LdapAppSettings
+                .Where(a => a.AuthApp.UserGroups.Any(u => u.Members.Any(m => m.Id == userId)))
                 .SingleAsync(l => l.AuthApp.Id == appId);
             AppUser user = await _userManager.GetUserAsync(context.GetHttpContext().User);
 
@@ -57,21 +60,49 @@ namespace AuthServer.Server.GRPC.Apps
 
         public override async Task<GetAppDetailsReply> GetAppDetails(GetAppDetailsRequest request, ServerCallContext context)
         {
+            Guid userId = new Guid(_userManager.GetUserId(context.GetHttpContext().User));
+
             Guid appId = new Guid(request.Id);
             AuthApp app = await _authDbContext.AuthApp
+                .Include(a => a.OidcAppSettings)
+                .Include(a => a.ProxyAppSettings)
+                .Where(a => a.UserGroups.Any(u => u.Members.Any(m => m.Id == userId)))
                 .SingleAsync(a => a.Id == appId);
 
-            return new GetAppDetailsReply
+            GetAppDetailsReply reply = new GetAppDetailsReply
             {
                 Id = app.Id.ToString(),
                 Name = app.Name,
             };
+
+            switch (app.AuthMethod)
+            {
+                case AuthApp.AuthMethodEnum.LDAP:
+                    reply.LdapAuth = new GetAppDetailsReply.Types.LdapAuthSetting();
+                    break;
+                case AuthApp.AuthMethodEnum.OIDC:
+                    reply.UrlAuth = new GetAppDetailsReply.Types.UrlAuthSetting
+                    {
+                        Url = app.OidcAppSettings.RedirectUrl,
+                    };
+                    break;
+                case AuthApp.AuthMethodEnum.PROXY:
+                    reply.UrlAuth = new GetAppDetailsReply.Types.UrlAuthSetting
+                    {
+                        Url = "https://" + app.ProxyAppSettings.PublicHostname,
+                    };
+                    break;
+                default:
+                    throw new Exception("UI for auth method not implemented " + app.AuthMethod);
+            }
+
+            return reply;
         }
 
         public override async Task<Shared.Apps.AppListReply> ListApps(Empty request, ServerCallContext context)
         {
             Guid userId = new Guid(_userManager.GetUserId(context.GetHttpContext().User));
-            
+
             IEnumerable<AuthApp> authApps = await _authDbContext.AuthApp
                 .AsNoTracking()
                 .Where(a => a.UserGroups.Any(u => u.Members.Any(m => m.Id == userId)))
