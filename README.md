@@ -19,7 +19,7 @@ Gatekeeper allows you to create users, grant them access to other services, and 
 
 ## Get your Gatekeeper
 
-Gatekeeper is currently under development and we advise against any production usage. Gatekeeper can currently only be installed from source.
+[Our website describes in detail how to setup Gatekeeper](https://gatekeeper.page/en/install/). Don't worry, it should take you just a few minutes.
 
 ## Setup Development Environment
 
