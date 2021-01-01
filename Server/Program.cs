@@ -3,6 +3,7 @@ using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using AuthServer.Server.Services.TLS;
+using Gatekeeper.Server.Services.FileStorage;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -14,7 +15,7 @@ namespace AuthServer.Server
     {
         public static void Main(string[] args)
         {
-            string logFileLocation = AuthServer.Server.Services.FileStorage.PathProvider.GetApplicationDataFolder() + "/gatekeeper-logs.txt";
+            string logFileLocation = PathProvider.GetApplicationDataFolder() + "/gatekeeper-logs.txt";
 
             NLog.Config.LoggingConfiguration config = new NLog.Config.LoggingConfiguration();
             NLog.Targets.FileTarget logFileTarget = new NLog.Targets.FileTarget("logfile") { FileName = logFileLocation };
