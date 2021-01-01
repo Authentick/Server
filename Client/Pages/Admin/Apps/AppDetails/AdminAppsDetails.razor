@@ -30,7 +30,7 @@
                     PublicHostname="@appDetailReply.ProxyAuthSetting.PublicHostname"
                     InternalHostname="@appDetailReply.ProxyAuthSetting.InternalHostname"
                     AppId="@Id"
-                    
+                    PublicEndpoints="@appDetailReply.ProxyAuthSetting.PublicEndpoints.ToList()"
                 />
                 break;
         }
