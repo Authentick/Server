@@ -1,6 +1,6 @@
 using System;
 
-namespace AuthServer.Server.Services.FileStorage
+namespace Gatekeeper.Server.Services.FileStorage
 {
     static class PathProvider
     {

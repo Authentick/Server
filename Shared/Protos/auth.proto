@@ -14,10 +14,11 @@ service Auth {
 }
 
 message WhoAmIReply {
-  bool isAuthenticated = 1;
-  google.protobuf.StringValue userId = 2;
+  bool is_authenticated = 1;
+  google.protobuf.StringValue user_id = 2;
   bool is_installed = 3;
   repeated string roles = 4;
+  google.protobuf.StringValue profile_picture = 5;
 }
 
 message LoginRequest {

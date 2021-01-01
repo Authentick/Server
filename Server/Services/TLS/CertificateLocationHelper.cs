@@ -1,5 +1,5 @@
 using System.IO;
-using AuthServer.Server.Services.FileStorage;
+using Gatekeeper.Server.Services.FileStorage;
 
 namespace AuthServer.Server.Services.TLS
 {

@@ -6,15 +6,21 @@
 @using AuthServer.Shared
 
 @inject UserProfile.UserProfileClient UserProfileClient
+@inject HttpClient HttpClient
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 @if(UserReply != null) {
     <div class="d-flex flex-column justify-content-center"> 
         <div class="d-flex flex-column flex-lg-row">
             <div class="d-flex flex-column justify-content-center align-items-center mb-3 mb-lg-0 mr-0 mr-lg-5">
-                <img src="img/unsplash/profile.jpg" class="avatar avatar__lg">
-                <a href="#" class="btn btn-secondary-dark mt-3">Upload new photo</a>
+                @if(_profileImageUrl != null) {
+                    <img src="@_profileImageUrl" class="avatar avatar__lg">
+                } else {
+                    <span class="material-icons" style="font-size: 100px;">face</span>                    
+                }
+                <InputFile OnChange="@OnInputFileChange" class="btn btn-secondary-dark mt-3" />
             </div>
-            
+
             <div class="user-profile__details form-group d-flex flex-row flex-wrap justify-content-center justify-content-lg-start">
                 <div class="px-4 pb-lg-5 pb-3 width-md-100">
                     <span class="text-md font-weight-bold">Name</span>
@@ -50,9 +56,30 @@
 
 @code {
     private UserReply? UserReply;
+    private string? _profileImageUrl;
+
+    protected override void OnInitialized()
+    {
+        _profileImageUrl = ((AuthServer.Client.Util.AuthStateProvider)AuthenticationStateProvider).ProfileImageUrl;
+    }
 
     protected override async Task OnInitializedAsync()
     {
         UserReply = await UserProfileClient.GetUserAsync(new Google.Protobuf.WellKnownTypes.Empty());
+    }
+    
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        string format = "image/jpeg";
+
+        var resizedImageFile = await e.File.RequestImageFileAsync(format,  256, 256);
+
+        var buffer = new byte[resizedImageFile.Size];
+        await resizedImageFile.OpenReadStream().ReadAsync(buffer);
+
+        MultipartFormDataContent content = new MultipartFormDataContent {
+            { new ByteArrayContent(buffer), "\"upload\"", resizedImageFile.Name}
+        };
+        await HttpClient.PutAsync("api/profile/image/", content);
     }
 }

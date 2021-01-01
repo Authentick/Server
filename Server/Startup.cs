@@ -32,6 +32,8 @@ using AuthServer.Server.Services.ReverseProxy.Configuration;
 using AuthServer.Server.Services.ReverseProxy.Authentication;
 using AuthServer.Server.Services.Crypto.JWT;
 using AuthServer.Server.Services.SCIM;
+using Gatekeeper.Server.Services.FileStorage;
+using Gatekeeper.Server.GRPC;
 
 namespace AuthServer.Server
 {
@@ -129,6 +131,9 @@ namespace AuthServer.Server
 
             // SCIM
             services.AddScoped<ISyncHandler, SyncHandler>();
+
+            // File storage
+            services.AddScoped<ProfileImageManager>();
 
             // Hangfire
             SqlMapper.AddTypeHandler(new NodaDateTimeHandler());

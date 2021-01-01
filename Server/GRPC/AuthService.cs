@@ -7,6 +7,7 @@ using AuthServer.Server.Services.Authentication;
 using AuthServer.Server.Services.Authentication.Session;
 using AuthServer.Server.Services.User;
 using AuthServer.Shared;
+using Gatekeeper.Server.Services.FileStorage;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.AspNetCore.Http;
@@ -15,7 +16,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
 
-namespace AuthServer.Server.GRPC
+namespace Gatekeeper.Server.GRPC
 {
     public class AuthService : AuthServer.Shared.Auth.AuthBase
     {
@@ -24,13 +25,15 @@ namespace AuthServer.Server.GRPC
         private readonly AuthDbContext _authDbContext;
         private readonly BruteforceManager _bruteforceManager;
         private readonly SessionManager _sessionManager;
+        private readonly ProfileImageManager _profileImageManager;
 
         public AuthService(
             UserManager userManager,
             SignInManager<AppUser> signInManager,
             AuthDbContext authDbContext,
             BruteforceManager bruteforceManager,
-            SessionManager sessionManager
+            SessionManager sessionManager,
+            ProfileImageManager profileImageManager
             )
         {
             _userManager = userManager;
@@ -38,6 +41,7 @@ namespace AuthServer.Server.GRPC
             _authDbContext = authDbContext;
             _bruteforceManager = bruteforceManager;
             _sessionManager = sessionManager;
+            _profileImageManager = profileImageManager;
         }
 
         public override async Task<LoginReply> Login(LoginRequest request, ServerCallContext context)
@@ -184,6 +188,10 @@ namespace AuthServer.Server.GRPC
                 result.IsAuthenticated = true;
                 result.UserId = user.Id.ToString();
                 result.Roles.AddRange(await _userManager.GetRolesAsync(user));
+                if (_profileImageManager.HasProfileImage(user.Id))
+                {
+                    result.ProfilePicture = "/api/profile/image/" + user.Id.ToString();
+                }
             }
             else
             {
