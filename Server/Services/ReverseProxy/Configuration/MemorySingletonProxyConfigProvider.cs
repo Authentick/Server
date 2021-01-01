@@ -5,16 +5,16 @@ namespace AuthServer.Server.Services.ReverseProxy.Configuration
 {
     public class MemorySingletonProxyConfigProvider
     {
-        private List<Route> Routes = new List<Route>();
+        private Dictionary<string, Route> Routes = new Dictionary<string, Route>();
 
-        internal List<Route> GetRoutes()
+        internal Dictionary<string, Route> GetRoutes()
         {
             return Routes;
         }
 
         internal void AddRoute(Route route)
         {
-            Routes.Add(route);
+            Routes.TryAdd(route.PublicHostname, route);
         }
 
         public class Route
@@ -22,12 +22,18 @@ namespace AuthServer.Server.Services.ReverseProxy.Configuration
             public readonly string InternalHostname;
             public readonly string PublicHostname;
             public readonly Guid ProxySettingId;
+            public readonly HashSet<string> PublicRoutes;
 
-            public Route(Guid proxySettingId, string internalHostName, string publicHostName)
+            public Route(
+                Guid proxySettingId, 
+                string internalHostName, 
+                string publicHostName,
+                HashSet<string> publicRoutes)
             {
                 ProxySettingId = proxySettingId;
                 InternalHostname = internalHostName;
                 PublicHostname = publicHostName;
+                PublicRoutes = publicRoutes;
             }
         }
     }

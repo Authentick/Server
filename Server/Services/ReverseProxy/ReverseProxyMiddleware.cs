@@ -71,42 +71,68 @@ namespace AuthServer.Server.Services.ReverseProxy
                         return;
                     }
 
-                    bool isAuthenticated = authenticationManager.IsAuthenticated(context, out Guid? sessionId);
+                    bool isPublicEndpoint = route.PublicRoutes.Contains(context.Request.Path);
 
-                    if (!isAuthenticated)
+                    if (!isPublicEndpoint)
                     {
-                        string csrf = secureRandom.GetRandomString(16);
-                        context.Response.Cookies.Append("gatekeeper.csrf", csrf);
+                        bool isAuthenticated = authenticationManager.IsAuthenticated(context, out Guid? sessionId);
 
-                        Dictionary<string, string> queryDictionary = new Dictionary<string, string>()
+                        if (!isAuthenticated)
                         {
-                            {"id", route.ProxySettingId.ToString()},
-                            {"csrf", csrf},
-                        };
+                            string csrf = secureRandom.GetRandomString(16);
+                            context.Response.Cookies.Append("gatekeeper.csrf", csrf);
 
-                        UriBuilder uriBuilder = new UriBuilder();
-                        uriBuilder.Scheme = "https";
-                        uriBuilder.Host = primaryDomain;
-                        uriBuilder.Path = "/auth/sso-connect";
-                        uriBuilder.Query = await ((new System.Net.Http.FormUrlEncodedContent(queryDictionary)).ReadAsStringAsync());
+                            Dictionary<string, string> queryDictionary = new Dictionary<string, string>()
+                            {
+                                {"id", route.ProxySettingId.ToString()},
+                                {"csrf", csrf},
+                            };
 
-                        context.Response.Redirect(uriBuilder.ToString(), false);
-                        return;
+                            UriBuilder uriBuilder = new UriBuilder();
+                            uriBuilder.Scheme = "https";
+                            uriBuilder.Host = primaryDomain;
+                            uriBuilder.Path = "/auth/sso-connect";
+                            uriBuilder.Query = await ((new System.Net.Http.FormUrlEncodedContent(queryDictionary)).ReadAsStringAsync());
+
+                            context.Response.Redirect(uriBuilder.ToString(), false);
+                            return;
+                        }
+                        else
+                        {
+                            if (sessionId == null)
+                            {
+                                // This should never happen
+                                return;
+                            }
+
+                            bool isAuthorized = await authenticationManager.IsAuthorizedAsync((Guid)sessionId, route);
+                            if (!isAuthorized)
+                            {
+                                context.Response.Redirect("https://" + primaryDomain + "/auth/403");
+                                return;
+                            }
+                        }
                     }
-                    else
-                    {
-                        if (sessionId == null)
-                        {
-                            // This should never happen
-                            return;
-                        }
 
-                        bool isAuthorized = await authenticationManager.IsAuthorizedAsync((Guid)sessionId, route);
-                        if (!isAuthorized)
+                    Dictionary<string, RequestHeaderTransform> requestHeaderTransforms = new Dictionary<string, RequestHeaderTransform>()
+                    {
                         {
-                            context.Response.Redirect("https://" + primaryDomain + "/auth/403");
-                            return;
+                            "X-Forwarded-For",
+                            new RequestHeaderValueTransform(context.Connection.RemoteIpAddress.ToString(), append: false)
+                        },
+                        {
+                            HeaderNames.Host,
+                            new RequestHeaderValueTransform(String.Empty, append: false)
                         }
+                    };
+
+                    if (context.Request.Cookies.TryGetValue(AuthenticationManager.AUTH_COOKIE, out string? authCookieValue))
+                    {
+                        // FIXME: This is currently also sent as cookie. Remove this and only send it as header.
+                        requestHeaderTransforms.Add(
+                            "X-Gatekeeper-Jwt-Assertion",
+                            new RequestHeaderValueTransform(authCookieValue, append: false)
+                        );
                     }
 
                     RequestProxyOptions proxyOptions = new RequestProxyOptions()
@@ -115,22 +141,7 @@ namespace AuthServer.Server.Services.ReverseProxy
                         Transforms = new Transforms(
                             copyRequestHeaders: true,
                             requestTransforms: Array.Empty<RequestParametersTransform>(),
-                            requestHeaderTransforms: new Dictionary<string, RequestHeaderTransform>()
-                            {
-                                {
-                                    "X-Forwarded-For",
-                                    new RequestHeaderValueTransform(context.Connection.RemoteIpAddress.ToString(), append: false)
-                                },
-                                {
-                                    HeaderNames.Host,
-                                    new RequestHeaderValueTransform(String.Empty, append: false)
-                                },
-                                // FIXME: This is currently also sent as cookie. Remove this and only send it as header.
-                                {
-                                    "X-Gatekeeper-Jwt-Assertion",
-                                    new RequestHeaderValueTransform(context.Request.Cookies[AuthenticationManager.AUTH_COOKIE], append: false)
-                                },
-                            },
+                            requestHeaderTransforms: requestHeaderTransforms,
                             responseHeaderTransforms: new Dictionary<string, ResponseHeaderTransform>(),
                             responseTrailerTransforms: new Dictionary<string, ResponseHeaderTransform>()
                         )
@@ -146,7 +157,13 @@ namespace AuthServer.Server.Services.ReverseProxy
 
         private MemorySingletonProxyConfigProvider.Route? GetMatchingRoute(HttpContext context)
         {
-            return _proxyConfigProvider.GetRoutes().SingleOrDefault(p => p.PublicHostname == context.Request.Host.Host);
+            bool exists = _proxyConfigProvider.GetRoutes().TryGetValue(context.Request.Host.Host, out MemorySingletonProxyConfigProvider.Route? route);
+            if (!exists)
+            {
+                return null;
+            }
+
+            return route;
         }
     }
 }

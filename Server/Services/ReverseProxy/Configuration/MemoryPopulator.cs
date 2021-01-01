@@ -25,10 +25,22 @@ namespace AuthServer.Server.Services.ReverseProxy.Configuration
 
             foreach (ProxyAppSettings setting in proxySettings)
             {
+                HashSet<string> publicRoutes;
+                if (setting.EndpointsWithoutAuth == null)
+                {
+                    publicRoutes = new HashSet<string>();
+                }
+                else
+                {
+                    publicRoutes = new HashSet<string>(setting.EndpointsWithoutAuth);
+                }
+
                 MemorySingletonProxyConfigProvider.Route route = new MemorySingletonProxyConfigProvider.Route(
                     setting.Id,
                     setting.InternalHostname,
-                    setting.PublicHostname);
+                    setting.PublicHostname,
+                    publicRoutes
+                    );
                 _proxyConfigProvider.AddRoute(route);
             }
         }
