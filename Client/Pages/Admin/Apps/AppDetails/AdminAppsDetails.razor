@@ -4,6 +4,7 @@
 @layout AdminShell
 
 @using AuthServer.Shared.Admin
+@using AuthServer.Client.Pages.Admin.Apps.AppDetails.ConfigurationView
 
 @inject AuthServer.Shared.Admin.AdminApps.AdminAppsClient AppsClient
 
@@ -25,8 +26,12 @@
                 break;
 
             case AppDetailReply.AuthSettingOneofCase.ProxyAuthSetting:
-                <p>Public hostname: @appDetailReply.ProxyAuthSetting.PublicHostname</p>
-                <p>Internal hostname: @appDetailReply.ProxyAuthSetting.InternalHostname</p>
+                <ConfigureGatekeeperProxy 
+                    PublicHostname="@appDetailReply.ProxyAuthSetting.PublicHostname"
+                    InternalHostname="@appDetailReply.ProxyAuthSetting.InternalHostname"
+                    AppId="@Id"
+                    
+                />
                 break;
         }
 

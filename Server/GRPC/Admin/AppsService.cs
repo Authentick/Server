@@ -244,6 +244,11 @@ namespace AuthServer.Server.GRPC.Admin
                         InternalHostname = app.ProxyAppSettings.InternalHostname,
                         PublicHostname = app.ProxyAppSettings.PublicHostname,
                     };
+                    if (app.ProxyAppSettings.EndpointsWithoutAuth != null)
+                    {
+                        reply.ProxyAuthSetting.PublicEndpoints.AddRange(app.ProxyAppSettings.EndpointsWithoutAuth);
+                    }
+
                     break;
             }
 
@@ -333,6 +338,39 @@ namespace AuthServer.Server.GRPC.Admin
             await _authDbContext.SaveChangesAsync();
 
             return new RemoveGroupFromAppReply { Success = true };
+        }
+
+        public override async Task<GatekeeperProxySettingsReply> SaveGatekeeperProxySettings(GatekeeperProxySettingsRequest request, ServerCallContext context)
+        {
+            Guid appId = new Guid(request.AppId);
+            ProxyAppSettings settings = await _authDbContext
+                .ProxyAppSettings
+                .SingleAsync(s => s.AuthAppId == appId);
+
+            if (request.InternalHostname != settings.InternalHostname)
+            {
+                settings.InternalHostname = request.InternalHostname;
+            }
+
+            if (request.PublicHostname != settings.PublicHostname)
+            {
+                settings.PublicHostname = request.PublicHostname;
+                BackgroundJob.Enqueue<IRequestAcmeCertificateJob>(job => job.Request("", request.PublicHostname));
+            }
+
+            if (request.PublicEndpoints.Count == 0)
+            {
+                settings.EndpointsWithoutAuth = null;
+            }
+            else
+            {
+                settings.EndpointsWithoutAuth = request.PublicEndpoints.ToList();
+            }
+
+            await _authDbContext.SaveChangesAsync();
+            await _memoryPopulator.PopulateFromDatabase();
+
+            return new GatekeeperProxySettingsReply { };
         }
 
         public override async Task<Empty> TriggerScimSync(ScimSyncRequest request, ServerCallContext context)

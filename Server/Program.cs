@@ -20,6 +20,8 @@ namespace AuthServer.Server
             NLog.Config.LoggingConfiguration config = new NLog.Config.LoggingConfiguration();
             NLog.Targets.FileTarget logFileTarget = new NLog.Targets.FileTarget("logfile") { FileName = logFileLocation };
             NLog.Targets.ConsoleTarget logConsoleTarget = new NLog.Targets.ConsoleTarget("logconsole");
+            logFileTarget.Layout = "${longdate} ${message} ${exception:format=tostring}";
+            logConsoleTarget.Layout = "${longdate} ${message} ${exception:format=tostring}";
             config.AddRule(NLog.LogLevel.Info, NLog.LogLevel.Fatal, logConsoleTarget);
             config.AddRule(NLog.LogLevel.Error, NLog.LogLevel.Fatal, logFileTarget);
 

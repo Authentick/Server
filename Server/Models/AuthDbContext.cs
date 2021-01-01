@@ -106,6 +106,7 @@ namespace AuthServer.Server.Models
         public AuthApp AuthApp { get; set; } = null!;
         public string InternalHostname { get; set; } = null!;
         public string PublicHostname { get; set; } = null!;
+        public List<string>? EndpointsWithoutAuth { get; set; }
     }
 
     public class LdapAppSettings

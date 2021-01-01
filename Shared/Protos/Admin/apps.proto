@@ -12,7 +12,17 @@ service AdminApps {
   rpc RemoveGroupFromApp (RemoveGroupFromAppRequest) returns
   (RemoveGroupFromAppReply);
   rpc TriggerScimSync(ScimSyncRequest) returns (google.protobuf.Empty);
+  rpc SaveGatekeeperProxySettings(GatekeeperProxySettingsRequest) returns (GatekeeperProxySettingsReply); 
 }
+
+message GatekeeperProxySettingsRequest {
+  string app_id = 1;
+  string internal_hostname = 2;
+  string public_hostname = 3;
+  repeated string public_endpoints = 4;
+}
+
+message GatekeeperProxySettingsReply {}
 
 message ScimSyncRequest {
   string app_id = 1;
@@ -122,6 +132,7 @@ message AppDetailReply {
   message ProxyAuthSetting {
     string internal_hostname = 1;
     string public_hostname = 2;
+    repeated string public_endpoints = 3;
   }
 
   message LdapAuthSetting {
