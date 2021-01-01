@@ -121,6 +121,10 @@ namespace AuthServer.Server.Services.ReverseProxy
                             new RequestHeaderValueTransform(context.Connection.RemoteIpAddress.ToString(), append: false)
                         },
                         {
+                            "X-Forwarded-Host",
+                            new RequestHeaderValueTransform(route.PublicHostname, append: false)
+                        },
+                        {
                             HeaderNames.Host,
                             new RequestHeaderValueTransform(String.Empty, append: false)
                         }
