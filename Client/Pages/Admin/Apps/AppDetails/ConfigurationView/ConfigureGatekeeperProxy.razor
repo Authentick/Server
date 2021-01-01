@@ -1,0 +1,43 @@
+@inject AuthServer.Shared.ConnectivityCheckService.ConnectivityCheckServiceClient ConnectivityCheckServiceClient
+@inject AuthServer.Shared.Admin.AdminApps.AdminAppsClient AppsClient
+
+<p>This application is protected using Gatekeeper Proxy. <a href="https://docs.gatekeeper.page/admin/managing-applications/understanding-settings/authentication-modes/gatekeeper-proxy"><i class="fas fa-book"></i></a></p>
+<p>Public hostname: <input @bind="PublicHostname" type="text" /></p>
+@if(_hasPublicHostnameResolutionProblem) {
+    <p>Public hostname doesn't resolve to this host.</p>
+}
+<p>Internal hostname: <input @bind="@InternalHostname" type="text" /></p>
+<button type="submit" @onclick="SaveChanges">Save changes</button>
+
+@code {
+    [Parameter]
+    public string PublicHostname { get; set;} = "";
+
+    [Parameter]
+    public string InternalHostname { get; set; } = "";
+
+    [Parameter]
+    public Guid AppId { get; set; }
+
+    private bool _hasPublicHostnameResolutionProblem;
+
+    private async Task SaveChanges()
+    {
+        _hasPublicHostnameResolutionProblem = ((await ConnectivityCheckServiceClient.IsPublicAccessibleAsync(
+            new AuthServer.Shared.IsPublicAccessibleRequest { 
+                Hostname = PublicHostname
+            }
+        )).State != AuthServer.Shared.IsPublicAccessibleReply.Types.AccessibleReplyEnum.Success);
+
+        if(!_hasPublicHostnameResolutionProblem) 
+        {
+            AuthServer.Shared.Admin.GatekeeperProxySettingsRequest request = new AuthServer.Shared.Admin.GatekeeperProxySettingsRequest {
+                AppId = AppId.ToString(),
+                InternalHostname = InternalHostname,
+                PublicHostname = PublicHostname,
+            };
+
+            await AppsClient.SaveGatekeeperProxySettingsAsync(request);
+        }
+    }
+}

@@ -12,7 +12,16 @@ service AdminApps {
   rpc RemoveGroupFromApp (RemoveGroupFromAppRequest) returns
   (RemoveGroupFromAppReply);
   rpc TriggerScimSync(ScimSyncRequest) returns (google.protobuf.Empty);
+  rpc SaveGatekeeperProxySettings(GatekeeperProxySettingsRequest) returns (GatekeeperProxySettingsReply); 
 }
+
+message GatekeeperProxySettingsRequest {
+  string app_id = 1;
+  string internal_hostname = 2;
+  string public_hostname = 3;
+}
+
+message GatekeeperProxySettingsReply {}
 
 message ScimSyncRequest {
   string app_id = 1;
