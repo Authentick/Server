@@ -15,15 +15,6 @@
 {
     <h2>@GroupDetails.Name</h2>
 
-    <p>Members:</p>
-
-    <ul>
-        @foreach(GroupMember member in GroupDetails.Members)
-        {
-            <li>@member.Name (@member.Id) <button @onclick="@(async () => await RemoveMember(member))">Remove</button></li>
-        }
-    </ul>
-
     <form @onsubmit="@AddUserToGroupSubmit">
         <div class="form-group col-12 col-md-8 p-0 d-flex flex-column flex-md-row">
             <div class="d-flex flex-column mb-3 mb-md-0 mr-0 mr-md-3 w-100">
@@ -33,6 +24,28 @@
             <button type="submit" class="btn btn-secondary-dark w-100" disabled="@(SelectedUserId == null)">Add user to group</button>
         </div>
     </form>
+
+    <div class="table-responsive mb-2">
+
+        <table class="table table-hover table-bordered mb-4 table-secondary table-striped">
+            <thead class="bg-secondary-dark">
+                <tr>
+                    <th scope="col" class="border-0">Member</th>
+                    <th scope="col" class="border-0">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(GroupMember member in GroupDetails.Members)
+                {
+                    <tr>
+                        <td>@member.Name</td>
+                        <td><button class="btn btn-secondary-dark btn-delete" @onclick="@(async () => await RemoveMember(member))">Remove</button></td>
+                    </tr>
+                }
+            
+            </tbody>
+        </table>
+    </div>
 
 }
 

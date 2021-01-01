@@ -10,9 +10,9 @@
 
 <h2 class="text-lg">Create group</h2>
 
-<form @onsubmit="@SubmitForm">
-    <input type="text" @bind="@Name" placeholder="Name..." />
-    <button type="submit">Create</button>
+<form @onsubmit="@SubmitForm" class="form-group col-12 col-md-6 pl-0">
+    <input type="text" class="form-control bg-secondary mb-4" @bind="@Name" placeholder="Name..." />
+    <button type="submit" class="btn btn-secondary-dark btn-add">Create</button>
 </form>
 
 @code {
