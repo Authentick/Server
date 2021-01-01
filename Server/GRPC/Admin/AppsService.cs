@@ -244,6 +244,11 @@ namespace AuthServer.Server.GRPC.Admin
                         InternalHostname = app.ProxyAppSettings.InternalHostname,
                         PublicHostname = app.ProxyAppSettings.PublicHostname,
                     };
+                    if (app.ProxyAppSettings.EndpointsWithoutAuth != null)
+                    {
+                        reply.ProxyAuthSetting.PublicEndpoints.AddRange(app.ProxyAppSettings.EndpointsWithoutAuth);
+                    }
+
                     break;
             }
 
@@ -351,6 +356,15 @@ namespace AuthServer.Server.GRPC.Admin
             {
                 settings.PublicHostname = request.PublicHostname;
                 BackgroundJob.Enqueue<IRequestAcmeCertificateJob>(job => job.Request("", request.PublicHostname));
+            }
+
+            if (request.PublicEndpoints.Count == 0)
+            {
+                settings.EndpointsWithoutAuth = null;
+            }
+            else
+            {
+                settings.EndpointsWithoutAuth = request.PublicEndpoints.ToList();
             }
 
             await _authDbContext.SaveChangesAsync();

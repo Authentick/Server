@@ -19,6 +19,7 @@ message GatekeeperProxySettingsRequest {
   string app_id = 1;
   string internal_hostname = 2;
   string public_hostname = 3;
+  repeated string public_endpoints = 4;
 }
 
 message GatekeeperProxySettingsReply {}
@@ -131,6 +132,7 @@ message AppDetailReply {
   message ProxyAuthSetting {
     string internal_hostname = 1;
     string public_hostname = 2;
+    repeated string public_endpoints = 3;
   }
 
   message LdapAuthSetting {

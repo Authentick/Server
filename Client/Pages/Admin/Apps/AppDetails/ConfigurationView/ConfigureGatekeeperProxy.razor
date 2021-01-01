@@ -7,6 +7,9 @@
     <p>Public hostname doesn't resolve to this host.</p>
 }
 <p>Internal hostname: <input @bind="@InternalHostname" type="text" /></p>
+
+<p>Public endpoints: (separated by space)</p> <input @bind="@_publicSpaceSeparatedEndpoints" type="text" />
+
 <button type="submit" @onclick="SaveChanges">Save changes</button>
 
 @code {
@@ -19,15 +22,37 @@
     [Parameter]
     public Guid AppId { get; set; }
 
-    private bool _hasPublicHostnameResolutionProblem;
+    [Parameter]
+    public List<string> PublicEndpoints { get; set; } = new List<string>();
 
-    private async Task SaveChanges()
+    private string _publicSpaceSeparatedEndpoints = "";
+    private bool _hasPublicHostnameResolutionProblem;
+    private string _initialPublicHostname = "";
+
+    protected override void OnInitialized()
+    {
+        _publicSpaceSeparatedEndpoints = String.Join(" ", PublicEndpoints);
+        _initialPublicHostname = PublicHostname;
+    }
+
+    private async Task PerformHostnameResolutionCheck()
     {
         _hasPublicHostnameResolutionProblem = ((await ConnectivityCheckServiceClient.IsPublicAccessibleAsync(
             new AuthServer.Shared.IsPublicAccessibleRequest { 
                 Hostname = PublicHostname
             }
         )).State != AuthServer.Shared.IsPublicAccessibleReply.Types.AccessibleReplyEnum.Success);
+    }
+
+    private async Task SaveChanges()
+    {
+        if(_initialPublicHostname == PublicHostname) {
+            _hasPublicHostnameResolutionProblem = false;
+        }
+        else
+        {
+            await PerformHostnameResolutionCheck();
+        }
 
         if(!_hasPublicHostnameResolutionProblem) 
         {
@@ -36,6 +61,19 @@
                 InternalHostname = InternalHostname,
                 PublicHostname = PublicHostname,
             };
+
+            if(_publicSpaceSeparatedEndpoints != "")
+            {
+                if(_publicSpaceSeparatedEndpoints.Contains(" ")) 
+                {
+                    List<string> publicEndpointList = _publicSpaceSeparatedEndpoints.Split(" ").ToList();
+                    request.PublicEndpoints.AddRange(publicEndpointList);
+                } 
+                else
+                {
+                    request.PublicEndpoints.Add(_publicSpaceSeparatedEndpoints);
+                }
+            }
 
             await AppsClient.SaveGatekeeperProxySettingsAsync(request);
         }
