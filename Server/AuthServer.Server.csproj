@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Certes" Version="2.3.4" />
-    <PackageReference Include="Gatekeeper.LdapServerLibrary" Version="0.0.4-alpha" />
+    <PackageReference Include="Gatekeeper.LdapServerLibrary" Version="0.0.5-alpha" />
     <PackageReference Include="Gatekeeper.SCIM.Client" Version="0.0.4-alpha" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.34.0" />
     <PackageReference Include="Grpc.AspNetCore.Web" Version="2.34.0" />
