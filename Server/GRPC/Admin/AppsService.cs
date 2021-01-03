@@ -197,6 +197,21 @@ namespace AuthServer.Server.GRPC.Admin
             };
         }
 
+        public override async Task<DeleteAppReply> DeleteApp(DeleteAppRequest request, ServerCallContext context)
+        {
+            AuthApp app = await _authDbContext.AuthApp
+                .SingleAsync(a => a.Id == new Guid(request.AppId));
+            _authDbContext.Remove(app);
+            await _authDbContext.SaveChangesAsync();
+            // fixme: this should be done outside a service
+            await _memoryPopulator.PopulateFromDatabase();
+
+            return new DeleteAppReply
+            {
+                Success = true,
+            };
+        }
+
         public override async Task<AppDetailReply> GetAppDetails(AppDetailRequest request, ServerCallContext context)
         {
             AuthApp app = await _authDbContext.AuthApp
@@ -299,37 +314,20 @@ namespace AuthServer.Server.GRPC.Admin
 
             foreach (AuthApp app in apps)
             {
-                AddNewAppRequest.Types.AuthChoice authChoice;
-                AddNewAppRequest.Types.DirectoryChoice directoryChoice;
-
-                switch (app.DirectoryMethod)
+                HostingType hostingType;
+                switch (app.HostingType)
                 {
-                    case AuthApp.DirectoryMethodEnum.NONE:
-                        directoryChoice = AddNewAppRequest.Types.DirectoryChoice.NoneDirectory;
+                    case AuthApp.HostingTypeEnum.NON_WEB:
+                        hostingType = HostingType.NonWeb;
                         break;
-                    case AuthApp.DirectoryMethodEnum.LDAP:
-                        directoryChoice = AddNewAppRequest.Types.DirectoryChoice.LdapDirectory;
+                    case AuthApp.HostingTypeEnum.WEB_GATEKEEPER_PROXY:
+                        hostingType = HostingType.WebGatekeeperProxy;
                         break;
-                    case AuthApp.DirectoryMethodEnum.SCIM:
-                        directoryChoice = AddNewAppRequest.Types.DirectoryChoice.ScimDirectory;
+                    case AuthApp.HostingTypeEnum.WEB_GENERIC:
+                        hostingType = HostingType.WebGeneric;
                         break;
                     default:
-                        throw new Exception("Unexpected directory method");
-                }
-
-                switch (app.AuthMethod)
-                {
-                    case AuthApp.AuthMethodEnum.LDAP:
-                        authChoice = AddNewAppRequest.Types.AuthChoice.LdapAuth;
-                        break;
-                    case AuthApp.AuthMethodEnum.OIDC:
-                        authChoice = AddNewAppRequest.Types.AuthChoice.OidcAuth;
-                        break;
-                    case AuthApp.AuthMethodEnum.NONE:
-                        authChoice = AddNewAppRequest.Types.AuthChoice.NoAuth;
-                        break;
-                    default:
-                        throw new Exception("Unexpected app method");
+                        throw new NotImplementedException("Not implemented type: " + app.HostingType);
                 }
 
                 AppListEntry entry = new AppListEntry
@@ -337,9 +335,7 @@ namespace AuthServer.Server.GRPC.Admin
                     Id = app.Id.ToString(),
                     Name = app.Name,
                     GroupsAssigned = app.UserGroups.Count(),
-                    AuthChoice = authChoice,
-                    DirectoryChoice = directoryChoice,
-                    UsesGatekeeperProxy = (app.ProxyAppSettings != null)
+                    HostingType = hostingType,
                 };
 
                 reply.Apps.Add(entry);
