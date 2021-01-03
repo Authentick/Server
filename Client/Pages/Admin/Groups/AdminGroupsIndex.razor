@@ -19,6 +19,7 @@
             <thead class="bg-secondary-dark">
                 <tr>
                     <th scope="col" class="border-0">Name</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -26,7 +27,11 @@
                 @foreach (Group group in groupsListReply.Groups)
                 {
                     <tr>
-                        <td><a href="/admin/groups/details/@group.Id">@group.Name</a></td>
+                        <td>@group.Name</td>
+                        <td>
+                            <a href="/admin/groups/details/@group.Id" class="btn btn-secondary-dark btn-add">Edit</a> 
+                            <button class="btn btn-secondary-dark btn-delete" @onclick="@(() => Delete(group))">Delete</button>
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -40,5 +45,17 @@
     protected override async Task OnInitializedAsync()
     {
         groupsListReply = await GroupsClient.ListGroupsAsync(new Google.Protobuf.WellKnownTypes.Empty());
+    }
+
+    private async Task Delete(Group group) 
+    {
+        var request = new DeleteGroupRequest {
+            Id = group.Id
+        };
+        await GroupsClient.DeleteGroupAsync(request);
+
+        if(groupsListReply != null) {
+            groupsListReply.Groups.Remove(group);
+        }
     }
 }
