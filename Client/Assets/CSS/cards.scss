@@ -10,6 +10,17 @@
   background-color: $secondary-theme-color;
 }
 
+.app-card {
+  border-radius: 16px;
+  
+  &__img {
+    position: absolute;
+    top: -15%;
+    left: 0;
+    right: 0;
+  }
+}
+
 .alert-card {
   background-color: $light-gray;
   border-left: 6px solid;

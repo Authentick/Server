@@ -9,7 +9,7 @@
 
 @RenderCurrentStep()
 
-<button type="submit" class="col-sm-5 btn btn-secondary-dark" @onclick="RevertToPreviousStep" disabled="@(!(SetupAppStateMachine.HasPreviousStep()))">Previous step</button>
+<button type="submit" class="col-sm-5 btn btn-secondary-dark mb-3 mb-lg-0" @onclick="RevertToPreviousStep" disabled="@(!(SetupAppStateMachine.HasPreviousStep()))">Previous step</button>
 @if(CurrentStep != null && CurrentStep.GetType() == typeof(Steps.FinalizeStep)) {
     <button type="submit" class="col-sm-5 offset-sm-1 btn btn-secondary-dark" @onclick="SetupApp" disabled="@(!(SetupAppStateMachine.HasNextStep()))">Finish setup</button>
 } else {
