@@ -1,0 +1,162 @@
+@implements IStep
+
+@using AuthServer.Shared.Admin
+@using AuthServer.Shared
+
+@inject AuthServer.Shared.ConnectivityCheckService.ConnectivityCheckServiceClient ConnectivityCheckServiceClient
+
+<h2>Application information</h2>
+
+<div class="form-group col-12 col-md-6 p-0">
+    <input type="text" @onchange="@NameChanged" class="form-control bg-secondary" placeholder="Name" />
+</div>
+
+<div class="form-group col-12 col-md-6 p-0">
+    <textarea type="text" @onchange="@DescriptionChanged" class="form-control bg-secondary" placeholder="Description shown to users" />
+</div>
+
+@if (
+    StateMachine.GetAddNewAppRequest().HostingType != HostingType.NonWeb
+) {
+    <div class="form-group col-12 col-md-6 p-0">
+        <input type="text" @onchange="@UrlChanged" class="form-control bg-secondary" placeholder="URL shown to users" />
+    </div>
+}
+
+@if(StateMachine.GetAddNewAppRequest().HostingType == HostingType.WebGatekeeperProxy) {
+    <h2>Gatekeeper Proxy</h2>
+    <div class="form-group col-12 col-md-6 p-0">
+        <input type="text" @onchange="@PublicDomainNameChanged" class="form-control bg-secondary" placeholder="Public Domain name" />
+        @if (!_gatekeeperProxyConnectivityCheck)
+        {
+            <p>Public hostname doesn't resolve to this host.</p>
+        }
+    </div>
+    <div class="form-group col-12 col-md-6 p-0">
+        <input type="text" @onchange="@InternalUrlChanged" class="form-control bg-secondary" placeholder="Internal URL" />
+    </div>
+}
+
+@code {
+    [Parameter]
+    public SetupAppStateMachine StateMachine { get; set; } = null!;
+
+    public string? Name { get; set; }
+    public string? Description { get; set; }
+    public string? Url { get; set; }
+    public string? PublicDomain { get; set; }
+    public string? InternalUrl { get; set; }
+    private bool _gatekeeperProxyConnectivityCheck;
+
+    private bool FormIsValid() 
+    {
+        HostingType type = StateMachine.GetAddNewAppRequest().HostingType;
+        switch(type) 
+        {
+            case HostingType.NonWeb:
+                return (!String.IsNullOrEmpty(Name) && !String.IsNullOrEmpty(Description));
+            case HostingType.WebGeneric:
+                return (!String.IsNullOrEmpty(Name) && !String.IsNullOrEmpty(Description) && !String.IsNullOrEmpty(Url));
+            case HostingType.WebGatekeeperProxy:
+                return (!String.IsNullOrEmpty(Name) && !String.IsNullOrEmpty(Description) && !String.IsNullOrEmpty(Url) && !String.IsNullOrEmpty(PublicDomain) && !String.IsNullOrEmpty(InternalUrl) && _gatekeeperProxyConnectivityCheck);
+            default:
+                throw new NotImplementedException("Unknown type: " + type);
+        }
+    }
+
+    private void SetNextStepIfPossible()
+    {
+        if (FormIsValid()) 
+        {
+            StateMachine.SetNextStep(new ChooseAuthMethodStep());
+        }
+        else
+        {
+            StateMachine.SetNextStep(null);
+        }
+    }
+
+    private void UrlChanged(ChangeEventArgs e)
+    {
+        if (e.Value != null)
+        {
+            Url = (string)e.Value;
+        }
+        else
+        {
+            Url = null;
+        }
+
+        SetNextStepIfPossible();
+    }
+
+    private async Task PublicDomainNameChanged(ChangeEventArgs e)
+    {
+        _gatekeeperProxyConnectivityCheck = false;
+
+        if (e.Value != null)
+        {
+            
+            PublicDomain = (string)e.Value;
+            IsPublicAccessibleRequest request = new IsPublicAccessibleRequest 
+            {
+                Hostname = PublicDomain,
+            };
+
+            IsPublicAccessibleReply reply = await ConnectivityCheckServiceClient.IsPublicAccessibleAsync(request);
+            
+            if (reply.State == IsPublicAccessibleReply.Types.AccessibleReplyEnum.Success)
+            {
+                _gatekeeperProxyConnectivityCheck = true;
+            }
+        }
+        else
+        {
+            PublicDomain = null;
+        }
+
+        SetNextStepIfPossible();
+    } 
+
+    private void InternalUrlChanged(ChangeEventArgs e) 
+    {
+        if (e.Value != null)
+        {
+            InternalUrl = (string)e.Value;
+        }
+        else
+        {
+            InternalUrl = null;
+        }
+
+        SetNextStepIfPossible();
+    }
+
+    private void DescriptionChanged(ChangeEventArgs e) 
+    {
+        if (e.Value != null)
+        {
+            Description = (string)e.Value;
+        }
+        else
+        {
+            Description = null;
+        }
+
+        SetNextStepIfPossible();
+    }
+
+    private void NameChanged(ChangeEventArgs e)
+    {
+        if (e.Value != null)
+        {
+            Name = (string)e.Value;
+        }
+        else
+        {
+            Name = null;
+        }
+
+        SetNextStepIfPossible();
+    }
+}

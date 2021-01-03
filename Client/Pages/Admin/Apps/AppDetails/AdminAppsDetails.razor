@@ -13,6 +13,16 @@
     <div>
         <h1>Configure @appDetailReply.Name</h1>
 
+        @if(appDetailReply.HostingType == HostingType.WebGatekeeperProxy) {
+            <h2>Gatekeeper Proxy</h2>
+            <ConfigureGatekeeperProxy 
+                    PublicHostname="@appDetailReply.ProxyAuthSetting.PublicHostname"
+                    InternalHostname="@appDetailReply.ProxyAuthSetting.InternalHostname"
+                    AppId="@Id"
+                    PublicEndpoints="@appDetailReply.ProxyAuthSetting.PublicEndpoints.ToList()"
+                />
+        }
+
         <h2>Auth setting</h2>
         @switch(appDetailReply.AuthSettingCase) {
             case AppDetailReply.AuthSettingOneofCase.LdapAuthSetting:
@@ -25,13 +35,8 @@
                 <p>Redirect URI: @appDetailReply.OidcAuthSetting.RedirectUri</p>
                 break;
 
-            case AppDetailReply.AuthSettingOneofCase.ProxyAuthSetting:
-                <ConfigureGatekeeperProxy 
-                    PublicHostname="@appDetailReply.ProxyAuthSetting.PublicHostname"
-                    InternalHostname="@appDetailReply.ProxyAuthSetting.InternalHostname"
-                    AppId="@Id"
-                    PublicEndpoints="@appDetailReply.ProxyAuthSetting.PublicEndpoints.ToList()"
-                />
+            case AppDetailReply.AuthSettingOneofCase.None:
+                <p>No further authentication is configured.</p>
                 break;
         }
 

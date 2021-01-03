@@ -15,10 +15,10 @@ namespace AuthServer.Client.Pages.Admin.Apps.Setup
 
         internal void Initialize()
         {
-            _currentStep = new InitialStep();
+            _currentStep = new TypeSelectionStep();
         }
 
-        internal AddNewAppRequest GetAddNewAppRequest()
+        public AddNewAppRequest GetAddNewAppRequest()
         {
             return _addNewAppRequest;
         }
@@ -27,8 +27,60 @@ namespace AuthServer.Client.Pages.Admin.Apps.Setup
         {
             switch (step)
             {
-                case InitialStep initialStep:
-                    _addNewAppRequest.Name = initialStep.Name;
+                case TypeSelectionStep typeSelectionStep:
+                    switch (typeSelectionStep.Type)
+                    {
+                        case "Other":
+                            _addNewAppRequest.HostingType = HostingType.NonWeb;
+                            break;
+                        case "Web":
+                            break;
+                        default:
+                            throw new NotImplementedException(typeSelectionStep.Type + " is not implemented");
+                    }
+                    break;
+                case WebHostingTypeSelectionStep webHostingTypeSelectionStep:
+                    switch (webHostingTypeSelectionStep.Type)
+                    {
+                        case "Cloud":
+                            _addNewAppRequest.HostingType = HostingType.WebGeneric;
+                            break;
+                        case "Self-Hosted":
+                            break;
+                        default:
+                            throw new NotImplementedException(webHostingTypeSelectionStep.Type + " is not implemented");
+                    }
+                    break;
+                case SelfHostedAccessSelectionStep selfHostedAccessSelectionStep:
+                    switch (selfHostedAccessSelectionStep.Type)
+                    {
+                        case "Gatekeeper Proxy":
+                            _addNewAppRequest.HostingType = HostingType.WebGatekeeperProxy;
+                            break;
+                        case "Directly":
+                            _addNewAppRequest.HostingType = HostingType.WebGeneric;
+                            break;
+                        default:
+                            throw new NotImplementedException(selfHostedAccessSelectionStep.Type + " is not implemented");
+                    }
+                    break;
+                case AppInformationStep appInformationStep:
+                    _addNewAppRequest.Name = appInformationStep.Name;
+                    _addNewAppRequest.Description = appInformationStep.Description;
+                    if (_addNewAppRequest.HostingType != HostingType.NonWeb) 
+                    {
+                        _addNewAppRequest.Url = appInformationStep.Url;
+                    }
+                    System.Console.WriteLine(_addNewAppRequest.HostingType);
+                    if(_addNewAppRequest.HostingType == HostingType.WebGatekeeperProxy) 
+                    {
+                        _addNewAppRequest.ProxySetting = new AddNewAppRequest.Types.ProxySetting
+                        {
+                            InternalHostname = appInformationStep.InternalUrl,
+                            PublicHostname = appInformationStep.PublicDomain,
+                        };              
+                    }
+                    
                     break;
                 case ChooseAuthMethodStep chooseAuthMethodStep:
                     _addNewAppRequest.AuthChoice = chooseAuthMethodStep.AuthChoice;
@@ -38,13 +90,6 @@ namespace AuthServer.Client.Pages.Admin.Apps.Setup
                     break;
                 case ConfigureAccessGroupsStep configureAccessGroupsStep:
                     _addNewAppRequest.GroupIds.AddRange(configureAccessGroupsStep.SelectedGroups);
-                    break;
-                case ConfigureGatekeeperProxyStep configureGatekeeperProxyStep:
-                    _addNewAppRequest.ProxySetting = new AddNewAppRequest.Types.ProxySetting
-                    {
-                        InternalHostname = configureGatekeeperProxyStep.gatekeeperProxySettings.InternalDomainName,
-                        PublicHostname = configureGatekeeperProxyStep.gatekeeperProxySettings.PublicDomainName,
-                    };
                     break;
                 case ConfigureOpenIDConnectStep configureOpenIDConnectStep:
                     _addNewAppRequest.OidcSetting = new AddNewAppRequest.Types.OIDCSetting

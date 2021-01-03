@@ -45,7 +45,7 @@
 
     protected override void OnInitialized() 
     {
-        _authMethods = (new AuthenticationMethodsProvider()).GetAuthMethods();
+        _authMethods = (new AuthenticationMethodsProvider()).GetAuthMethods(StateMachine.GetAddNewAppRequest().HostingType);
     }
 
     private void SetActiveMethod(AuthenticationMethodsProvider.IAuthMethod method) 
@@ -61,9 +61,9 @@
                 AuthChoice = AuthServer.Shared.Admin.AddNewAppRequest.Types.AuthChoice.OidcAuth;
                 StateMachine.SetNextStep(new ConfigureOpenIDConnectStep());
                 break;
-            case AuthenticationMethodsProvider.GatekeeperProxyAuthMethod:
-                AuthChoice = AuthServer.Shared.Admin.AddNewAppRequest.Types.AuthChoice.ProxyAuth;
-                StateMachine.SetNextStep(new ConfigureGatekeeperProxyStep());
+             case AuthenticationMethodsProvider.GatkeeperProxyAuthMethod:
+                AuthChoice = AuthServer.Shared.Admin.AddNewAppRequest.Types.AuthChoice.NoAuth;
+                StateMachine.SetNextStep(new ChooseDirectoryMethodStep());
                 break;
             default:
                 StateMachine.SetNextStep(null);

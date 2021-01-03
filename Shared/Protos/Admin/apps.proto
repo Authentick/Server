@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
 
 option csharp_namespace = "AuthServer.Shared.Admin";
 
@@ -46,6 +47,14 @@ message RemoveGroupFromAppReply {
   bool success = 1;
 }
 
+enum HostingType
+{
+  UNKNOWN_HOSTING_TYPE = 0;
+  WEB_GENERIC = 1;
+  WEB_GATEKEEPER_PROXY = 2;
+  NON_WEB = 3;
+}
+
 message AddNewAppRequest {
   string name = 1;
   AuthChoice auth_choice = 2;
@@ -58,6 +67,9 @@ message AddNewAppRequest {
 
   SCIMSetting scim_setting = 6;
   repeated string group_ids = 7;
+  HostingType hosting_type = 8;
+  string description = 9;
+  google.protobuf.StringValue url = 10;
 
   message OIDCSetting {
     string redirect_uri = 1;
@@ -77,7 +89,7 @@ message AddNewAppRequest {
     UNKNOWN_AUTH = 0;
     LDAP_AUTH = 1;
     OIDC_AUTH = 2;
-    PROXY_AUTH = 3;
+    NO_AUTH = 3;
   }
 
   enum DirectoryChoice {
@@ -101,6 +113,7 @@ message AppListEntry {
   AddNewAppRequest.AuthChoice auth_choice = 3;
   AddNewAppRequest.DirectoryChoice directory_choice = 4;
   int32 groups_assigned = 5;
+  bool uses_gatekeeper_proxy = 6;
 }
 
 message AppDetailRequest {
@@ -111,16 +124,17 @@ message AppDetailReply {
   string id = 1;
   string name = 2;
   repeated GrantedAppGroup groups = 3;
+  HostingType hosting_type = 4;
+  ProxyAuthSetting proxy_auth_setting = 5;
 
   oneof auth_setting {
-    OidcAuthSetting oidc_auth_setting = 4;
-    ProxyAuthSetting proxy_auth_setting = 5;
-    LdapAuthSetting ldap_auth_setting = 6; 
+    OidcAuthSetting oidc_auth_setting = 6;
+    LdapAuthSetting ldap_auth_setting = 7; 
   }
 
   oneof directory_setting {
-    LdapDirectorySetting ldap_directory_setting = 7;
-    ScimDirectorySetting scim_directory_setting = 8;
+    LdapDirectorySetting ldap_directory_setting = 8;
+    ScimDirectorySetting scim_directory_setting = 9;
   }
 
   message OidcAuthSetting {

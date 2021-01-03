@@ -47,6 +47,7 @@ namespace AuthServer.Server.Models
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = null!;
+        public HostingTypeEnum HostingType { get; set; }
         public DirectoryMethodEnum DirectoryMethod { get; set; }
         public AuthMethodEnum AuthMethod { get; set; }
         public LdapAppSettings? LdapAppSettings { get; set; }
@@ -54,6 +55,15 @@ namespace AuthServer.Server.Models
         public ProxyAppSettings? ProxyAppSettings { get; set; }
         public SCIMAppSettings? ScimAppSettings { get; set; }
         public ICollection<UserGroup> UserGroups { get; set; } = null!;
+        public string? Description { get; set; }
+        public string? Url { get; set; }
+
+        public enum HostingTypeEnum
+        {
+            WEB_GENERIC = 1,
+            WEB_GATEKEEPER_PROXY = 3,
+            NON_WEB = 4,
+        }
 
         public enum DirectoryMethodEnum
         {
@@ -64,9 +74,9 @@ namespace AuthServer.Server.Models
 
         public enum AuthMethodEnum
         {
+            NONE = 0,
             LDAP = 1,
             OIDC = 2,
-            PROXY = 3,
         }
     }
 
@@ -84,7 +94,7 @@ namespace AuthServer.Server.Models
     public class ScimUserSyncState
     {
         public Guid Id { get; set; }
-        public Guid SCIMAppSettingsId { get;set; }
+        public Guid SCIMAppSettingsId { get; set; }
         public SCIMAppSettings SCIMAppSettings { get; set; } = null!;
         public AppUser User { get; set; } = null!;
         public string ServiceId { get; set; } = null!;
@@ -93,7 +103,7 @@ namespace AuthServer.Server.Models
     public class ScimGroupSyncState
     {
         public Guid Id { get; set; }
-        public Guid SCIMAppSettingsId { get;set; }
+        public Guid SCIMAppSettingsId { get; set; }
         public SCIMAppSettings SCIMAppSettings { get; set; } = null!;
         public UserGroup UserGroup { get; set; } = null!;
         public string ServiceId { get; set; } = null!;
