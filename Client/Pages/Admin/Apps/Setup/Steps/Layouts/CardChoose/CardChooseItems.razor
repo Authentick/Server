@@ -1,0 +1,35 @@
+<div class="row">
+    @foreach(CardItem cardItem in CardItems)
+    {
+        <div class="card col-sm-4">
+            <img src="@cardItem.Icon" />
+            <h1>@cardItem.Name</h1>
+            <p>@cardItem.Description</p>
+            <button @onclick="@(() => Select(cardItem))" class="btn btn-primary">
+                @if(_activeCard == cardItem) 
+                {
+                    <span>Selected</span>
+                }
+                else
+                {
+                    <span>Choose</span>
+                }
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public List<CardItem> CardItems { get; set; } = new List<CardItem>();
+    [Parameter] 
+    public EventCallback<CardItem> OnSelect { get; set; }
+    
+    private CardItem? _activeCard;
+    
+    private async Task Select(CardItem cardItem) 
+    {
+        _activeCard = cardItem;
+        await OnSelect.InvokeAsync(cardItem);
+    }
+}

@@ -73,28 +73,10 @@ namespace AuthServer.Server.GRPC.Apps
             {
                 Id = app.Id.ToString(),
                 Name = app.Name,
+                Description = app.Description,
+                LoginUrl = app.Url,
+                HasLdapAuth =  (app.AuthMethod == AuthApp.AuthMethodEnum.LDAP),
             };
-
-            switch (app.AuthMethod)
-            {
-                case AuthApp.AuthMethodEnum.LDAP:
-                    reply.LdapAuth = new GetAppDetailsReply.Types.LdapAuthSetting();
-                    break;
-                case AuthApp.AuthMethodEnum.OIDC:
-                    reply.UrlAuth = new GetAppDetailsReply.Types.UrlAuthSetting
-                    {
-                        Url = app.OidcAppSettings.RedirectUrl,
-                    };
-                    break;
-                case AuthApp.AuthMethodEnum.PROXY:
-                    reply.UrlAuth = new GetAppDetailsReply.Types.UrlAuthSetting
-                    {
-                        Url = "https://" + app.ProxyAppSettings.PublicHostname,
-                    };
-                    break;
-                default:
-                    throw new Exception("UI for auth method not implemented " + app.AuthMethod);
-            }
 
             return reply;
         }

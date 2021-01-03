@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
 
 option csharp_namespace = "AuthServer.Shared.Apps";
 
@@ -18,17 +19,13 @@ message GetAppDetailsRequest {
 message GetAppDetailsReply {
   string id = 1;
   string name = 2;
-
-  oneof auth_setting {
-    UrlAuthSetting url_auth = 3;
-    LdapAuthSetting ldap_auth = 4; 
-  }
+  bool has_ldap_auth = 3;
+  google.protobuf.StringValue login_url = 4;
+  google.protobuf.StringValue description = 5;
 
   message UrlAuthSetting {
     string url = 1;
   }
-
-  message LdapAuthSetting {}
 }
 
 message CreateLdapCredentialRequest {

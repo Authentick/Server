@@ -1,0 +1,11 @@
+Note: This list is non-conclusive. Check the source code at https://github.com/getgatekeeper/server for other used components.
+
+# The Noun Project
+
+The following icons from "The Noun Project" are used and licensed under CC BY 3.0 (https://creativecommons.org/licenses/by/3.0/):
+
+- Server Security by Gajah Mada Studio from the Noun Project
+- server connection by Gajah Mada Studio from the Noun Project
+- On Premise by Aficons from the Noun Project
+- Cloud by Aficons from the Noun Project
+- data analytics by Andri Graphic from the Noun Project

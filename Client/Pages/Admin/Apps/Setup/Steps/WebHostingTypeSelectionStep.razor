@@ -1,0 +1,35 @@
+@implements IStep
+
+@using AuthServer.Client.Pages.Admin.Apps.Setup.Steps.Layouts.CardChoose
+
+<h2>Where is your application hosted?</h2>
+
+<CardChooseItems 
+    CardItems="@CardItems"
+    OnSelect="@OnSelect" />
+
+@code {
+    [Parameter]
+    public SetupAppStateMachine StateMachine { get; set; } = null!;
+    public string? Type;
+
+    private readonly List<CardItem> CardItems = new List<CardItem>(){
+        new CardItem("Cloud", "Applications hosted in the cloud (e.g. SaaS)", "/img/nounproject/cloud.svg"),
+        new CardItem("Self-Hosted", "Applications that are hosted on-premise.", "/img/nounproject/on-premise.svg"),
+    };
+
+    private Task OnSelect(CardItem cardItem)
+    {
+        Type = cardItem.Name;
+        if (cardItem.Name == "Self-Hosted")
+        {
+            StateMachine.SetNextStep(new SelfHostedAccessSelectionStep());
+        }
+        else
+        {
+            StateMachine.SetNextStep(new AppInformationStep());
+        }
+
+        return Task.CompletedTask;
+    }
+}

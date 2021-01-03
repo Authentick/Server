@@ -67,8 +67,25 @@ namespace AuthServer.Server.GRPC.Admin
             AuthApp app = new AuthApp
             {
                 Name = request.Name,
+                Url = request.Url,
+                Description = request.Description,
             };
             _authDbContext.Add(app);
+
+            switch (request.HostingType)
+            {
+                case HostingType.NonWeb:
+                    app.HostingType = AuthApp.HostingTypeEnum.NON_WEB;
+                    break;
+                case HostingType.WebGatekeeperProxy:
+                    app.HostingType = AuthApp.HostingTypeEnum.WEB_GATEKEEPER_PROXY;
+                    break;
+                case HostingType.WebGeneric:
+                    app.HostingType = AuthApp.HostingTypeEnum.WEB_GENERIC;
+                    break;
+                default:
+                    throw new NotImplementedException("Auth mode is not implemented");
+            }
 
             switch (request.DirectoryChoice)
             {
@@ -94,10 +111,6 @@ namespace AuthServer.Server.GRPC.Admin
                 case AddNewAppRequest.Types.AuthChoice.OidcAuth:
                     app.AuthMethod = AuthApp.AuthMethodEnum.OIDC;
                     break;
-
-                case AddNewAppRequest.Types.AuthChoice.ProxyAuth:
-                    app.AuthMethod = AuthApp.AuthMethodEnum.PROXY;
-                    break;
             }
 
             if (app.AuthMethod == AuthApp.AuthMethodEnum.LDAP || app.DirectoryMethod == AuthApp.DirectoryMethodEnum.LDAP)
@@ -120,7 +133,7 @@ namespace AuthServer.Server.GRPC.Admin
                 app.LdapAppSettings = ldapAppSettings;
             }
 
-            if (app.AuthMethod == AuthApp.AuthMethodEnum.PROXY)
+            if (app.HostingType == AuthApp.HostingTypeEnum.WEB_GATEKEEPER_PROXY)
             {
                 ProxyAppSettings proxyAppSettings = new ProxyAppSettings
                 {
@@ -222,6 +235,28 @@ namespace AuthServer.Server.GRPC.Admin
                     break;
             }
 
+            switch (app.HostingType)
+            {
+                case AuthApp.HostingTypeEnum.WEB_GENERIC:
+                    reply.HostingType = HostingType.WebGeneric;
+                    break;
+                case AuthApp.HostingTypeEnum.WEB_GATEKEEPER_PROXY:
+                    reply.HostingType = HostingType.WebGatekeeperProxy;
+                    reply.ProxyAuthSetting = new AppDetailReply.Types.ProxyAuthSetting
+                    {
+                        InternalHostname = app.ProxyAppSettings.InternalHostname,
+                        PublicHostname = app.ProxyAppSettings.PublicHostname,
+                    };
+                    if (app.ProxyAppSettings.EndpointsWithoutAuth != null)
+                    {
+                        reply.ProxyAuthSetting.PublicEndpoints.AddRange(app.ProxyAppSettings.EndpointsWithoutAuth);
+                    }
+                    break;
+                case AuthApp.HostingTypeEnum.NON_WEB:
+                    reply.HostingType = HostingType.NonWeb;
+                    break;
+            }
+
             switch (app.AuthMethod)
             {
                 case AuthApp.AuthMethodEnum.LDAP:
@@ -237,18 +272,6 @@ namespace AuthServer.Server.GRPC.Admin
                         ClientSecret = app.OidcAppSettings.ClientSecret,
                         RedirectUri = app.OidcAppSettings.RedirectUrl,
                     };
-                    break;
-                case AuthApp.AuthMethodEnum.PROXY:
-                    reply.ProxyAuthSetting = new AppDetailReply.Types.ProxyAuthSetting
-                    {
-                        InternalHostname = app.ProxyAppSettings.InternalHostname,
-                        PublicHostname = app.ProxyAppSettings.PublicHostname,
-                    };
-                    if (app.ProxyAppSettings.EndpointsWithoutAuth != null)
-                    {
-                        reply.ProxyAuthSetting.PublicEndpoints.AddRange(app.ProxyAppSettings.EndpointsWithoutAuth);
-                    }
-
                     break;
             }
 
@@ -271,6 +294,7 @@ namespace AuthServer.Server.GRPC.Admin
 
             IEnumerable<AuthApp> apps = await _authDbContext.AuthApp
                 .Include(a => a.UserGroups)
+                .Include(a => a.ProxyAppSettings)
                 .ToListAsync();
 
             foreach (AuthApp app in apps)
@@ -301,8 +325,8 @@ namespace AuthServer.Server.GRPC.Admin
                     case AuthApp.AuthMethodEnum.OIDC:
                         authChoice = AddNewAppRequest.Types.AuthChoice.OidcAuth;
                         break;
-                    case AuthApp.AuthMethodEnum.PROXY:
-                        authChoice = AddNewAppRequest.Types.AuthChoice.ProxyAuth;
+                    case AuthApp.AuthMethodEnum.NONE:
+                        authChoice = AddNewAppRequest.Types.AuthChoice.NoAuth;
                         break;
                     default:
                         throw new Exception("Unexpected app method");
@@ -315,6 +339,7 @@ namespace AuthServer.Server.GRPC.Admin
                     GroupsAssigned = app.UserGroups.Count(),
                     AuthChoice = authChoice,
                     DirectoryChoice = directoryChoice,
+                    UsesGatekeeperProxy = (app.ProxyAppSettings != null)
                 };
 
                 reply.Apps.Add(entry);

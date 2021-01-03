@@ -1,21 +1,39 @@
+using System;
 using System.Collections.Generic;
+using AuthServer.Shared.Admin;
 
 namespace AuthServer.Client.Pages.Admin.Apps.Setup.Steps
 {
     public class AuthenticationMethodsProvider
     {
-        public IEnumerable<IAuthMethod> GetAuthMethods()
+        public IEnumerable<IAuthMethod> GetAuthMethods(HostingType hostingType)
         {
-            return new List<IAuthMethod>(){
-                new GatekeeperProxyAuthMethod(),
-                new OpenIDConnectAuthMethod(),
-                new LDAPAuthMethod(),
-            };
+            switch (hostingType)
+            {
+                case HostingType.WebGeneric:
+                    return new List<IAuthMethod>(){
+                        new OpenIDConnectAuthMethod(),
+                        new LDAPAuthMethod(),
+                    };
+
+                case HostingType.WebGatekeeperProxy:
+                    return new List<IAuthMethod>() {
+                        new GatkeeperProxyAuthMethod(),
+                        new OpenIDConnectAuthMethod(),
+                        new LDAPAuthMethod(),
+                    };
+                case HostingType.NonWeb:
+                    return new List<IAuthMethod>() {
+                        new LDAPAuthMethod(),
+                    };
+                default:
+                    throw new NotImplementedException();
+            }
         }
 
-        public class GatekeeperProxyAuthMethod : IAuthMethod
+        public class GatkeeperProxyAuthMethod : IAuthMethod
         {
-            public string Name => "Gatekeeper Proxy";
+            public string Name => "No additional authentication method";
             public string Description => "Gatekeeper will act as a reverse proxy for all incoming traffic and authorize users for you.";
             public List<string> Advantages => new List<string>() {
                 "Your application will only be accessible to authorized users.",
@@ -24,8 +42,7 @@ namespace AuthServer.Client.Pages.Admin.Apps.Setup.Steps
             };
 
             public List<string> Disadvantages => new List<string>() {
-                "No public access possible to Gatekeeper Proxy.",
-                "Only feasible for self-hosted web applications.",
+                "JWT authentication has to be implemented to automatically login users.",
             };
         }
 
