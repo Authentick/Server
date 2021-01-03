@@ -14,6 +14,15 @@ service AdminApps {
   (RemoveGroupFromAppReply);
   rpc TriggerScimSync(ScimSyncRequest) returns (google.protobuf.Empty);
   rpc SaveGatekeeperProxySettings(GatekeeperProxySettingsRequest) returns (GatekeeperProxySettingsReply); 
+  rpc DeleteApp(DeleteAppRequest) returns (DeleteAppReply);
+}
+
+message DeleteAppRequest {
+  string app_id = 1;
+}
+
+message DeleteAppReply {
+  bool success = 1;
 }
 
 message GatekeeperProxySettingsRequest {
@@ -110,10 +119,8 @@ message AppListReply {
 message AppListEntry {
   string id = 1;
   string name = 2;
-  AddNewAppRequest.AuthChoice auth_choice = 3;
-  AddNewAppRequest.DirectoryChoice directory_choice = 4;
-  int32 groups_assigned = 5;
-  bool uses_gatekeeper_proxy = 6;
+  HostingType hosting_type = 3;
+  int32 groups_assigned = 4;
 }
 
 message AppDetailRequest {

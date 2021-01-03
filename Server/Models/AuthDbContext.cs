@@ -129,6 +129,7 @@ namespace AuthServer.Server.Models
         public string BaseDn { get; set; } = null!;
         public bool UseForAuthentication { get; set; }
         public bool UseForIdentity { get; set; }
+        public IEnumerable<LdapAppUserCredentials> LdapAppUserCredentials { get; set; } = null!;
     }
 
     public class LdapAppUserCredentials

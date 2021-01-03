@@ -71,7 +71,7 @@ namespace AuthServer.Client.Pages.Admin.Apps.Setup
                     {
                         _addNewAppRequest.Url = appInformationStep.Url;
                     }
-                    System.Console.WriteLine(_addNewAppRequest.HostingType);
+
                     if(_addNewAppRequest.HostingType == HostingType.WebGatekeeperProxy) 
                     {
                         _addNewAppRequest.ProxySetting = new AddNewAppRequest.Types.ProxySetting
