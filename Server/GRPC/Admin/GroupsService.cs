@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using AuthServer.Shared.Admin;
@@ -11,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AuthServer.Server.GRPC.Admin
 {
-    [Authorize(Policy="SuperAdministrator")]
+    [Authorize(Policy = "SuperAdministrator")]
     public class GroupsService : AuthServer.Shared.Admin.Groups.GroupsBase
     {
         private readonly AuthDbContext _authDbContext;
@@ -96,6 +95,19 @@ namespace AuthServer.Server.GRPC.Admin
             }
 
             return reply;
+        }
+
+        public override async Task<DeleteGroupReply> DeleteGroup(DeleteGroupRequest request, ServerCallContext context)
+        {
+            UserGroup group = await _authDbContext.UserGroup
+                .SingleAsync(g => g.Id == new Guid(request.Id));
+            _authDbContext.Remove(group);
+            await _authDbContext.SaveChangesAsync();
+
+            return new DeleteGroupReply
+            {
+                Success = true,
+            };
         }
 
         public override async Task<RemoveUserFromGroupResponse> RemoveUserFromGroup(RemoveUserFromGroupRequest request, ServerCallContext context)

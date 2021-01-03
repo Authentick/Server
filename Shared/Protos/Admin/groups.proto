@@ -11,6 +11,15 @@ service Groups {
   rpc AddUserToGroup (AddUserToGroupRequest) returns (AddUserToGroupResponse);
   rpc RemoveUserFromGroup (RemoveUserFromGroupRequest) returns 
   (RemoveUserFromGroupResponse);
+  rpc DeleteGroup (DeleteGroupRequest) returns (DeleteGroupReply);
+}
+
+message DeleteGroupRequest {
+  string id = 1;
+}
+
+message DeleteGroupReply {
+  bool success = 1;
 }
 
 message GroupDetailRequest {
