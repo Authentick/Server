@@ -15,6 +15,18 @@ service AdminApps {
   rpc TriggerScimSync(ScimSyncRequest) returns (google.protobuf.Empty);
   rpc SaveGatekeeperProxySettings(GatekeeperProxySettingsRequest) returns (GatekeeperProxySettingsReply); 
   rpc DeleteApp(DeleteAppRequest) returns (DeleteAppReply);
+  rpc SaveAppInformation(SaveAppInformationRequest) returns (SaveAppInformationReply);
+}
+
+message SaveAppInformationRequest {
+  string name = 1;
+  string description = 2;
+  google.protobuf.StringValue url = 3;
+  string app_id = 4;
+}
+
+message SaveAppInformationReply {
+  bool success = 1;
 }
 
 message DeleteAppRequest {
@@ -143,6 +155,9 @@ message AppDetailReply {
     LdapDirectorySetting ldap_directory_setting = 8;
     ScimDirectorySetting scim_directory_setting = 9;
   }
+
+  string description = 10;
+  google.protobuf.StringValue url = 11;
 
   message OidcAuthSetting {
     string client_id = 1;
