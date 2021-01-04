@@ -227,6 +227,8 @@ namespace AuthServer.Server.GRPC.Admin
             {
                 Id = app.Id.ToString(),
                 Name = app.Name,
+                Description = app.Description,
+                Url = app.Url,
             };
 
             switch (app.DirectoryMethod)
@@ -359,6 +361,28 @@ namespace AuthServer.Server.GRPC.Admin
             await _authDbContext.SaveChangesAsync();
 
             return new RemoveGroupFromAppReply { Success = true };
+        }
+
+        public override async Task<SaveAppInformationReply> SaveAppInformation(SaveAppInformationRequest request, ServerCallContext context)
+        {
+            Guid appId = new Guid(request.AppId);
+            AuthApp app = await _authDbContext
+                .AuthApp
+                .SingleAsync(a => a.Id == appId);
+            app.Name = request.Name;
+            app.Description = request.Description;
+
+            if (app.HostingType != AuthApp.HostingTypeEnum.NON_WEB)
+            {
+                app.Url = request.Url;
+            }
+
+            await _authDbContext.SaveChangesAsync();
+
+            return new SaveAppInformationReply
+            {
+                Success = true,
+            };
         }
 
         public override async Task<GatekeeperProxySettingsReply> SaveGatekeeperProxySettings(GatekeeperProxySettingsRequest request, ServerCallContext context)
