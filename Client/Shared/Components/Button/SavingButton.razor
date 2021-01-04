@@ -1,0 +1,56 @@
+@if (Configuration != null) {
+    <button class="btn btn-secondary-dark" disabled="@IsDisabled()" @onclick="ButtonClicked">@GetText()</button>
+}
+
+@code {
+    [Parameter]
+    public ButtonConfiguration? Configuration { get; set; }
+    
+    [Parameter]
+    public EventCallback ButtonClickedCallback { get; set; }
+
+    public class ButtonConfiguration
+    {
+        public string DefaultText { get; set; } = "Save";
+        public string ProcessingText { get; set; } = "Saving…";
+        public string SuccessText { get; set; } = "Saved";
+        public string FailedText { get; set; } = "Failed";
+        public ButtonStateEnum State { get; set; } = ButtonStateEnum.Default;
+    }
+
+    public enum ButtonStateEnum
+    {
+        Default = 1,
+        Processing = 2,
+        Finished = 3,
+        Failed = 4,
+    }
+
+    private async Task ButtonClicked() 
+    {
+        await ButtonClickedCallback.InvokeAsync();
+    }
+
+    private string GetText() 
+    {
+        switch(Configuration.State)
+        {
+            case ButtonStateEnum.Default:
+                return Configuration.DefaultText;
+            case ButtonStateEnum.Processing:
+                return Configuration.ProcessingText;
+            case ButtonStateEnum.Failed:
+                return Configuration.FailedText;
+            case ButtonStateEnum.Finished:
+                return Configuration.SuccessText;
+            default:
+                throw new Exception("Unexpected state");
+        }
+    }
+
+    private bool IsDisabled() 
+    {
+        bool shouldBeDisabled = (Configuration.State != ButtonStateEnum.Default);
+        return shouldBeDisabled;
+    }
+}
