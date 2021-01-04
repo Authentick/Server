@@ -309,15 +309,18 @@ namespace AuthServer.Server.GRPC.Admin
         {
             AppListReply reply = new AppListReply();
 
-            IEnumerable<AuthApp> apps = await _authDbContext.AuthApp
-                .Include(a => a.UserGroups)
-                .Include(a => a.ProxyAppSettings)
+            var results = await _authDbContext.AuthApp
+                .AsNoTracking()
+                .Select(s => new {
+                    App = s,
+                    AssignedGroupCount = s.UserGroups.Count(),
+                })
                 .ToListAsync();
 
-            foreach (AuthApp app in apps)
+            foreach (var result in results)
             {
                 HostingType hostingType;
-                switch (app.HostingType)
+                switch (result.App.HostingType)
                 {
                     case AuthApp.HostingTypeEnum.NON_WEB:
                         hostingType = HostingType.NonWeb;
@@ -329,14 +332,14 @@ namespace AuthServer.Server.GRPC.Admin
                         hostingType = HostingType.WebGeneric;
                         break;
                     default:
-                        throw new NotImplementedException("Not implemented type: " + app.HostingType);
+                        throw new NotImplementedException("Not implemented type: " + result.App.HostingType);
                 }
 
                 AppListEntry entry = new AppListEntry
                 {
-                    Id = app.Id.ToString(),
-                    Name = app.Name,
-                    GroupsAssigned = app.UserGroups.Count(),
+                    Id = result.App.Id.ToString(),
+                    Name = result.App.Name,
+                    GroupsAssigned = result.AssignedGroupCount,
                     HostingType = hostingType,
                 };
 
