@@ -6,32 +6,22 @@ namespace AuthServer.Client.Util
     {
         public event Action<ActiveContentEnum>? ActiveContentChanged;
         private ActiveContentEnum _activeContent = ActiveContentEnum.Sidebar;
+        public string? Name;
 
         public ActiveContentEnum GetActiveContent()
         {
             return _activeContent;
         }
 
-        public void ToggleActive()
+        public void SetContentActive(string name)
         {
-            switch (_activeContent)
-            {
-                case ActiveContentEnum.Content:
-                    SetSidebarActive();
-                    break;
-                case ActiveContentEnum.Sidebar:
-                    SetContentActive();
-                    break;
-            }
-        }
-
-        public void SetContentActive()
-        {
+            Name = name;
             SetActiveContent(ActiveContentEnum.Content);
         }
 
-        public void SetSidebarActive()
+        public void SetSidebarActive(string name)
         {
+            Name = name;
             SetActiveContent(ActiveContentEnum.Sidebar);
         }
 

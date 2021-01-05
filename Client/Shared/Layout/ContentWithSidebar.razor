@@ -10,16 +10,16 @@
         <div class="d-flex flex-lg-column flex-row justify-content-center align-items-center">
             <img  class="d-none d-lg-block" src="/img/logo.svg" />
             <div class="d-flex flex-lg-column flex-row justify-content-center align-items-center w-100">
-                <NavLink @onclick="@SetNavActive" class="sidebar__icon d-flex justify-content-center flex-column align-items-center  mt-lg-5 mt-0 w-100" href="apps" Match="NavLinkMatch.Prefix">
+                <NavLink @onclick="@(() => SetNavActive("Apps"))" class="sidebar__icon d-flex justify-content-center flex-column align-items-center  mt-lg-5 mt-0 w-100" href="apps" Match="NavLinkMatch.Prefix">
                     <span class="material-icons md-icon-24">apps</span>
                     <span>Apps</span>
                 </NavLink>
-                <NavLink @onclick="@SetNavActive" class="sidebar__icon d-flex justify-content-center flex-column align-items-center mt-lg-4 mt-0 w-100" href="security" Match="NavLinkMatch.Prefix">
+                <NavLink @onclick="@(() => SetNavActive("Security"))" class="sidebar__icon d-flex justify-content-center flex-column align-items-center mt-lg-4 mt-0 w-100" href="security" Match="NavLinkMatch.Prefix">
                     <span class="material-icons md-icon-24">security</span>
                     <span>Security</span>
                 </NavLink>
                 <AuthorizeView Policy="SuperAdministrator">
-                    <NavLink @onclick="@SetNavActive" class="sidebar__icon d-flex justify-content-center flex-column align-items-center mt-lg-4 mt-0 w-100" href="admin" Match="NavLinkMatch.Prefix">
+                    <NavLink @onclick="@(() => SetNavActive("Settings"))" class="sidebar__icon d-flex justify-content-center flex-column align-items-center mt-lg-4 mt-0 w-100" href="admin" Match="NavLinkMatch.Prefix">
                         <span class="material-icons md-icon-24">settings</span>
                         <span>Admin</span>
                     </NavLink>
@@ -46,7 +46,11 @@
     </div>
 </div>
 <div class="header-menu d-lg-none d-flex text-secondary flex-row justify-content-between bg-primary py-2">
-    <span class="text-lg pb-2 font-weight-bold px-3 text-white">All apps</span>
+    <span class="text-lg pb-2 font-weight-bold px-3 text-white">
+        @if(MobileNavigationStateProvider.Name != null) {
+            @MobileNavigationStateProvider.Name
+        }
+    </span>
     <div class="d-lg-none d-flex justify-content-center pr-2">
         <a href="/profile">
             @if(_profileImageUrl != null) {
@@ -79,9 +83,9 @@
         _profileImageUrl = ((AuthServer.Client.Util.AuthStateProvider)AuthenticationStateProvider).ProfileImageUrl;
     }
     
-    private void SetNavActive() 
+    private void SetNavActive(string name)
     {
-        MobileNavigationStateProvider.SetSidebarActive();
+        MobileNavigationStateProvider.SetSidebarActive(name);
     }
 
     public void Dispose()
