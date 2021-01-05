@@ -8,6 +8,7 @@ using AuthServer.Server.Services.Crypto;
 using AuthServer.Server.Services.ReverseProxy.Configuration;
 using AuthServer.Server.Services.SCIM;
 using AuthServer.Server.Services.TLS;
+using AuthServer.Server.Services.TLS.BackgroundJob;
 using AuthServer.Shared.Admin;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;

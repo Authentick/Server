@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "AuthServer.Shared.Admin";
+
+service LetsEncrypt {
+  rpc ListCertificates (google.protobuf.Empty) returns (CertificateListReply);
+}
+
+message CertificateListReply {
+    repeated Certificate certificates = 1;
+}
+
+message Certificate {
+    string domain = 1;
+    google.protobuf.Timestamp last_issued = 2;
+}

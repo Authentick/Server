@@ -1,0 +1,31 @@
+@inject AuthServer.Shared.Admin.LetsEncrypt.LetsEncryptClient LetsEncryptClient
+
+<p>Managed certificates:</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">Domain</th>
+            <th scope="col">Last issued</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if(_certificateListReply != null) {
+            foreach(var certificate in _certificateListReply.Certificates) {
+                <tr>
+                    <td>@certificate.Domain</td>
+                    <td>@certificate.LastIssued</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@code {
+    private AuthServer.Shared.Admin.CertificateListReply? _certificateListReply;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _certificateListReply = await LetsEncryptClient.ListCertificatesAsync(new Google.Protobuf.WellKnownTypes.Empty{});
+    }
+}

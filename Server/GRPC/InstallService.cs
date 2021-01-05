@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using AuthServer.Server.Services.Crypto;
-using AuthServer.Server.Services.TLS;
+using AuthServer.Server.Services.TLS.BackgroundJob;
 using AuthServer.Server.Services.User;
 using AuthServer.Shared;
 using Google.Protobuf.WellKnownTypes;

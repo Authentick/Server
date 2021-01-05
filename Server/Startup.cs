@@ -34,6 +34,7 @@ using AuthServer.Server.Services.Crypto.JWT;
 using AuthServer.Server.Services.SCIM;
 using Gatekeeper.Server.Services.FileStorage;
 using Gatekeeper.Server.GRPC;
+using AuthServer.Server.Services.TLS.BackgroundJob;
 
 namespace AuthServer.Server
 {
@@ -99,6 +100,7 @@ namespace AuthServer.Server
             // TLS
             services.AddSingleton<AcmeChallengeSingleton>();
             services.AddScoped<IRequestAcmeCertificateJob, RequestAcmeCertificateJob>();
+            services.AddScoped<CertificateRepository>();
 
             // Framework
             services.AddGrpc();
@@ -220,6 +222,7 @@ namespace AuthServer.Server
                 endpoints.MapGrpcService<UserProfileService>();
                 endpoints.MapGrpcService<ConnectivityServiceCheck>();
                 endpoints.MapGrpcService<SsoTokenService>();
+                endpoints.MapGrpcService<LetsEncryptService>();
                 endpoints.MapFallbackToPage("/_Host");
             });
         }
