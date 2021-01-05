@@ -1,25 +1,26 @@
 @inject AuthServer.Shared.Admin.LetsEncrypt.LetsEncryptClient LetsEncryptClient
 
-<p>Managed certificates:</p>
-
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th scope="col">Domain</th>
-            <th scope="col">Last issued</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if(_certificateListReply != null) {
-            foreach(var certificate in _certificateListReply.Certificates) {
-                <tr>
-                    <td>@certificate.Domain</td>
-                    <td>@certificate.LastIssued</td>
-                </tr>
+<p class="mt-2 font-weight-bold">Managed certificates:</p>
+<div class="table-responsive my-2">
+    <table class="table table-striped table-hover table-bordered mb-4 table-secondary">
+        <thead class="bg-secondary-dark">
+            <tr>
+                <th scope="col">Domain</th>
+                <th scope="col">Last issued</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if(_certificateListReply != null) {
+                foreach(var certificate in _certificateListReply.Certificates) {
+                    <tr>
+                        <td>@certificate.Domain</td>
+                        <td>@certificate.LastIssued</td>
+                    </tr>
+                }
             }
-        }
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</div>
 
 @code {
     private AuthServer.Shared.Admin.CertificateListReply? _certificateListReply;
