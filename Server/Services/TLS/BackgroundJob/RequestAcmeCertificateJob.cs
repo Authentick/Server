@@ -5,7 +5,7 @@ using Certes;
 using Certes.Acme;
 using Certes.Acme.Resource;
 
-namespace AuthServer.Server.Services.TLS
+namespace AuthServer.Server.Services.TLS.BackgroundJob
 {
     class RequestAcmeCertificateJob : IRequestAcmeCertificateJob
     {
