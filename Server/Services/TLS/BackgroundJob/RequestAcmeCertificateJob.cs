@@ -11,14 +11,17 @@ namespace AuthServer.Server.Services.TLS.BackgroundJob
     {
         private readonly AcmeChallengeSingleton _challengeSingleton;
         private readonly ConfigurationProvider _configurationProvider;
+        private readonly CertificateRepository _certificateRepository;
         const string ACCOUNT_KEYNAME = "tls.acme.accountKey";
 
         public RequestAcmeCertificateJob(
             AcmeChallengeSingleton challengeSingleton,
-            ConfigurationProvider configurationProvider)
+            ConfigurationProvider configurationProvider,
+            CertificateRepository certificateRepository)
         {
             _challengeSingleton = challengeSingleton;
             _configurationProvider = configurationProvider;
+            _certificateRepository = certificateRepository;
         }
 
         public async Task Request(string contactEmail, string domainName)
@@ -65,10 +68,8 @@ namespace AuthServer.Server.Services.TLS.BackgroundJob
             await order.Finalize(new CsrInfo { }, certKey);
             var certChain = await order.Download();
 
-            var pfxBuilder = certChain.ToPfx(certKey);
-
-            string targetLocation = CertificateLocationHelper.GetPath(domainName);
-            File.WriteAllBytes(targetLocation, pfxBuilder.Build(domainName, ""));
+            var pfxBuilder = certChain.ToPfx(certKey);  
+            _certificateRepository.StoreCertificate(domainName, pfxBuilder.Build(domainName, ""));
         }
     }
 }

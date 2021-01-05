@@ -62,14 +62,17 @@ namespace AuthServer.Server
 
                                    SslServerAuthenticationOptions options = new SslServerAuthenticationOptions { };
 
-                                   if (CertificateLocationHelper.CertificateExists(clientHelloInfo.ServerName))
+                                   X509Certificate2? certificate;
+                                   bool hasCertificate = CertificateRepository.TryGetCertificate(clientHelloInfo.ServerName, out certificate);
+
+                                   if (hasCertificate)
                                    {
-                                       options.ServerCertificate = new X509Certificate2(CertificateLocationHelper.GetPath(clientHelloInfo.ServerName));
+                                       options.ServerCertificate = certificate;
                                    }
                                    else
                                    {
-                                    // FIXME: Use default certificate
-                                }
+                                       // FIXME: Use default certificate
+                                   }
 
                                    return options;
                                }, state: null);
