@@ -1,0 +1,82 @@
+<div class="form-group">
+    <label 
+        for="@_divIdentifier"
+    >
+        @Name
+    </label>
+    <div class="wrapper @GetWrapperClasses()">
+        <input
+            type="text" 
+            id="@_divIdentifier" 
+            placeholder="@Placeholder"
+            class="form-control bg-secondary @GetCssClasses()"
+            @bind-value="_value" 
+            @bind-value:event="oninput"
+            @onkeyup="KeyPressed"
+        />
+    </div>
+    @if (ErrorHint != null && ValidationState == ValidationStateEnum.Failed)
+    {
+        <small 
+            class="form-text text-muted"
+        >
+            @ErrorHint
+        </small>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string Name { get; set; } = null!;
+    [Parameter]
+    public string Placeholder { get; set; } = null!;
+    [Parameter]
+    public ValidationStateEnum ValidationState { get; set; }
+    [Parameter]
+    public EventCallback<string> ValueChangedCallback { get; set; }
+    [Parameter]
+    public string? ErrorHint { get; set; }
+
+
+    private Guid _divIdentifier = Guid.NewGuid();
+    private string? _value;
+
+    public string GetWrapperClasses()
+    {
+        string cssClasses = GetCssClasses();
+
+        if (cssClasses == "")
+        {
+            return "";
+        }
+
+        return "wrapper-" + GetCssClasses();
+    }
+    public string GetCssClasses()
+    {
+        switch (ValidationState)
+        {
+            case ValidationStateEnum.Checking:
+                return "checking";
+            case ValidationStateEnum.Failed:
+                return "failed";
+            case ValidationStateEnum.Success:
+                return "success";
+        }
+
+        return "";
+    }
+
+    public enum ValidationStateEnum
+    {
+        None = 0,
+        Success = 1,
+        Failed = 2,
+        Checking = 3,    
+    }
+
+    private async Task KeyPressed(KeyboardEventArgs e)
+    {
+        await ValueChangedCallback.InvokeAsync(_value);
+    }
+}

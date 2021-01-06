@@ -1,0 +1,41 @@
+.success {
+    border-color: var(--green);
+}
+
+.failed {
+    border-color: var(--red);
+}
+
+.wrapper {
+    position: relative;
+}
+
+.wrapper:after {
+    position: absolute;
+    transform: translate(0,-50%);
+    right: 15px;
+    top: 50%;
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+}
+
+.wrapper-success:after {
+    content: "\f00c";
+    color: var(--green);
+}
+
+.wrapper-failed:after {
+    content: "\f00d";
+    color: var(--red);
+}
+
+.wrapper-checking:after {
+    content: "\f110";
+    animation: spin 2s linear infinite;
+    top: 7px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
