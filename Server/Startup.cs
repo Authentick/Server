@@ -72,7 +72,9 @@ namespace AuthServer.Server
                     o => o.UseNodaTime()
                 )
             );
-            services.AddDataProtection().PersistKeysToDbContext<KeyStorageDbContext>();
+            services.AddDataProtection()
+                .SetApplicationName("Gatekeeper Server")
+                .PersistKeysToDbContext<KeyStorageDbContext>();
 
             // Identity
             services.AddScoped<TotpAuthenticatorProvider>();
