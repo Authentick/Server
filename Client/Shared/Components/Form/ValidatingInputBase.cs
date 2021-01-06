@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace AuthServer.Client.Shared.Components.Form
 {
-    public class ValidatingInputBase : ComponentBase
+    public abstract class ValidatingInputBase : ComponentBase
     {
         [Parameter]
         public List<IFormValidator> FormValidators { get; set; } = null!;
@@ -18,6 +18,9 @@ namespace AuthServer.Client.Shared.Components.Form
         public string Name { get; set; } = null!;
         [Parameter]
         public string Placeholder { get; set; } = null!;
+        public HashSet<Guid> ErrorRegister { get; set; } = null!;
+        [CascadingParameter]
+        public EventHandler<ValidatingFormWrapper.ValidatingFormWrapperEvent> Callback { get; set; } = null!;
 
         protected ValidationStateEnum _validationState { get; set; }
         protected string? _errorHint { get; set; }
@@ -35,11 +38,13 @@ namespace AuthServer.Client.Shared.Components.Form
                 {
                     _validationState = ValidationStateEnum.Failed;
                     _errorHint = reply.ErrorMessage;
+                    Callback.Invoke(null, new ValidatingFormWrapper.ValidatingFormWrapperEvent { IsValid = false, Identifier = _divIdentifier });
                     return;
                 }
             }
 
             _validationState = ValidationStateEnum.Success;
+            Callback.Invoke(null, new ValidatingFormWrapper.ValidatingFormWrapperEvent { IsValid = true, Identifier = _divIdentifier });
         }
 
         protected string GetWrapperClasses()

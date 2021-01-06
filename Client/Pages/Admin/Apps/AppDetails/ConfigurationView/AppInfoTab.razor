@@ -4,29 +4,36 @@
 
 @if (TabData != null) {
     <br />
-    <div class="col-12 col-md-6 p-0">
-        <ValidatingInput 
-            Name="Name"
-            Placeholder="Name"
-            @bind-Value="@TabData.Name"
-            FormValidators="new List<AuthServer.Client.Shared.Components.Form.FormValidator.IFormValidator>(){new AuthServer.Client.Shared.Components.Form.FormValidator.NotEmptyStringValidator()}"
-        />
-    </div>
-
-    <div class="col-12 col-md-6 p-0">
-        <ValidatingTextarea 
-            Name="Description"
-            Placeholder="Description shown to users"
-            @bind-Value="@TabData.Description"
-            FormValidators="new List<AuthServer.Client.Shared.Components.Form.FormValidator.IFormValidator>(){new AuthServer.Client.Shared.Components.Form.FormValidator.NotEmptyStringValidator()}"
-        />
-    </div>
-
-    @if (@TabData.Url != null) {
-        <div class="form-group col-12 col-md-6 p-0">
-            <input type="text" @bind="@TabData.Url" class="form-control bg-secondary" placeholder="URL shown to users" />
+    <ValidatingFormWrapper FormValidityChangedCallback="FormValidityChangedCallback">
+        <div class="col-12 col-md-6 p-0">
+            <ValidatingInput 
+                Name="Name"
+                Placeholder="Name"
+                @bind-Value="@TabData.Name"
+                FormValidators="new List<AuthServer.Client.Shared.Components.Form.FormValidator.IFormValidator>(){new AuthServer.Client.Shared.Components.Form.FormValidator.NotEmptyStringValidator()}"
+            />
         </div>
-    }
+
+        <div class="col-12 col-md-6 p-0">
+            <ValidatingTextarea 
+                Name="Description"
+                Placeholder="Description shown to users"
+                @bind-Value="@TabData.Description"
+                FormValidators="new List<AuthServer.Client.Shared.Components.Form.FormValidator.IFormValidator>(){new AuthServer.Client.Shared.Components.Form.FormValidator.NotEmptyStringValidator()}"
+            />
+        </div>
+
+        @if (@TabData.Url != null) {
+            <div class="col-12 col-md-6 p-0">
+                <ValidatingInput 
+                    Name="URL"
+                    Placeholder="URL shown to users"
+                    @bind-Value="@TabData.Url"
+                    FormValidators="new List<AuthServer.Client.Shared.Components.Form.FormValidator.IFormValidator>(){new AuthServer.Client.Shared.Components.Form.FormValidator.NotEmptyStringValidator(), new AuthServer.Client.Shared.Components.Form.FormValidator.ValidUrlValidator()}"
+                />
+            </div>
+        }
+    </ValidatingFormWrapper>
 
     <AuthServer.Client.Shared.Components.Button.SavingButton
         ButtonClickedCallback="@SaveButtonClicked"
@@ -48,6 +55,11 @@
         public string? Name { get; set;}
         public string? Description { get; set; }
         public string? Url { get; set; }
+    }
+
+    private async Task FormValidityChangedCallback(bool valid)
+    {
+        _saveButtonConfiguration.IsDisabled = !valid;
     }
 
     private async Task SaveButtonClicked() 

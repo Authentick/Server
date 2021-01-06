@@ -1,5 +1,10 @@
 @if (Configuration != null) {
-    <button class="btn btn-secondary-dark" disabled="@IsDisabled()" @onclick="ButtonClicked">@GetText()</button>
+    <button 
+        class="btn btn-secondary-dark" 
+        disabled="@(Configuration.IsDisabled || Configuration.State != ButtonStateEnum.Default)" 
+        @onclick="ButtonClicked">
+        @GetText()
+    </button>
 }
 
 @code {
@@ -16,6 +21,7 @@
         public string SuccessText { get; set; } = "Saved";
         public string FailedText { get; set; } = "Failed";
         public ButtonStateEnum State { get; set; } = ButtonStateEnum.Default;
+        public bool IsDisabled { get; set; } = true;
     }
 
     public enum ButtonStateEnum
@@ -46,11 +52,5 @@
             default:
                 throw new Exception("Unexpected state");
         }
-    }
-
-    private bool IsDisabled() 
-    {
-        bool shouldBeDisabled = (Configuration.State != ButtonStateEnum.Default);
-        return shouldBeDisabled;
     }
 }
