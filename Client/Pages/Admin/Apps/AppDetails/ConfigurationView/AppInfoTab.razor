@@ -4,31 +4,36 @@
 
 @if (TabData != null) {
     <br />
-    <div class="col-12 col-md-6 p-0">
-        <ValidatingInput 
-            Name="Name"
-            Placeholder="Name"
-            InitialValue="@TabData.Name"
-            ValidationState="NameValidationState"
-            ValueChangedCallback="NameChanged"
-        />
-    </div>
-
-    <div class="col-12 col-md-6 p-0">
-        <ValidatingTextarea 
-            Name="Description"
-            Placeholder="Description shown to users"
-            InitialValue="@TabData.Description"
-            ValidationState="DescriptionValidationState"
-            ValueChangedCallback="DescriptionChanged"
-        />
-    </div>
-
-    @if (@TabData.Url != null) {
-        <div class="form-group col-12 col-md-6 p-0">
-            <input type="text" @bind="@TabData.Url" class="form-control bg-secondary" placeholder="URL shown to users" />
+    <ValidatingFormWrapper FormValidityChangedCallback="FormValidityChangedCallback">
+        <div class="col-12 col-md-6 p-0">
+            <ValidatingInput 
+                Name="Name"
+                Placeholder="Name"
+                @bind-Value="@TabData.Name"
+                FormValidators="new List<AuthServer.Client.Shared.Components.Form.FormValidator.IFormValidator>(){new AuthServer.Client.Shared.Components.Form.FormValidator.NotEmptyStringValidator()}"
+            />
         </div>
-    }
+
+        <div class="col-12 col-md-6 p-0">
+            <ValidatingTextarea 
+                Name="Description"
+                Placeholder="Description shown to users"
+                @bind-Value="@TabData.Description"
+                FormValidators="new List<AuthServer.Client.Shared.Components.Form.FormValidator.IFormValidator>(){new AuthServer.Client.Shared.Components.Form.FormValidator.NotEmptyStringValidator()}"
+            />
+        </div>
+
+        @if (@TabData.Url != null) {
+            <div class="col-12 col-md-6 p-0">
+                <ValidatingInput 
+                    Name="URL"
+                    Placeholder="URL shown to users"
+                    @bind-Value="@TabData.Url"
+                    FormValidators="new List<AuthServer.Client.Shared.Components.Form.FormValidator.IFormValidator>(){new AuthServer.Client.Shared.Components.Form.FormValidator.NotEmptyStringValidator(), new AuthServer.Client.Shared.Components.Form.FormValidator.ValidUrlValidator()}"
+                />
+            </div>
+        }
+    </ValidatingFormWrapper>
 
     <AuthServer.Client.Shared.Components.Button.SavingButton
         ButtonClickedCallback="@SaveButtonClicked"
@@ -43,8 +48,6 @@
     public EventCallback<AppInfoTabData?> TabDataChangedCallBack { get; set; }
 
     private AuthServer.Client.Shared.Components.Button.SavingButton.ButtonConfiguration _saveButtonConfiguration = new Shared.Components.Button.SavingButton.ButtonConfiguration();
-    private ValidatingInput.ValidationStateEnum NameValidationState;
-    private ValidatingTextarea.ValidationStateEnum DescriptionValidationState;
 
     public class AppInfoTabData
     {
@@ -54,38 +57,9 @@
         public string? Url { get; set; }
     }
 
-    private void NameChanged(string name)
+    private async Task FormValidityChangedCallback(bool valid)
     {
-        if (TabData != null)
-        {
-            TabData.Name = name;
-        }
-
-        if(name.Length > 0)
-        {
-            NameValidationState = ValidatingInput.ValidationStateEnum.Success;
-        } 
-        else
-        {
-            NameValidationState = ValidatingInput.ValidationStateEnum.Failed;
-        } 
-    }
-
-    private void DescriptionChanged(string description)
-    {
-        if (TabData != null)
-        {
-            TabData.Description = description;
-        }
-
-        if(description.Length > 0)
-        {
-            DescriptionValidationState = ValidatingTextarea.ValidationStateEnum.Success;
-        } 
-        else
-        {
-            DescriptionValidationState = ValidatingTextarea.ValidationStateEnum.Failed;
-        }    
+        _saveButtonConfiguration.IsDisabled = !valid;
     }
 
     private async Task SaveButtonClicked() 

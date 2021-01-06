@@ -1,0 +1,53 @@
+@implements IDisposable
+
+<CascadingValue Value="@Callback">
+    @ChildContent
+</CascadingValue>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+    [Parameter]
+    public EventCallback<bool> FormValidityChangedCallback { get; set; }
+
+    private EventHandler<ValidatingFormWrapperEvent> Callback { get; set; }
+    private HashSet<Guid> _errorRegister { get; set; } = new HashSet<Guid>();
+    private EventHandler<ValidatingFormWrapperEvent> HandleErrorsChangedAction => async (s, e) => await ErrorChange(s, e);
+    private int _lastReportedCount = -1;
+    
+    public override async Task SetParametersAsync(ParameterView parameters)
+    {
+        Callback += HandleErrorsChangedAction;
+        await base.SetParametersAsync(parameters);
+    }
+
+    public void Dispose()
+    {
+        Callback -= HandleErrorsChangedAction;
+    }
+
+    private async Task ErrorChange(object sender, ValidatingFormWrapperEvent validateEvent)
+    {
+        if(validateEvent.IsValid)
+        {
+            _errorRegister.Remove(validateEvent.Identifier);
+        }
+        else 
+        {
+            _errorRegister.Add(validateEvent.Identifier);
+        }
+
+        int errorCount = _errorRegister.Count;
+        if(_lastReportedCount != errorCount)
+        {
+            _lastReportedCount = errorCount;
+            await FormValidityChangedCallback.InvokeAsync(errorCount == 0);            
+        }
+    }
+
+    public class ValidatingFormWrapperEvent 
+    {
+        public bool IsValid { get; set; }
+        public Guid Identifier { get; set; }
+    }
+}
