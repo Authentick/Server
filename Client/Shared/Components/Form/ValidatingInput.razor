@@ -36,10 +36,19 @@
     public EventCallback<string> ValueChangedCallback { get; set; }
     [Parameter]
     public string? ErrorHint { get; set; }
-
+    [Parameter]
+    public string? InitialValue { get; set; }
 
     private Guid _divIdentifier = Guid.NewGuid();
     private string? _value;
+
+    protected override void OnInitialized()
+    {
+        if (InitialValue != null)
+        {
+            _value = InitialValue;
+        }
+    }
 
     public string GetWrapperClasses()
     {
