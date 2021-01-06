@@ -8,9 +8,8 @@
         <ValidatingInput 
             Name="Name"
             Placeholder="Name"
-            InitialValue="@TabData.Name"
-            ValidationState="NameValidationState"
-            ValueChangedCallback="NameChanged"
+            @bind-Value="@TabData.Name"
+            FormValidators="new List<AuthServer.Client.Shared.Components.Form.FormValidator.IFormValidator>(){new AuthServer.Client.Shared.Components.Form.FormValidator.NotEmptyStringValidator()}"
         />
     </div>
 
@@ -18,9 +17,8 @@
         <ValidatingTextarea 
             Name="Description"
             Placeholder="Description shown to users"
-            InitialValue="@TabData.Description"
-            ValidationState="DescriptionValidationState"
-            ValueChangedCallback="DescriptionChanged"
+            @bind-Value="@TabData.Description"
+            FormValidators="new List<AuthServer.Client.Shared.Components.Form.FormValidator.IFormValidator>(){new AuthServer.Client.Shared.Components.Form.FormValidator.NotEmptyStringValidator()}"
         />
     </div>
 
@@ -43,8 +41,6 @@
     public EventCallback<AppInfoTabData?> TabDataChangedCallBack { get; set; }
 
     private AuthServer.Client.Shared.Components.Button.SavingButton.ButtonConfiguration _saveButtonConfiguration = new Shared.Components.Button.SavingButton.ButtonConfiguration();
-    private ValidatingInput.ValidationStateEnum NameValidationState;
-    private ValidatingTextarea.ValidationStateEnum DescriptionValidationState;
 
     public class AppInfoTabData
     {
@@ -52,40 +48,6 @@
         public string? Name { get; set;}
         public string? Description { get; set; }
         public string? Url { get; set; }
-    }
-
-    private void NameChanged(string name)
-    {
-        if (TabData != null)
-        {
-            TabData.Name = name;
-        }
-
-        if(name.Length > 0)
-        {
-            NameValidationState = ValidatingInput.ValidationStateEnum.Success;
-        } 
-        else
-        {
-            NameValidationState = ValidatingInput.ValidationStateEnum.Failed;
-        } 
-    }
-
-    private void DescriptionChanged(string description)
-    {
-        if (TabData != null)
-        {
-            TabData.Description = description;
-        }
-
-        if(description.Length > 0)
-        {
-            DescriptionValidationState = ValidatingTextarea.ValidationStateEnum.Success;
-        } 
-        else
-        {
-            DescriptionValidationState = ValidatingTextarea.ValidationStateEnum.Failed;
-        }    
     }
 
     private async Task SaveButtonClicked() 

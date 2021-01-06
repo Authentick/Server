@@ -1,3 +1,5 @@
+@inherits ValidatingInputBase
+
 <div class="form-group">
     <label 
         for="@_divIdentifier"
@@ -8,84 +10,19 @@
         <textarea 
             type="text"
             id="@_divIdentifier"  
-            @bind-value="_value" 
+            @bind-value="Value" 
             @bind-value:event="oninput"
             @onkeyup="KeyPressed"
             class="form-control bg-secondary @GetCssClasses()" 
             placeholder="@Placeholder"
         />
     </div>
-    @if (ErrorHint != null && ValidationState == ValidationStateEnum.Failed)
+    @if (_errorHint != null && _validationState == ValidationStateEnum.Failed)
     {
         <small 
             class="form-text text-muted"
         >
-            @ErrorHint
+            @_errorHint
         </small>
     }
 </div>
-
-@code {
-    [Parameter]
-    public string Name { get; set; } = null!;
-    [Parameter]
-    public string Placeholder { get; set; } = null!;
-    [Parameter]
-    public ValidationStateEnum ValidationState { get; set; }
-    [Parameter]
-    public EventCallback<string> ValueChangedCallback { get; set; }
-    [Parameter]
-    public string? ErrorHint { get; set; }
-    [Parameter]
-    public string? InitialValue { get; set; }
-
-    private Guid _divIdentifier = Guid.NewGuid();
-    private string? _value;
-
-    protected override void OnInitialized()
-    {
-        if (InitialValue != null)
-        {
-            _value = InitialValue;
-        }
-    }
-
-    public string GetWrapperClasses()
-    {
-        string cssClasses = GetCssClasses();
-
-        if (cssClasses == "")
-        {
-            return "";
-        }
-
-        return "wrapper-" + GetCssClasses();
-    }
-    public string GetCssClasses()
-    {
-        switch (ValidationState)
-        {
-            case ValidationStateEnum.Checking:
-                return "checking";
-            case ValidationStateEnum.Failed:
-                return "failed";
-            case ValidationStateEnum.Success:
-                return "success";
-        }
-
-        return "";
-    }
-
-    public enum ValidationStateEnum
-    {
-        None = 0,
-        Success = 1,
-        Failed = 2,
-        Checking = 3,    
-    }
-
-    private async Task KeyPressed(KeyboardEventArgs e)
-    {
-        await ValueChangedCallback.InvokeAsync(_value);
-    }
-}
