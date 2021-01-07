@@ -1,0 +1,11 @@
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+    <strong>@Title</strong> 
+    @Message
+</div>
+
+@code {
+    [Parameter]
+    public string Title { get; set; } = "Error";
+    [Parameter]
+    public string Message { get; set; } = null!;
+}

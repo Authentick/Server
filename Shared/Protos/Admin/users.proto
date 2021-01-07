@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
 
 option csharp_namespace = "AuthServer.Shared.Admin";
 
@@ -26,4 +27,5 @@ message CreateUserRequest {
 
 message CreateUserResponse {
   bool success = 1;
+  google.protobuf.StringValue error = 2;
 }
