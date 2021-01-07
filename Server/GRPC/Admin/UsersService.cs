@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using AuthServer.Server.Services.User;
@@ -6,6 +7,7 @@ using AuthServer.Shared.Admin;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace AuthServer.Server.GRPC.Admin
 {
@@ -29,7 +31,16 @@ namespace AuthServer.Server.GRPC.Admin
                 Email = request.Email,
                 EmailConfirmed = true,
             };
-            await _userManager.CreateAsync(user, request.Password);
+            
+            IdentityResult result = await _userManager.CreateAsync(user, request.Password);
+            if(!result.Succeeded)
+            {
+                return new CreateUserResponse
+                {
+                    Success = false,
+                    Error = result.Errors.First().Description,
+                };
+            }
 
             return new CreateUserResponse
             {

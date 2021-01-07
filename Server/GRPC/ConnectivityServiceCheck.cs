@@ -55,7 +55,7 @@ namespace AuthServer.Server.GRPC
 
             try
             {
-                HttpResponseMessage responseMessage = await client.PostAsync("https://connectivity-check-services.gatekeeper.page", content);
+                HttpResponseMessage responseMessage = await client.PostAsync("https://connectivity-check-services.gatekeeper.page", content, context.CancellationToken);
                 string responseBody = await responseMessage.Content.ReadAsStringAsync();
                 ConnectivityCheckResponse response = JsonSerializer.Deserialize<ConnectivityCheckResponse>(responseBody);
 

@@ -1,77 +1,78 @@
 @implements IStep
-@implements IDisposable
+
+@using AuthServer.Client.Shared.Components.Form
+@using AuthServer.Client.Shared.Components.Form.FormValidator
 
 <h1>Configure custom SMTP server</h1>
 
-<EditForm EditContext="@editContext">
-    <DataAnnotationsValidator />
-    
-    <InputText @bind-Value="emailSettings.Hostname" class="form-control bg-secondary" placeholder="Hostname" />
-    <br/>
-
-    <InputText @bind-Value="emailSettings.Port" type="text" class="form-control bg-secondary" placeholder="Port" />
-    <br/>
-
-    <InputText @bind-Value="emailSettings.Username" class="form-control bg-secondary" placeholder="Username" />
-    <br/>
-
-    <InputText @bind-Value="emailSettings.Password" type="password" class="form-control bg-secondary" placeholder="Password" />
-    <br/>
-
-    <InputText @bind-Value="emailSettings.SenderAddress" type="email" class="form-control bg-secondary" placeholder="Sender address" />
-</EditForm>
+<ValidatingFormWrapper FormValidityChangedCallback="FormValidityChangedCallback">
+    <ValidatingInput 
+        Name="Hostname"
+        Placeholder="example.com"
+        @bind-Value="emailSettings.Hostname"
+        Required="true"
+        FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator()}"
+    />
+    <ValidatingInput 
+        Name="Port"
+        InputType="number"
+        Placeholder="25"
+        @bind-Value="emailSettings.Port"
+        Required="true"
+        FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator(), new PortValidator()}"
+    />
+    <ValidatingInput 
+        Name="Username"
+        Placeholder="Username"
+        @bind-Value="emailSettings.Username"
+        Required="true"
+        FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator()}"
+    />
+    <ValidatingInput 
+        Name="Password"
+        Placeholder="Password"
+        InputType="password"
+        @bind-Value="emailSettings.Password"
+        Required="true"
+        FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator()}"
+    />
+    <ValidatingInput 
+        Name="Sender address"
+        Placeholder="sender@example.com"
+        @bind-Value="emailSettings.SenderAddress"
+        Required="true"
+        FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator(), new EmailValidator()}"
+    />
+</ValidatingFormWrapper>
 
 @code {
     [Parameter]
     public InstallStateMachine StateMachine { get; set; }
     internal EmailSettings emailSettings = new EmailSettings();
-    private EditContext? editContext;
 
     protected override void OnInitialized()
     {
-        editContext = new EditContext(emailSettings);
-        editContext.OnFieldChanged += HandleFieldChanged;
-
         StateMachine.SetNextStep(null);
         StateMachine.SetPreviousStep(new EmailSelectionStep());
     }
 
-
-    private void HandleFieldChanged(object sender, FieldChangedEventArgs e)
+    private async Task FormValidityChangedCallback(bool valid)
     {
-        if(editContext != null) 
+        if (valid)
         {
-            bool formValid = editContext.Validate();
-            if (formValid)
-            {
-                StateMachine.SetNextStep(new AccountCreationStep());
-            } 
-            else
-            {
-                StateMachine.SetNextStep(null);
-            } 
+            StateMachine.SetNextStep(new AccountCreationStep());
+        }
+        else 
+        {
+            StateMachine.SetNextStep(null);    
         }
     }
 
-    public void Dispose()
-    {
-        editContext.OnFieldChanged -= HandleFieldChanged;
-    }
-
     internal class EmailSettings {
-        [Required]
-        public string? Hostname { get; set; }
-
-        [Required]
-        public string? Username { get; set; }
-
-        [Required]
-        public string? Password { get; set; }
-
-        [Required]
-        public string? SenderAddress { get; set; }
-
-        [Required]
-        public string? Port { get; set; }
+        public string Hostname { get; set; } = "";
+        public string Username { get; set; } = "";
+        public string Password { get; set; } = "";
+        public string SenderAddress { get; set; } = "";
+        public string Port { get; set; } = "";
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using AuthServer.Client.Shared.Components.Form.FormValidator;
 using Microsoft.AspNetCore.Components;
@@ -26,6 +27,7 @@ namespace AuthServer.Client.Shared.Components.Form
         protected ValidationStateEnum _validationState { get; set; }
         protected string? _errorHint { get; set; }
         protected Guid _divIdentifier = Guid.NewGuid();
+        private List<CancellationTokenSource> _cancellationTokenSourceList = new List<CancellationTokenSource>();
 
         protected override void OnInitialized()
         {
@@ -35,14 +37,38 @@ namespace AuthServer.Client.Shared.Components.Form
             }
         }
 
+        private void CancelOldTokens()
+        {
+            foreach(CancellationTokenSource tokenSource in _cancellationTokenSourceList)
+            {
+                tokenSource.Cancel();
+            }
+            _cancellationTokenSourceList = new List<CancellationTokenSource>();
+        }
+
         protected async Task KeyPressed()
         {
             _validationState = ValidationStateEnum.Checking;
+            Callback.Invoke(null, new ValidatingFormWrapper.ValidatingFormWrapperEvent { IsValid = false, Identifier = _divIdentifier });
+
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            CancelOldTokens();
+            _cancellationTokenSourceList.Add(cancellationTokenSource);
+
             await ValueChanged.InvokeAsync(Value);
 
             foreach (FormValidator.IFormValidator validator in FormValidators)
             {
-                FormValidator.FormValidatorResponse reply = await validator.Check(Value);
+                if (cancellationTokenSource.Token.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                FormValidator.FormValidatorResponse reply = await validator.Check(Value, cancellationTokenSource.Token);
+                if (cancellationTokenSource.Token.IsCancellationRequested)
+                {
+                    return;
+                }
                 if (!reply.IsValid)
                 {
                     _validationState = ValidationStateEnum.Failed;

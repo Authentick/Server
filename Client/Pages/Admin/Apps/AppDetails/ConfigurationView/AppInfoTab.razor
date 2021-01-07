@@ -1,5 +1,7 @@
 @using AuthServer.Shared.Admin
 @using AuthServer.Client.Shared.Components.Form
+@using AuthServer.Client.Shared.Components.Form.FormValidator
+
 @inject AuthServer.Shared.Admin.AdminApps.AdminAppsClient AppsClient
 
 @if (TabData != null) {
@@ -11,7 +13,7 @@
                 Placeholder="Name"
                 @bind-Value="@TabData.Name"
                 Required="true"
-                FormValidators="new List<AuthServer.Client.Shared.Components.Form.FormValidator.IFormValidator>(){new AuthServer.Client.Shared.Components.Form.FormValidator.NotEmptyStringValidator()}"
+                FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator()}"
             />
         </div>
 
@@ -21,7 +23,7 @@
                 Placeholder="Description shown to users"
                 @bind-Value="@TabData.Description"
                 Required="true"
-                FormValidators="new List<AuthServer.Client.Shared.Components.Form.FormValidator.IFormValidator>(){new AuthServer.Client.Shared.Components.Form.FormValidator.NotEmptyStringValidator()}"
+                FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator()}"
             />
         </div>
 
@@ -32,7 +34,7 @@
                     Placeholder="URL shown to users"
                     @bind-Value="@TabData.Url"
                     Required="true"
-                    FormValidators="new List<AuthServer.Client.Shared.Components.Form.FormValidator.IFormValidator>(){new AuthServer.Client.Shared.Components.Form.FormValidator.NotEmptyStringValidator(), new AuthServer.Client.Shared.Components.Form.FormValidator.ValidUrlValidator()}"
+                    FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator(), new ValidUrlValidator()}"
                 />
             </div>
         }

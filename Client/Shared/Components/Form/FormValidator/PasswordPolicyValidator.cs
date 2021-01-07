@@ -1,11 +1,12 @@
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AuthServer.Client.Shared.Components.Form.FormValidator
 {
     public class PasswordPolicyValidator : IFormValidator
     {
-        public Task<FormValidatorResponse> Check(string value)
+        public Task<FormValidatorResponse> Check(string value, CancellationToken cancellationToken)
         {
             if (
                 value.Length < 6 ||

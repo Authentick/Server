@@ -12,6 +12,12 @@
 
 <h2 class="text-lg">Add a new user</h2>
 
+@if(_errorMessage != null)
+{
+    <PostSubmissionAlert 
+        Message="@_errorMessage"/>
+}
+
 <ValidatingFormWrapper FormValidityChangedCallback="FormValidityChangedCallback">
     <ValidatingInput 
         Name="Username"
@@ -38,13 +44,14 @@
     />
 </ValidatingFormWrapper>
 
-<button type="submit" class="btn btn-secondary-dark btn-add" disabled="@Disabled">Add</button>
+<button @onclick="SubmitForm" type="submit" class="btn btn-secondary-dark btn-add" disabled="@Disabled">Add</button>
 
 @code {
     private string Username = "";
     private string Email = "";
     private string Password = "";
     private bool Disabled = true;
+    private string? _errorMessage;
 
     private async Task FormValidityChangedCallback(bool valid)
     {
@@ -61,6 +68,13 @@
         };
         
         CreateUserResponse response = await UsersClient.CreateUserAsync(createUserRequest);
-        NavigationManager.NavigateTo("/admin/users/");
+        if (response.Success)
+        {
+            NavigationManager.NavigateTo("/admin/users/");
+        }
+        else
+        {
+            _errorMessage = response.Error;
+        }
     }
 }
