@@ -10,6 +10,7 @@
                 Name="Name"
                 Placeholder="Name"
                 @bind-Value="@TabData.Name"
+                Required="true"
                 FormValidators="new List<AuthServer.Client.Shared.Components.Form.FormValidator.IFormValidator>(){new AuthServer.Client.Shared.Components.Form.FormValidator.NotEmptyStringValidator()}"
             />
         </div>
@@ -19,6 +20,7 @@
                 Name="Description"
                 Placeholder="Description shown to users"
                 @bind-Value="@TabData.Description"
+                Required="true"
                 FormValidators="new List<AuthServer.Client.Shared.Components.Form.FormValidator.IFormValidator>(){new AuthServer.Client.Shared.Components.Form.FormValidator.NotEmptyStringValidator()}"
             />
         </div>
@@ -29,6 +31,7 @@
                     Name="URL"
                     Placeholder="URL shown to users"
                     @bind-Value="@TabData.Url"
+                    Required="true"
                     FormValidators="new List<AuthServer.Client.Shared.Components.Form.FormValidator.IFormValidator>(){new AuthServer.Client.Shared.Components.Form.FormValidator.NotEmptyStringValidator(), new AuthServer.Client.Shared.Components.Form.FormValidator.ValidUrlValidator()}"
                 />
             </div>
