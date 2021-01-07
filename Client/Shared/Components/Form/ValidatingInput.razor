@@ -5,10 +5,14 @@
         for="@_divIdentifier"
     >
         @Name
+        @if (Required)
+        {
+            <span>&nbsp;(Required)</span>
+        }
     </label>
     <div class="wrapper @GetWrapperClasses()">
         <input
-            type="text" 
+            type="@InputType" 
             id="@_divIdentifier" 
             placeholder="@Placeholder"
             class="form-control bg-secondary @GetCssClasses()"
@@ -26,3 +30,8 @@
         </small>
     }
 </div>
+
+@code {
+    [Parameter]
+    public string InputType { get; set; } = "text";
+}
