@@ -5,6 +5,10 @@
         for="@_divIdentifier"
     >
         @Name
+        @if (Required)
+        {
+            <span>&nbsp;(Required)</span>
+        }
     </label>
     <div class="wrapper @GetWrapperClasses()">
         <textarea 

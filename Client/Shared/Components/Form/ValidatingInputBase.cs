@@ -18,13 +18,22 @@ namespace AuthServer.Client.Shared.Components.Form
         public string Name { get; set; } = null!;
         [Parameter]
         public string Placeholder { get; set; } = null!;
-        public HashSet<Guid> ErrorRegister { get; set; } = null!;
+        [Parameter]
+        public bool Required { get; set; }
         [CascadingParameter]
         public EventHandler<ValidatingFormWrapper.ValidatingFormWrapperEvent> Callback { get; set; } = null!;
 
         protected ValidationStateEnum _validationState { get; set; }
         protected string? _errorHint { get; set; }
         protected Guid _divIdentifier = Guid.NewGuid();
+
+        protected override void OnInitialized()
+        {
+            if (Required && String.IsNullOrEmpty(Value))
+            {
+                Callback.Invoke(null, new ValidatingFormWrapper.ValidatingFormWrapperEvent { IsValid = false, Identifier = _divIdentifier });
+            }
+        }
 
         protected async Task KeyPressed()
         {
