@@ -1,27 +1,35 @@
 @implements IStep
 
+@using AuthServer.Client.Shared.Components.Form.FormValidator
+@using AuthServer.Client.Shared.Components.Form
+
 <h2>Configure OpenID Connect</h2>
 
-<div class="form-group col-12 col-md-6 p-0">
-    <input type="text" @onchange="@RedirectUrlChanged" class="form-control bg-secondary" placeholder="Redirect URL" />
-</div>
+<ValidatingFormWrapper FormValidityChangedCallback="FormValidityChangedCallback">
+    <ValidatingInput 
+        InputType="url"
+        Name="Redirect URL"
+        Placeholder="https://example.com/oidc/redirect_url"
+        @bind-Value="RedirectUrl"
+        Required="true"
+        FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator(), new ValidUrlValidator()}"
+    />
+</ValidatingFormWrapper>
 
 @code {
     [Parameter]
     public SetupAppStateMachine StateMachine { get; set; } = null!;
 
-    public string? RedirectUrl { get; set; }
+    public string RedirectUrl { get; set; } = "";
 
-    private void RedirectUrlChanged(ChangeEventArgs e)
+    private async Task FormValidityChangedCallback(bool valid)
     {
-        if (e.Value != null)
+        if(valid)
         {
-            RedirectUrl = (string)e.Value;
             StateMachine.SetNextStep(new ChooseDirectoryMethodStep());
         }
         else
         {
-            RedirectUrl = null;
             StateMachine.SetNextStep(null);
         }
     }

@@ -1,72 +1,73 @@
 @implements IStep
 
 @using AuthServer.Shared.Admin
-@using AuthServer.Shared
+@using AuthServer.Client.Shared.Components.Form
+@using AuthServer.Client.Shared.Components.Form.FormValidator
 
 @inject AuthServer.Shared.ConnectivityCheckService.ConnectivityCheckServiceClient ConnectivityCheckServiceClient
 
 <h2>Application information</h2>
 
-<div class="form-group col-12 col-md-6 p-0">
-    <input type="text" @onchange="@NameChanged" class="form-control bg-secondary" placeholder="Name" />
-</div>
+ <ValidatingFormWrapper FormValidityChangedCallback="FormValidityChangedCallback">
+    <ValidatingInput 
+        Name="Name"
+        Placeholder="Name"
+        @bind-Value="Name"
+        Required="true"
+        FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator()}"
+    />
 
-<div class="form-group col-12 col-md-6 p-0">
-    <textarea type="text" @onchange="@DescriptionChanged" class="form-control bg-secondary" placeholder="Description shown to users" />
-</div>
+    <ValidatingTextarea 
+        Name="Description"
+        Placeholder="Description shown to users"
+        @bind-Value="Description"
+        Required="true"
+        FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator()}"
+    />
 
-@if (
-    StateMachine.GetAddNewAppRequest().HostingType != HostingType.NonWeb
-) {
-    <div class="form-group col-12 col-md-6 p-0">
-        <input type="text" @onchange="@UrlChanged" class="form-control bg-secondary" placeholder="URL shown to users" />
-    </div>
-}
+    @if (StateMachine.GetAddNewAppRequest().HostingType != HostingType.NonWeb)
+    {
+        <ValidatingInput 
+            Name="URL"
+            Placeholder="URL shown to users"
+            @bind-Value="Url"
+            Required="true"
+            FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator(), new ValidUrlValidator()}"
+        />
+    }
 
-@if(StateMachine.GetAddNewAppRequest().HostingType == HostingType.WebGatekeeperProxy) {
-    <h2>Gatekeeper Proxy</h2>
-    <div class="form-group col-12 col-md-6 p-0">
-        <input type="text" @onchange="@PublicDomainNameChanged" class="form-control bg-secondary" placeholder="Public Domain name" />
-        @if (!_gatekeeperProxyConnectivityCheck)
-        {
-            <p>Public hostname doesn't resolve to this host.</p>
-        }
-    </div>
-    <div class="form-group col-12 col-md-6 p-0">
-        <input type="text" @onchange="@InternalUrlChanged" class="form-control bg-secondary" placeholder="Internal URL" />
-    </div>
-}
+    @if (StateMachine.GetAddNewAppRequest().HostingType == HostingType.WebGatekeeperProxy)
+    {
+        <ValidatingInput 
+            Name="Public Domain Name"
+            Placeholder="example.com"
+            @bind-Value="PublicDomain"
+            Required="true"
+            FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator(), new DomainPublicAccessibleValidator(ConnectivityCheckServiceClient)}"
+        />
+        <ValidatingInput 
+            Name="Internal URL"
+            Placeholder="http://192.168.1.28"
+            @bind-Value="InternalUrl"
+            Required="true"
+            FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator(), new ValidUrlValidator()}"
+        />
+    }
+</ValidatingFormWrapper>
 
 @code {
     [Parameter]
     public SetupAppStateMachine StateMachine { get; set; } = null!;
 
-    public string? Name { get; set; }
-    public string? Description { get; set; }
-    public string? Url { get; set; }
-    public string? PublicDomain { get; set; }
-    public string? InternalUrl { get; set; }
-    private bool _gatekeeperProxyConnectivityCheck;
+    public string Name { get; set; } = "";
+    public string Description { get; set; } = "";
+    public string Url { get; set; } = "";
+    public string PublicDomain { get; set; } = "";
+    public string InternalUrl { get; set; } = "";
 
-    private bool FormIsValid() 
+    private async Task FormValidityChangedCallback(bool valid)
     {
-        HostingType type = StateMachine.GetAddNewAppRequest().HostingType;
-        switch(type) 
-        {
-            case HostingType.NonWeb:
-                return (!String.IsNullOrEmpty(Name) && !String.IsNullOrEmpty(Description));
-            case HostingType.WebGeneric:
-                return (!String.IsNullOrEmpty(Name) && !String.IsNullOrEmpty(Description) && !String.IsNullOrEmpty(Url));
-            case HostingType.WebGatekeeperProxy:
-                return (!String.IsNullOrEmpty(Name) && !String.IsNullOrEmpty(Description) && !String.IsNullOrEmpty(Url) && !String.IsNullOrEmpty(PublicDomain) && !String.IsNullOrEmpty(InternalUrl) && _gatekeeperProxyConnectivityCheck);
-            default:
-                throw new NotImplementedException("Unknown type: " + type);
-        }
-    }
-
-    private void SetNextStepIfPossible()
-    {
-        if (FormIsValid()) 
+        if (valid) 
         {
             StateMachine.SetNextStep(new ChooseAuthMethodStep());
         }
@@ -74,89 +75,5 @@
         {
             StateMachine.SetNextStep(null);
         }
-    }
-
-    private void UrlChanged(ChangeEventArgs e)
-    {
-        if (e.Value != null)
-        {
-            Url = (string)e.Value;
-        }
-        else
-        {
-            Url = null;
-        }
-
-        SetNextStepIfPossible();
-    }
-
-    private async Task PublicDomainNameChanged(ChangeEventArgs e)
-    {
-        _gatekeeperProxyConnectivityCheck = false;
-
-        if (e.Value != null)
-        {
-            
-            PublicDomain = (string)e.Value;
-            IsPublicAccessibleRequest request = new IsPublicAccessibleRequest 
-            {
-                Hostname = PublicDomain,
-            };
-
-            IsPublicAccessibleReply reply = await ConnectivityCheckServiceClient.IsPublicAccessibleAsync(request);
-            
-            if (reply.State == IsPublicAccessibleReply.Types.AccessibleReplyEnum.Success)
-            {
-                _gatekeeperProxyConnectivityCheck = true;
-            }
-        }
-        else
-        {
-            PublicDomain = null;
-        }
-
-        SetNextStepIfPossible();
-    } 
-
-    private void InternalUrlChanged(ChangeEventArgs e) 
-    {
-        if (e.Value != null)
-        {
-            InternalUrl = (string)e.Value;
-        }
-        else
-        {
-            InternalUrl = null;
-        }
-
-        SetNextStepIfPossible();
-    }
-
-    private void DescriptionChanged(ChangeEventArgs e) 
-    {
-        if (e.Value != null)
-        {
-            Description = (string)e.Value;
-        }
-        else
-        {
-            Description = null;
-        }
-
-        SetNextStepIfPossible();
-    }
-
-    private void NameChanged(ChangeEventArgs e)
-    {
-        if (e.Value != null)
-        {
-            Name = (string)e.Value;
-        }
-        else
-        {
-            Name = null;
-        }
-
-        SetNextStepIfPossible();
     }
 }
