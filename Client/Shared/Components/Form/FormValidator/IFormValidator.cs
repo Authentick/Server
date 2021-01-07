@@ -1,10 +1,11 @@
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AuthServer.Client.Shared.Components.Form.FormValidator
 {
     public interface IFormValidator
     {
-        public Task<FormValidatorResponse> Check(string value);
+        public Task<FormValidatorResponse> Check(string value, CancellationToken cancellationToken);
     }
 
     public class FormValidatorResponse
