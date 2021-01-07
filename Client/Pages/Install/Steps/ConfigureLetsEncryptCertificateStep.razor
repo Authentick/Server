@@ -1,7 +1,7 @@
 @implements IStep
-@implements IDisposable
 
-@using AuthServer.Shared
+@using AuthServer.Client.Shared.Components.Form
+@using AuthServer.Client.Shared.Components.Form.FormValidator
 
 @inject AuthServer.Shared.ConnectivityCheckService.ConnectivityCheckServiceClient ConnectivityCheckServiceClient
 
@@ -9,17 +9,23 @@
 
 <p>By proceeding you agree to the currently-in-effect <a href="https://letsencrypt.org/repository/">Subscriber Agreement.</a>.</p>
 
-<EditForm EditContext="@editContext">
-    <DataAnnotationsValidator />
-    
-    <InputText @bind-Value="letsEncryptCertificateSettings.DomainName" class="form-control bg-secondary" placeholder="Hostname (e.g. example.com)" />
-    @if(!_isValidPublicHostname) {
-        <p>Public hostname doesn't resolve to this host.</p>
-    }
-    <br/>
-
-    <InputText @bind-Value="letsEncryptCertificateSettings.Email" type="email" class="form-control bg-secondary" placeholder="Contact email address" />
-</EditForm>
+<ValidatingFormWrapper FormValidityChangedCallback="FormValidityChangedCallback">
+    <ValidatingInput 
+        Name="Hostname"
+        Placeholder="example.com"
+        @bind-Value="letsEncryptCertificateSettings.DomainName"
+        Required="true"
+        FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator(), new DomainPublicAccessibleValidator(ConnectivityCheckServiceClient)}"
+    />
+    <ValidatingInput 
+        Name="Contact Email address"
+        InputType="email"
+        Placeholder="Email"
+        @bind-Value="letsEncryptCertificateSettings.Email"
+        Required="true"
+        FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator(), new EmailValidator()}"
+    />
+</ValidatingFormWrapper>
 
 @code {
     #nullable enable
@@ -28,50 +34,23 @@
     public InstallStateMachine StateMachine { get; set; }
 
     internal LetsEncryptCertificateSettings letsEncryptCertificateSettings = new LetsEncryptCertificateSettings();
-    private EditContext? editContext;
-    private bool _isValidPublicHostname;
-    private EventHandler<Microsoft.AspNetCore.Components.Forms.FieldChangedEventArgs> HandleFieldChangedAction => async (s, e) => await HandleFieldChanged(s, e);
 
     protected override void OnInitialized()
     {
-        editContext = new EditContext(letsEncryptCertificateSettings);
-        editContext.OnFieldChanged += HandleFieldChangedAction;
-
         StateMachine.SetNextStep(null);
         StateMachine.SetPreviousStep(new CertificateSelectionStep());
     }
 
-    private async Task HandleFieldChanged(object sender, FieldChangedEventArgs e)
+    private async Task FormValidityChangedCallback(bool valid)
     {
-        if(editContext != null) 
+        if (valid)
         {
-            bool formValid = editContext.Validate();
-            if (formValid)
-            {
-                 IsPublicAccessibleRequest request = new IsPublicAccessibleRequest{
-                    Hostname = letsEncryptCertificateSettings.DomainName,
-                };
-
-                IsPublicAccessibleReply reply = await ConnectivityCheckServiceClient.IsPublicAccessibleAsync(request);
-                
-                if(reply.State != IsPublicAccessibleReply.Types.AccessibleReplyEnum.Success) {
-                    _isValidPublicHostname = false;
-                    StateMachine.SetNextStep(null);
-                } else {
-                    _isValidPublicHostname = true;
-                    StateMachine.SetNextStep(new EmailSelectionStep());
-                }
-            }
-            else
-            {
-                StateMachine.SetNextStep(null);
-            } 
+            StateMachine.SetNextStep(new EmailSelectionStep());
         }
-    }
-
-    public void Dispose()
-    {
-        editContext.OnFieldChanged -= HandleFieldChangedAction;
+        else 
+        {
+            StateMachine.SetNextStep(null);    
+        }
     }
 
     internal class LetsEncryptCertificateSettings 
