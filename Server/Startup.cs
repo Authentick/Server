@@ -35,6 +35,7 @@ using AuthServer.Server.Services.SCIM;
 using Gatekeeper.Server.Services.FileStorage;
 using Gatekeeper.Server.GRPC;
 using AuthServer.Server.Services.TLS.BackgroundJob;
+using AuthServer.Server.Services.Authentication.PasswordPolicy;
 
 namespace AuthServer.Server
 {
@@ -82,7 +83,13 @@ namespace AuthServer.Server
             services.AddIdentity<AppUser, IdentityRole<Guid>>(config =>
             {
                 config.SignIn.RequireConfirmedEmail = true;
+                config.Password.RequiredLength = 10;
+                config.Password.RequireLowercase = false;
+                config.Password.RequireUppercase = false;
+                config.Password.RequireNonAlphanumeric = false;
+                config.Password.RequireDigit = false;
             })
+                .AddPasswordValidator<HIBP>()
                 .AddEntityFrameworkStores<AuthDbContext>()
                 .AddTokenProvider<TotpAuthenticatorProvider>(TotpAuthenticatorProvider.ProviderName);
             services
