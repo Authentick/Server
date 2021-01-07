@@ -3,6 +3,8 @@
 @using AuthServer.Client.Shared.Components.Form
 @using AuthServer.Client.Shared.Components.Form.FormValidator
 
+@inject AuthServer.Shared.Auth.AuthClient AuthClient
+
 <h1>Create your first account</h1>
 
 <ValidatingFormWrapper FormValidityChangedCallback="FormValidityChangedCallback">
@@ -27,7 +29,7 @@
         Placeholder="Password"
         @bind-Value="userAccount.Password"
         Required="true"
-        FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator(), new PasswordPolicyValidator()}"
+        FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator(), new PasswordPolicyValidator(AuthClient)}"
     />
 </ValidatingFormWrapper>
 

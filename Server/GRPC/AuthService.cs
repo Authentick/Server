@@ -7,6 +7,7 @@ using AuthServer.Server.Services.Authentication;
 using AuthServer.Server.Services.Authentication.Session;
 using AuthServer.Server.Services.User;
 using AuthServer.Shared;
+using Gatekeeper.Server.Services.Authentication.PasswordPolicy;
 using Gatekeeper.Server.Services.FileStorage;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
@@ -26,6 +27,7 @@ namespace Gatekeeper.Server.GRPC
         private readonly BruteforceManager _bruteforceManager;
         private readonly SessionManager _sessionManager;
         private readonly ProfileImageManager _profileImageManager;
+        private readonly HIBPClient _hibpClient;
 
         public AuthService(
             UserManager userManager,
@@ -33,7 +35,8 @@ namespace Gatekeeper.Server.GRPC
             AuthDbContext authDbContext,
             BruteforceManager bruteforceManager,
             SessionManager sessionManager,
-            ProfileImageManager profileImageManager
+            ProfileImageManager profileImageManager,
+            HIBPClient hibpClient
             )
         {
             _userManager = userManager;
@@ -42,6 +45,16 @@ namespace Gatekeeper.Server.GRPC
             _bruteforceManager = bruteforceManager;
             _sessionManager = sessionManager;
             _profileImageManager = profileImageManager;
+            _hibpClient = hibpClient;
+        }
+
+        public override async Task<CheckPasswordBreachReply> CheckPasswordBreach(CheckPasswordBreachRequest request, ServerCallContext context)
+        {
+            bool isBreached = await _hibpClient.IsBreachedAsync(request.Password, context.CancellationToken);
+            return new CheckPasswordBreachReply
+            {
+                IsBreached = isBreached,
+            };
         }
 
         public override async Task<LoginReply> Login(LoginRequest request, ServerCallContext context)
