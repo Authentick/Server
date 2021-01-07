@@ -61,8 +61,8 @@ async function testInstaller(page, percySnapshot) {
     await percySnapshot('installer-create-account-step', config);
     await page.type('.form-group:nth-of-type(1) input', 'testuser', { delay: 100 });
     await page.type('.form-group:nth-of-type(2) input', 'test@example.com', { delay: 100 });
-    await page.type('.form-group:nth-of-type(3) input', 'ins3cureTestUserPassw0rd!', { delay: 100 });
-    await page.keyboard.press('Tab');
+    await page.type('.form-group:nth-of-type(3) input', 'ins3cureTestUserPassw0rd!');
+    await page.waitForTimeout(5000);
     await page.click(nextButton);
     await page.waitForTimeout(5000);
 }
