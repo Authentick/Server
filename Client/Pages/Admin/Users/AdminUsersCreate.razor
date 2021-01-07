@@ -9,6 +9,7 @@
 
 @inject NavigationManager NavigationManager
 @inject AuthServer.Shared.Admin.Users.UsersClient UsersClient
+@inject AuthServer.Shared.Auth.AuthClient AuthClient
 
 <h2 class="text-lg">Add a new user</h2>
 
@@ -40,7 +41,7 @@
         Placeholder="Password"
         @bind-Value="@Password"
         Required="true"
-        FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator(), new PasswordPolicyValidator()}"
+        FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator(), new PasswordPolicyValidator(AuthClient)}"
     />
 </ValidatingFormWrapper>
 

@@ -35,7 +35,7 @@ using AuthServer.Server.Services.SCIM;
 using Gatekeeper.Server.Services.FileStorage;
 using Gatekeeper.Server.GRPC;
 using AuthServer.Server.Services.TLS.BackgroundJob;
-using AuthServer.Server.Services.Authentication.PasswordPolicy;
+using Gatekeeper.Server.Services.Authentication.PasswordPolicy;
 
 namespace AuthServer.Server
 {
@@ -145,6 +145,9 @@ namespace AuthServer.Server
 
             // File storage
             services.AddScoped<ProfileImageManager>();
+
+            // HIBP
+            services.AddScoped<HIBPClient>();
 
             // Hangfire
             SqlMapper.AddTypeHandler(new NodaDateTimeHandler());

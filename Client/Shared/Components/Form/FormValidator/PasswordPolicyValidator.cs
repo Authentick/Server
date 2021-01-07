@@ -1,25 +1,50 @@
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AuthServer.Shared;
+using static AuthServer.Shared.Auth;
 
 namespace AuthServer.Client.Shared.Components.Form.FormValidator
 {
     public class PasswordPolicyValidator : IFormValidator
     {
-        public Task<FormValidatorResponse> Check(string value, CancellationToken cancellationToken)
+        private readonly AuthClient _authClient;
+
+        public PasswordPolicyValidator(AuthClient authClient)
         {
-            if (
-                value.Length < 6 ||
-                !value.Any(char.IsUpper) ||
-                !value.Any(char.IsLower) ||
-                !value.Any(char.IsDigit) ||
-                value.All(char.IsLetterOrDigit)
-            )
+            _authClient = authClient;
+        }
+
+        public async Task<FormValidatorResponse> Check(string value, CancellationToken cancellationToken)
+        {
+            if (value.Length < 10)
             {
-                return Task.FromResult(new FormValidatorResponse(false, "Input does not meet minimum password criteria"));
+                return new FormValidatorResponse(false, "Password is not long enough");
             }
 
-            return Task.FromResult(new FormValidatorResponse(true, null));
+            CheckPasswordBreachReply reply;
+            try
+            {
+                reply = await _authClient.CheckPasswordBreachAsync(
+                    new CheckPasswordBreachRequest
+                    {
+                        Password = value,
+                    },
+                    null,
+                    null,
+                    cancellationToken
+                );
+            }
+            catch
+            {
+                return new FormValidatorResponse(true, null);
+            }
+
+            if (reply.IsBreached)
+            {
+                return new FormValidatorResponse(false, "Password is not unique enough");
+            }
+
+            return new FormValidatorResponse(true, null);
         }
     }
 }

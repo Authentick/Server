@@ -11,6 +11,15 @@ service Auth {
   rpc Logout (google.protobuf.Empty) returns (google.protobuf.Empty);
   rpc VerifyEmail (VerifyEmailRequest) returns (VerifyEmailReply);
   rpc VerifyAuthenticatorToken (VerifyAuthenticatorTokenRequest) returns (VerifyAuthenticatorReply);
+  rpc CheckPasswordBreach (CheckPasswordBreachRequest) returns (CheckPasswordBreachReply);
+}
+
+message CheckPasswordBreachRequest {
+  string password = 1;
+}
+
+message CheckPasswordBreachReply {
+  bool is_breached = 1;
 }
 
 message WhoAmIReply {
