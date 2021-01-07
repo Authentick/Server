@@ -38,7 +38,7 @@
     />
 </ValidatingFormWrapper>
 
-<button type="submit" class="btn btn-secondary-dark btn-add" disabled="@Disabled">Add</button>
+<button @onclick="SubmitForm" type="submit" class="btn btn-secondary-dark btn-add" disabled="@Disabled">Add</button>
 
 @code {
     private string Username = "";
