@@ -36,6 +36,8 @@ using Gatekeeper.Server.Services.FileStorage;
 using Gatekeeper.Server.GRPC;
 using AuthServer.Server.Services.TLS.BackgroundJob;
 using Gatekeeper.Server.Services.Authentication.PasswordPolicy;
+using Gatekeeper.Server.Services.GeoLocation;
+using Gatekeeper.Server.Services.Authentication.BackgroundJob;
 
 namespace AuthServer.Server
 {
@@ -142,6 +144,10 @@ namespace AuthServer.Server
 
             // SCIM
             services.AddScoped<ISyncHandler, SyncHandler>();
+
+            // Geolocation
+            services.AddScoped<GeoLocationManager>();
+            services.AddScoped<ISessionLocationResolver, SessionLocationResolver>();
 
             // File storage
             services.AddScoped<ProfileImageManager>();

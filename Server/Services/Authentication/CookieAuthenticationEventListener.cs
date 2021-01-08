@@ -1,10 +1,14 @@
 using System;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using AuthServer.Server.Services.Authentication.Session;
 using AuthServer.Server.Services.User;
+using Gatekeeper.Server.Services.Authentication.BackgroundJob;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 using NodaTime;
 
 namespace AuthServer.Server.Services.Authentication
@@ -36,9 +40,25 @@ namespace AuthServer.Server.Services.Authentication
                 Name = "TODO Name",
                 User = user,
             };
-
             _authDbContext.AuthSessions.Add(session);
+
+
+            AuthSessionIp? authSessionIp = null;
+            if (context.HttpContext.Connection.RemoteIpAddress != null)
+            {
+                authSessionIp = new AuthSessionIp
+                {
+                    AuthSession = session,
+                    IpAddress = context.HttpContext.Connection.RemoteIpAddress,
+                };
+                _authDbContext.AuthSessionIps.Add(authSessionIp);
+            }
+
             await _authDbContext.SaveChangesAsync();
+            if(authSessionIp != null)
+            {
+                BackgroundJob.Enqueue<ISessionLocationResolver>(s => s.ResolveForAuthSessionIp(authSessionIp.Id));
+            }
 
             ClaimsIdentity identity = (ClaimsIdentity)context.Principal.Identity;
             identity.AddClaim(new Claim("cookie_identifier", session.Id.ToString()));
@@ -57,6 +77,26 @@ namespace AuthServer.Server.Services.Authentication
             }
             else
             {
+                if (context.HttpContext.Connection.RemoteIpAddress != null)
+                {
+                    AuthSessionIp? authSessionIp = await _authDbContext.AuthSessionIps
+                        .Where(s => s.AuthSession == session)
+                        .Where(s => s.IpAddress == context.HttpContext.Connection.RemoteIpAddress)
+                        .SingleOrDefaultAsync();
+
+                    if (authSessionIp == null)
+                    {
+                        authSessionIp = new AuthSessionIp
+                        {
+                            AuthSession = session,
+                            IpAddress = context.HttpContext.Connection.RemoteIpAddress
+                        };
+                        _authDbContext.AuthSessionIps.Add(authSessionIp);
+                        await _authDbContext.SaveChangesAsync();
+                        BackgroundJob.Enqueue<ISessionLocationResolver>(s => s.ResolveForAuthSessionIp(authSessionIp.Id));
+                    }
+                }
+
                 _sessionManager.MarkSessionLastUsedNow(session);
             }
         }

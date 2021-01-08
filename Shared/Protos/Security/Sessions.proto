@@ -2,6 +2,7 @@ syntax = "proto3";
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
 
 option csharp_namespace = "AuthServer.Shared.Security";
 
@@ -19,10 +20,15 @@ message Session {
   string id = 1;
   string name = 2;
   google.protobuf.Timestamp last_active = 3;
-  string last_location = 4;
-  repeated string ip_addresses  = 5;
-  google.protobuf.Timestamp signed_in = 6;
-  google.protobuf.Timestamp invalidated_at = 7;
+  repeated LocationReply locations = 4;
+  google.protobuf.Timestamp signed_in = 5;
+  google.protobuf.Timestamp invalidated_at = 6;
+
+  message LocationReply {
+    google.protobuf.StringValue country = 1;
+    google.protobuf.StringValue city = 2;
+    string ip_address = 3;
+  }
 }
 
 message InvalidateSessionRequest {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using AuthServer.Server.Services.Authentication.Session;
@@ -46,10 +47,20 @@ namespace AuthServer.Server.GRPC.Security
                 {
                     Id = session.Id.ToString(),
                     LastActive = NodaTime.Serialization.Protobuf.NodaExtensions.ToTimestamp(session.LastUsedTime),
-                    LastLocation = "TODO",
                     Name = session.Name,
                     SignedIn = NodaTime.Serialization.Protobuf.NodaExtensions.ToTimestamp(session.CreationTime),
                 };
+
+                foreach (AuthSessionIp sessionIp in session.SessionIps)
+                {
+                    Session.Types.LocationReply locationReply = new Session.Types.LocationReply
+                    {
+                        IpAddress = sessionIp.IpAddress.ToString(),
+                        Country = sessionIp.Country,
+                        City = sessionIp.City,
+                    };
+                    replySession.Locations.Add(locationReply);
+                }
 
                 Instant? expiredTime = session.ExpiredTime;
                 if (expiredTime != null)

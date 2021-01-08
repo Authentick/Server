@@ -42,6 +42,7 @@ namespace AuthServer.Server.Services.Authentication.Session
         {
             List<AuthSession> sessions = _authDbContext.AuthSessions
                 .AsNoTracking()
+                .Include(s => s.SessionIps)
                 .Where(
                         s => (s.User == user && s.ExpiredTime == null)
                     )
@@ -54,6 +55,7 @@ namespace AuthServer.Server.Services.Authentication.Session
         {
             List<AuthSession> sessions = _authDbContext.AuthSessions
                 .AsNoTracking()
+                .Include(s => s.SessionIps)
                 .Where(
                         s => (s.User == user && s.ExpiredTime != null)
                     )
