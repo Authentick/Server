@@ -18,6 +18,7 @@
           <th scope="col" class="border-0">Name</th>
           <th scope="col" class="border-0">Added</th>
           <th scope="col" class="border-0">Last used</th>
+          <th scope="col" class="border-0">Locations</th>
           <th scope="col" class="border-0">Actions</th>
         </tr>
       </thead>
@@ -29,6 +30,28 @@
             <td>@session.Name</td>
             <td>@session.SignedIn</td>
             <td>@session.LastActive</td>
+            <td>
+              <ul>
+              @foreach(var location in session.Locations) {
+                <li>
+                  @location.IpAddress &nbsp;
+                  @if(location.City != null || location.Country != null)
+                  {
+                    <span> (</span>
+                      @if(location.City != null)
+                      {
+                        <span>Near&nbsp;</span> @location.City<span>,&nbsp;</span>
+                      }
+                      @if(location.Country != null)
+                      {
+                        @location.Country
+                      }
+                    <span>)</span>
+                  }
+                </li>
+              }
+              </ul>
+            </td>
             <td>
               <button @onclick="@(async () => await InvalidateSession(session))"
                 class="btn btn-secondary-dark btn-delete">Invalidate</button>
@@ -51,6 +74,7 @@
           <th scope="col" class="border-0">Name</th>
           <th scope="col" class="border-0">Added</th>
           <th scope="col" class="border-0">Last used</th>
+          <th scope="col" class="border-0">Locations</th>
           <th scope="col" class="border-0">Invalidated at</th>
         </tr>
       </thead>
@@ -62,6 +86,28 @@
             <td>@session.Name</td>
             <td>@session.SignedIn</td>
             <td>@session.LastActive</td>
+            <td>
+              <ul>
+              @foreach(var location in session.Locations) {
+                <li>
+                  @location.IpAddress &nbsp;
+                  @if(location.City != null || location.Country != null)
+                  {
+                    <span> (</span>
+                      @if(location.City != null)
+                      {
+                        <span>Near&nbsp;</span> @location.City<span>,&nbsp;</span>
+                      }
+                      @if(location.Country != null)
+                      {
+                        @location.Country
+                      }
+                    <span>)</span>
+                  }
+                </li>
+              }
+              </ul>
+            </td>
             <td>@session.InvalidatedAt</td>
           </tr>
         }

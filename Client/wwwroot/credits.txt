@@ -1,5 +1,9 @@
 Note: This list is non-conclusive. Check the source code at https://github.com/getgatekeeper/server for other used components.
 
+# GeoLite2
+
+This product includes GeoLite2 data created by MaxMind, available from https://www.maxmind.com.
+
 # The Noun Project
 
 The following icons from "The Noun Project" are used and licensed under CC BY 3.0 (https://creativecommons.org/licenses/by/3.0/):

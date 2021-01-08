@@ -13,16 +13,18 @@ namespace AuthServer.Server.Models
     {
         public AuthDbContext(DbContextOptions<AuthDbContext> options) : base(options) { }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<AuthSessionIp>()
+                .HasIndex(b => b.IpAddress);
+
+            base.OnModelCreating(modelBuilder);
+        }
+
         public DbSet<AuthSession> AuthSessions { get; set; } = null!;
         public DbSet<AuthApp> AuthApp { get; set; } = null!;
         public DbSet<LdapAppSettings> LdapAppSettings { get; set; } = null!;
         public DbSet<LdapAppUserCredentials> LdapAppUserCredentials { get; set; } = null!;
-
-        internal object AsNoTracking()
-        {
-            throw new NotImplementedException();
-        }
-
         public DbSet<UserGroup> UserGroup { get; set; } = null!;
         public DbSet<SystemSetting> SystemSettings { get; set; } = null!;
         public DbSet<UserTotpDevice> UserTotpDevices { get; set; } = null!;
@@ -34,6 +36,7 @@ namespace AuthServer.Server.Models
         public DbSet<SCIMAppSettings> SCIMAppSettings { get; set; } = null!;
         public DbSet<ScimUserSyncState> ScimUserSyncStates { get; set; } = null!;
         public DbSet<ScimGroupSyncState> ScimGroupSyncStates { get; set; } = null!;
+        public DbSet<AuthSessionIp> AuthSessionIps { get; set; } = null!;
     }
 
     public class SystemSetting
@@ -170,6 +173,16 @@ namespace AuthServer.Server.Models
         public AppUser User { get; set; } = null!;
         public Instant LastUsedTime { get; set; }
         public Instant? ExpiredTime { get; set; }
+        public ICollection<AuthSessionIp> SessionIps { get; set; } = null!;
+    }
+
+    public class AuthSessionIp
+    {
+        public Guid Id { get; set; }
+        public IPAddress IpAddress { get; set; } = null!;
+        public AuthSession AuthSession { get; set; } = null!;
+        public string? City { get; set; }
+        public string? Country { get; set; }
     }
 
     public class UserGroup
