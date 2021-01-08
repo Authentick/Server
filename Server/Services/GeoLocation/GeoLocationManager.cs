@@ -26,6 +26,7 @@ namespace Gatekeeper.Server.Services.GeoLocation
         {
             HttpClient client = _clientFactory.CreateClient();
             client.Timeout = TimeSpan.FromSeconds(3);
+            client.DefaultRequestHeaders.Add("User-Agent", "Gatekeeper");
 
             UriBuilder uriBuilder = new UriBuilder();
             uriBuilder.Scheme = "https";
