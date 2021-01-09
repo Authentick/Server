@@ -36,7 +36,7 @@ namespace AuthServer.Server.Services.Authentication
             AppUser user = await _userManager.GetUserAsync(context.Principal);
 
             StringValues userAgent;
-            context.Request.Headers.TryGetValue("User-Agent", out userAgent);
+            context.HttpContext.Request.Headers.TryGetValue("User-Agent", out userAgent);
 
             AuthSession session = new AuthSession
             {
