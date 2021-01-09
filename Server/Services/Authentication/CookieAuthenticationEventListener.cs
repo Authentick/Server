@@ -9,6 +9,7 @@ using Gatekeeper.Server.Services.Authentication.BackgroundJob;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Primitives;
 using NodaTime;
 
 namespace AuthServer.Server.Services.Authentication
@@ -34,14 +35,16 @@ namespace AuthServer.Server.Services.Authentication
         {
             AppUser user = await _userManager.GetUserAsync(context.Principal);
 
+            StringValues userAgent;
+            context.Request.Headers.TryGetValue("User-Agent", out userAgent);
+
             AuthSession session = new AuthSession
             {
                 CreationTime = SystemClock.Instance.GetCurrentInstant(),
-                Name = "TODO Name",
                 User = user,
+                UserAgent = userAgent,
             };
             _authDbContext.AuthSessions.Add(session);
-
 
             AuthSessionIp? authSessionIp = null;
             if (context.HttpContext.Connection.RemoteIpAddress != null)
@@ -55,7 +58,9 @@ namespace AuthServer.Server.Services.Authentication
             }
 
             await _authDbContext.SaveChangesAsync();
-            if(authSessionIp != null)
+
+            BackgroundJob.Enqueue<ISessionDeviceInfoResolver>(s => s.ResolveForAuthSession(session.Id));
+            if (authSessionIp != null)
             {
                 BackgroundJob.Enqueue<ISessionLocationResolver>(s => s.ResolveForAuthSessionIp(authSessionIp.Id));
             }
