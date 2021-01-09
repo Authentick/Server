@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using AuthServer.Server.Services.Authentication.Session;
@@ -88,9 +89,15 @@ namespace AuthServer.Server.GRPC.Security
 
                 foreach (AuthSessionIp sessionIp in session.SessionIps)
                 {
+                    IPAddress ipAddress = sessionIp.IpAddress;
+                    if (ipAddress.IsIPv4MappedToIPv6)
+                    {
+                        ipAddress = ipAddress.MapToIPv4();
+                    }
+
                     Session.Types.LocationReply locationReply = new Session.Types.LocationReply
                     {
-                        IpAddress = sessionIp.IpAddress.ToString(),
+                        IpAddress = ipAddress.ToString(),
                         Country = sessionIp.Country,
                         City = sessionIp.City,
                     };
