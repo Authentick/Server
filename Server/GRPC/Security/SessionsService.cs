@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using AuthServer.Server.Services.Authentication.Session;
@@ -10,6 +9,7 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using NodaTime;
+using static AuthServer.Shared.Security.Session.Types;
 
 namespace AuthServer.Server.GRPC.Security
 {
@@ -37,18 +37,53 @@ namespace AuthServer.Server.GRPC.Security
             return new InvalidateSessionReply { Success = true };
         }
 
-        private SessionListReply FormatSessionListReply(List<AuthSession> sessions)
+        private SessionListReply FormatSessionListReply(List<AuthSession> sessions, ServerCallContext context)
         {
             SessionListReply reply = new SessionListReply();
+            Guid currentCookieId = _sessionManager.GetCurrentSessionId(context.GetHttpContext().User);
 
             foreach (AuthSession session in sessions)
             {
+                string deviceName = "Unknown";
+                DeviceTypeEnum deviceType = DeviceTypeEnum.Unknown;
+
+                if (session.DeviceInfo != null)
+                {
+                    if (!String.IsNullOrEmpty(session.DeviceInfo.Browser))
+                    {
+                        deviceName = session.DeviceInfo.Browser;
+                        if (!String.IsNullOrEmpty(session.DeviceInfo.Model))
+                        {
+                            deviceName = deviceName + " on " + session.DeviceInfo.Model;
+                        }
+                        else if (!String.IsNullOrEmpty(session.DeviceInfo.OperatingSystem))
+                        {
+                            deviceName = deviceName + " on " + session.DeviceInfo.OperatingSystem;
+                        }
+                    }
+
+                    switch (session.DeviceInfo.DeviceType)
+                    {
+                        case DeviceInformation.DeviceTypeEnum.Desktop:
+                            deviceType = DeviceTypeEnum.Desktop;
+                            break;
+                        case DeviceInformation.DeviceTypeEnum.Smartphone:
+                            deviceType = DeviceTypeEnum.Smartphone;
+                            break;
+                        case DeviceInformation.DeviceTypeEnum.Tablet:
+                            deviceType = DeviceTypeEnum.Tablet;
+                            break;
+                    }
+                }
+
                 Session replySession = new Session
                 {
                     Id = session.Id.ToString(),
                     LastActive = NodaTime.Serialization.Protobuf.NodaExtensions.ToTimestamp(session.LastUsedTime),
-                    Name = session.Name,
                     SignedIn = NodaTime.Serialization.Protobuf.NodaExtensions.ToTimestamp(session.CreationTime),
+                    Name = deviceName,
+                    IsCurrentSession = (currentCookieId == session.Id),
+                    DeviceType = deviceType
                 };
 
                 foreach (AuthSessionIp sessionIp in session.SessionIps)
@@ -79,7 +114,7 @@ namespace AuthServer.Server.GRPC.Security
             AppUser user = await _userManager.GetUserAsync(context.GetHttpContext().User);
             List<AuthSession> sessions = _sessionManager.GetActiveSessionsForUser(user);
 
-            return FormatSessionListReply(sessions);
+            return FormatSessionListReply(sessions, context);
         }
 
         public override async Task<SessionListReply> ListInactiveSessions(Empty request, ServerCallContext context)
@@ -87,7 +122,7 @@ namespace AuthServer.Server.GRPC.Security
             AppUser user = await _userManager.GetUserAsync(context.GetHttpContext().User);
             List<AuthSession> sessions = _sessionManager.GetExpiredSessionsForUser(user);
 
-            return FormatSessionListReply(sessions);
+            return FormatSessionListReply(sessions, context);
         }
     }
 }

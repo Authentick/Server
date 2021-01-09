@@ -1,0 +1,67 @@
+@page "/security/sessions"
+@attribute [Authorize]
+
+@layout SecurityShell
+
+@using AuthServer.Shared.Security
+
+@inject AuthServer.Shared.Security.Sessions.SessionsClient SessionsClient
+
+<h2>Active sessions</h2>
+
+@if (SessionListReply != null)
+{
+  <div class="wrapper">
+    @foreach (Session session in SessionListReply.Sessions)
+    {
+      <SessionEntry 
+        Session="session"
+        InvalidateSessionCallback="InvalidateSession"
+      />
+    }
+  </div>
+}
+
+<h2>Expired sessions</h2>
+
+@if (ExpiredSessionListReply != null)
+{
+  <div class="wrapper">
+    @foreach (Session session in ExpiredSessionListReply.Sessions)
+    {
+      <SessionEntry 
+        Session="session"
+      />
+    }
+  </div>
+}
+
+@code {
+  #nullable enable
+
+  private SessionListReply? SessionListReply;
+  private SessionListReply? ExpiredSessionListReply;
+
+  protected override async Task OnInitializedAsync()
+  {
+    await FetchSessionList();
+  }
+
+  private async Task InvalidateSession(Session session)
+  {
+    InvalidateSessionRequest request = new InvalidateSessionRequest { Id = session.Id };
+    await SessionsClient.InvalidateSessionAsync(request);
+    await FetchSessionList();
+  }
+
+  private async Task FetchSessionList()
+  {
+    Grpc.Core.AsyncUnaryCall<SessionListReply> SessionListReplyTask =  SessionsClient.ListActiveSessionsAsync(new Google.Protobuf.WellKnownTypes.Empty());
+    Grpc.Core.AsyncUnaryCall<SessionListReply> ExpiredSessionListReplyTask = SessionsClient.ListInactiveSessionsAsync(new Google.Protobuf.WellKnownTypes.Empty());
+    
+    await Task.WhenAll(SessionListReplyTask.ResponseAsync, ExpiredSessionListReplyTask.ResponseAsync);
+
+    SessionListReply = await SessionListReplyTask.ResponseAsync;
+    ExpiredSessionListReply = await ExpiredSessionListReplyTask.ResponseAsync;
+  }
+}

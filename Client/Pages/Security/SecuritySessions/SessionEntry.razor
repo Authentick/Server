@@ -1,0 +1,118 @@
+@using AuthServer.Shared.Security
+
+<div>
+    <i class="fas @_icon"></i>
+    <div class="title">@Session.Name</div>
+    @if (Session.IsCurrentSession)
+    {
+        <p>Your current session</p>
+    }
+    else if(_isInvalidated)
+    {
+        <p>Expired on @Session.InvalidatedAt.ToDateTime().ToString("dd MMMM yyyy")</p>
+    }
+    else
+    {
+        <p>Last accessed on @Session.LastActive.ToDateTime().ToString("dd MMMM yyyy")</p>
+    }
+
+    <span>
+        Seen in: 
+        @foreach(string country in _countryList)
+        {
+            @country
+            @if (_countryList.Last() != country)
+            {
+                <text>", "</text>
+            }
+        }
+    </span>
+
+    <button @onclick="@(() => _isExpanded = !_isExpanded)">
+        @if (_isExpanded)
+        {
+            <text>See less</text>
+        }
+        else 
+        {
+            <text>See more</text>
+        }
+    </button>
+
+    @if (_isExpanded)
+    {
+        @if(!_isInvalidated)
+        {
+            <button onclick="InvalidateSession">Revoke access</button>        
+        }
+        <text><i class="fas fa-globe-europe"></i>Locations</text>
+        <ul>
+            @foreach(var location in Session.Locations)
+            {
+                <li>
+                  @location.IpAddress &nbsp;
+                  @if(location.City != null || location.Country != null)
+                  {
+                    <span> (</span>
+                      @if(location.City != null)
+                      {
+                        <span>Near&nbsp;</span> @location.City<span>,&nbsp;</span>
+                      }
+                      @if(location.Country != null)
+                      {
+                        @location.Country
+                      }
+                    <span>)</span>
+                  }
+                </li>
+            }
+        </ul>
+        <p>Signed in:</p>
+        @Session.SignedIn.ToDateTime().ToString("dd MMMM yyyy")
+    }
+
+
+</div>
+
+@code {
+    [Parameter]
+    public AuthServer.Shared.Security.Session Session { get; set; } = null!;
+    [Parameter]
+    public EventCallback<AuthServer.Shared.Security.Session> InvalidateSessionCallback { get; set; }
+
+    private bool _isExpanded;
+    private HashSet<string> _countryList = new HashSet<string>();
+    private string _icon = "fa-desktop";
+    private bool _isInvalidated;
+
+    protected override void OnInitialized()
+    {
+        _isInvalidated = Session.InvalidatedAt != null;
+        switch(Session.DeviceType)
+        {
+            case AuthServer.Shared.Security.Session.Types.DeviceTypeEnum.Smartphone:
+                _icon = "fa-mobile-alt";
+                break;
+            case AuthServer.Shared.Security.Session.Types.DeviceTypeEnum.Tablet:
+                _icon = "fa-tablet-alt";
+                break;
+        }
+
+        foreach(var location in Session.Locations)
+        {
+            if (location.Country != null)
+            {
+                _countryList.Add(location.Country);
+            }
+            else
+            {
+                _countryList.Add("Unknown location");
+            }
+        }
+    }
+
+    private async Task InvalidateSession()
+    {
+        await InvalidateSessionCallback.InvokeAsync(Session);
+    }
+}

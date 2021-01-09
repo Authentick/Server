@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Net;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -168,12 +169,31 @@ namespace AuthServer.Server.Models
     public class AuthSession
     {
         public Guid Id { get; set; }
-        public string Name { get; set; } = null!;
         public Instant CreationTime { get; set; }
         public AppUser User { get; set; } = null!;
         public Instant LastUsedTime { get; set; }
         public Instant? ExpiredTime { get; set; }
         public ICollection<AuthSessionIp> SessionIps { get; set; } = null!;
+        public string? UserAgent { get; set; }
+        [Column(TypeName = "jsonb")]
+        public DeviceInformation? DeviceInfo { get; set; }
+    }
+
+    public class DeviceInformation
+    {
+        public DeviceTypeEnum DeviceType { get; set; }
+        public string? OperatingSystem { get; set; }
+        public string? Browser { get; set; }
+        public string? Brand { get; set; }
+        public string? Model { get; set; }
+
+        public enum DeviceTypeEnum
+        {
+            Unknown = 0,
+            Smartphone = 1,
+            Tablet = 2,
+            Desktop = 3,
+        }
     }
 
     public class AuthSessionIp

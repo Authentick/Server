@@ -23,6 +23,15 @@ message Session {
   repeated LocationReply locations = 4;
   google.protobuf.Timestamp signed_in = 5;
   google.protobuf.Timestamp invalidated_at = 6;
+  DeviceTypeEnum device_type = 7;
+  bool IsCurrentSession = 8;
+  
+  enum DeviceTypeEnum {
+    Unknown = 0;
+    Smartphone = 1;
+    Tablet = 2;
+    Desktop = 3;    
+  }
 
   message LocationReply {
     google.protobuf.StringValue country = 1;
