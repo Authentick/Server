@@ -45,11 +45,11 @@ namespace Gatekeeper.Server.Services.Authentication.BackgroundJob
 
                     session.DeviceInfo = new DeviceInformation
                     {
-                        Brand = info.BrandName,
-                        Browser = info.BrowserName,
+                        Brand = (info.BrandName != "UNK") ? info.BrandName : null,
+                        Browser = (info.BrowserName != "UNK") ? info.BrowserName : null,
                         DeviceType = type,
-                        Model = info.ModelName,
-                        OperatingSystem = info.OperatingSystemName,
+                        Model = (info.ModelName != "UNK") ? info.ModelName : null,
+                        OperatingSystem = (info.OperatingSystemName != "UNK") ? info.OperatingSystemName : null,
                     };
                     await _authDbContext.SaveChangesAsync();
                 }
