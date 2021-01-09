@@ -1,34 +1,75 @@
 @using AuthServer.Shared.Security
 
-<div class="entry">
-    <i class="fas @_icon"></i>
-    <div class="title">@Session.Name</div>
-    @if (Session.IsCurrentSession)
-    {
-        <p>Your current session</p>
-    }
-    else if(_isInvalidated)
-    {
-        <p>Expired on @Session.InvalidatedAt.ToDateTime().ToString("dd MMMM yyyy")</p>
-    }
-    else
-    {
-        <p>Last accessed on @Session.LastActive.ToDateTime().ToString("dd MMMM yyyy")</p>
-    }
-
-    <span>
-        Seen in: 
-        @foreach(string country in _countryList)
-        {
-            @country
-            @if (_countryList.Last() != country)
+<div class="entry d-flex flex-column flex-md-row justify-content-between">
+    <div class="d-flex flex-row">
+        <i class="fas @_icon fa-2x mr-3 pt-2 md-icon-34"></i>
+        <div class="d-flex flex-column line-height-teaser"> 
+            <p class="mb-0">@Session.Name</p>
+            @if (Session.IsCurrentSession)
             {
-                <text>", "</text>
+                <p class="mb-0 text-sm">Your current session</p>
             }
-        }
-    </span>
+            else if(_isInvalidated)
+            {
+                <p class="mb-0 text-sm">Expired on @Session.InvalidatedAt.ToDateTime().ToString("dd MMMM yyyy")</p>
+            }
+            else
+            {
+                <p class="mb-0 text-sm">Last accessed on @Session.LastActive.ToDateTime().ToString("dd MMMM yyyy")</p>
+            }
 
-    <button @onclick="@(() => _isExpanded = !_isExpanded)">
+            <span class="mb-0 text-sm">
+                Seen in: 
+                @foreach(string country in _countryList)
+                {
+                    @country
+                    @if (_countryList.Last() != country)
+                    {
+                        <text>", "</text>
+                    }
+                }
+            </span>
+            @if (_isExpanded)
+                {
+                    <div class="d-flex flex-row text-sm mt-2">
+                        <div class="d-flex flex-column">
+                            <span class="d-flex flex-row justify-content-center align-items-center">
+                                <i class="fas fa-globe-europe mr-1"></i>
+                                <p class="mb-0">Locations</p>
+                            </span>
+                                @foreach(var location in Session.Locations)
+                                {
+                                    <p>
+                                    @location.IpAddress &nbsp;
+                                    @if(location.City != null || location.Country != null)
+                                    {
+                                        <span> (</span>
+                                        @if(location.City != null)
+                                        {
+                                            <span>Near&nbsp;</span> @location.City<span>,&nbsp;</span>
+                                        }
+                                        @if(location.Country != null)
+                                        {
+                                            @location.Country
+                                        }
+                                        <span>)</span>
+                                    }
+                                    </p>
+                                }
+                    </div>
+                    <div class="d-flex flex-column ml-4">
+                        <p class="mb-0">Signed in:</p>
+                        <p class="mb-0">@Session.SignedIn.ToDateTime().ToString("dd MMMM yyyy")</p>
+                    </div>
+                </div>
+                }
+        </div>
+
+    </div>
+
+    <div class="d-flex flex-column">
+
+    <button @onclick="@(() => _isExpanded = !_isExpanded)" class="btn btn-secondary-dark mb-2">
         @if (_isExpanded)
         {
             <text>See less</text>
@@ -39,40 +80,13 @@
         }
     </button>
 
-    @if (_isExpanded)
-    {
-        @if(!_isInvalidated)
+    @if(!_isInvalidated && _isExpanded)
         {
-            <button onclick="InvalidateSession">Revoke access</button>        
+            <button @onclick="InvalidateSession" class="btn btn-secondary-dark">Revoke access</button>        
         }
-        <text><i class="fas fa-globe-europe"></i>Locations</text>
-        <ul>
-            @foreach(var location in Session.Locations)
-            {
-                <li>
-                  @location.IpAddress &nbsp;
-                  @if(location.City != null || location.Country != null)
-                  {
-                    <span> (</span>
-                      @if(location.City != null)
-                      {
-                        <span>Near&nbsp;</span> @location.City<span>,&nbsp;</span>
-                      }
-                      @if(location.Country != null)
-                      {
-                        @location.Country
-                      }
-                    <span>)</span>
-                  }
-                </li>
-            }
-        </ul>
-        <p>Signed in:</p>
-        @Session.SignedIn.ToDateTime().ToString("dd MMMM yyyy")
-    }
-
-
+    </div>
 </div>
+
 
 @code {
     [Parameter]
