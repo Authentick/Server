@@ -124,8 +124,18 @@ namespace AuthServer.Server.GRPC.Security
                 .Where(d => d.Id == id)
                 .SingleAsync();
 
+            int deviceCount = await _authDbContext.UserTotpDevices
+                .Where(d => d.User == user)
+                .CountAsync();
+
             _authDbContext.Remove(device);
             await _authDbContext.SaveChangesAsync();
+
+            // FIXME: Should really not be in here
+            if(deviceCount == 1)
+            {
+                await _userManager.SetTwoFactorEnabledAsync(user, false);
+            }
 
             return new RemoveAuthenticatorReply
             {
