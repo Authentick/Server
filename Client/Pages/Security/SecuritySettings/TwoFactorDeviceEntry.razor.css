@@ -1,0 +1,4 @@
+.entry {
+    padding: 25px;
+    border-bottom: 1px solid var(--secondary-dark);
+}

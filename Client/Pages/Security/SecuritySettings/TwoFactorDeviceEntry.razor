@@ -1,0 +1,38 @@
+@using AuthServer.Shared.Security
+
+<div class="entry d-flex flex-column flex-md-row justify-content-between">
+    <div class="d-flex flex-row">
+        <i class="fas fa-mobile-alt fa-2x mr-3 pt-2 md-icon-34"></i>
+        <div class="d-flex flex-column line-height-teaser"> 
+            <p class="mb-0">@Device.Name</p>
+            @if(Device.LastUsed != null)
+            {
+                <p class="mb-0 text-sm">Last used on @Device.LastUsed.ToDateTime().ToString("dd MMMM yyyy")</p>
+            }
+            else
+            {
+                <p class="mb-0 text-sm">Never used</p>
+            }
+            <p class="mb-0 text-sm">Added on @Device.Added.ToDateTime().ToString("dd MMMM yyyy")</p>
+        </div>
+
+    </div>
+
+    <div class="d-flex flex-column">
+        <button @onclick="Remove" class="btn btn-secondary-dark mb-2 btn-delete">
+            Remove
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public TwoFactorDevice Device { get; set; } = null!;
+    [Parameter]
+    public EventCallback<TwoFactorDevice> InvalidateDeviceCallback { get; set; }
+
+    public async Task Remove()
+    {
+        await InvalidateDeviceCallback.InvokeAsync(Device);
+    }
+}
