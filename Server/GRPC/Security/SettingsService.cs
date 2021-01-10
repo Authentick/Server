@@ -101,6 +101,7 @@ namespace AuthServer.Server.GRPC.Security
                     Added = NodaTime.Serialization.Protobuf.NodaExtensions.ToTimestamp(device.CreationTime),
                     Name = device.Name,
                     Id = device.Id.ToString(),
+                    LastUsed = (device.LastUsedTime != null) ? NodaTime.Serialization.Protobuf.NodaExtensions.ToTimestamp(device.LastUsedTime) : null,
                 };
 
                 reply.TwoFactorDevices.Add(replyDevice);
