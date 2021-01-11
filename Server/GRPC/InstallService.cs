@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using AuthServer.Server.Services.Crypto;
+using AuthServer.Server.Services.TLS;
 using AuthServer.Server.Services.TLS.BackgroundJob;
 using AuthServer.Server.Services.User;
 using AuthServer.Shared;
@@ -122,34 +123,50 @@ namespace AuthServer.Server.GRPC
                 Value = request.SmtpSettings.Port.ToString(),
             };
 
-            SystemSetting tlsCertificateSetting = new SystemSetting
+            SystemSetting? primaryDomainSetting = await _authDbContext.SystemSettings
+                .SingleOrDefaultAsync(s => s.Name == PRIMARY_DOMAIN_KEY);
+            if (primaryDomainSetting == null)
             {
-                Name = "tls.acme.support",
-            };
-
-            if (request.TlsData != null)
-            {
-                tlsCertificateSetting.Value = "true";
-                BackgroundJob.Enqueue<IRequestAcmeCertificateJob>(job => job.Request(request.TlsData.ContactEmail, request.TlsData.Domain));
+                primaryDomainSetting = new SystemSetting
+                {
+                    Name = PRIMARY_DOMAIN_KEY,
+                    Value = context.GetHttpContext().Request.Host.Host,
+                };
+                SystemSetting tlsCertificateSetting = new SystemSetting
+                {
+                    Name = "tls.acme.support",
+                    Value = "false"
+                };
+                _authDbContext.AddRange(primaryDomainSetting, tlsCertificateSetting);
             }
-            else
-            {
-                tlsCertificateSetting.Value = "false";
-            }
 
-            SystemSetting primaryDomainSetting = new SystemSetting
-            {
-                Name = PRIMARY_DOMAIN_KEY,
-                Value = (request.PrimaryDomain != null) ? request.PrimaryDomain : context.GetHttpContext().Request.Host.Host,
-            };
-
-            _authDbContext.AddRange(installSetting, smtpHostnameSetting, smtpUsernameSetting, smtpPasswordSetting, smtpSenderAddress, tlsCertificateSetting, primaryDomainSetting);
+            _authDbContext.AddRange(installSetting, smtpHostnameSetting, smtpUsernameSetting, smtpPasswordSetting, smtpSenderAddress);
             await _authDbContext.SaveChangesAsync();
 
             return new SetupInstanceReply
             {
                 Succeeded = true,
             };
+        }
+
+        private async Task<string> SetNewAuthToken()
+        {
+            SystemSetting? authKeySetting = await _authDbContext.SystemSettings
+                .SingleOrDefaultAsync(s => s.Name == AUTH_KEY);
+            string newAuthKey = _secureRandom.GetRandomString(16);
+
+            if (authKeySetting == null)
+            {
+                authKeySetting = new SystemSetting
+                {
+                    Name = AUTH_KEY,
+                };
+                _authDbContext.Add(authKeySetting);
+            }
+            authKeySetting.Value = newAuthKey;
+
+            await _authDbContext.SaveChangesAsync();
+            return newAuthKey;
         }
 
         public override async Task<StartSetupReply> StartSetup(Empty request, ServerCallContext context)
@@ -165,19 +182,77 @@ namespace AuthServer.Server.GRPC
                 };
             }
 
-            string newAuthKey = _secureRandom.GetRandomString(16);
-            SystemSetting authKeySetting = new SystemSetting
-            {
-                Name = AUTH_KEY,
-                Value = newAuthKey,
-            };
-            _authDbContext.Add(authKeySetting);
-            await _authDbContext.SaveChangesAsync();
+            string newAuthKey = await SetNewAuthToken();
 
             return new StartSetupReply
             {
                 Success = true,
                 AuthToken = newAuthKey,
+            };
+        }
+
+        private async Task<bool> IsAccessible(string authToken)
+        {
+            bool isInstalled = await IsAlreadyInstalled();
+            string existingAuthKey = await GetSetupAuthKey() ?? "";
+            bool authKeysMatch = CryptographicOperations.FixedTimeEquals(Encoding.ASCII.GetBytes(existingAuthKey), Encoding.ASCII.GetBytes(authToken));
+            if (!authKeysMatch || isInstalled)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public override async Task<Empty> IssueTlsCertificate(IssueTlsCertificateRequest request, ServerCallContext context)
+        {
+            if (!await IsAccessible(request.AuthToken))
+            {
+                return new Empty { };
+            }
+
+            SystemSetting tlsCertificateSetting = new SystemSetting
+            {
+                Name = "tls.acme.support",
+                Value = "true",
+            };
+            _authDbContext.Add(tlsCertificateSetting);
+            await _authDbContext.SaveChangesAsync();
+
+            BackgroundJob.Enqueue<IRequestAcmeCertificateJob>(job => job.Request(request.ContactEmail, request.Domain));
+
+            return new Empty();
+        }
+
+        public override async Task<IsTlsCertificateSetupReply> IsTlsCertificateSetup(IsTlsCertificateSetupRequest request, ServerCallContext context)
+        {
+            if (!await IsAccessible(request.AuthToken))
+            {
+                return new IsTlsCertificateSetupReply
+                {
+                    Success = false
+                };
+            }
+
+            return new IsTlsCertificateSetupReply
+            {
+                Success = CertificateRepository.TryGetCertificate(request.Domain, out _),
+            };
+        }
+
+        public override async Task<ChangeInstallTokenReply> ChangeInstallToken(ChangeInstallTokenRequest request, ServerCallContext context)
+        {
+            if (!await IsAccessible(request.AuthToken))
+            {
+                return new ChangeInstallTokenReply
+                {
+                    AuthToken = ""
+                };
+            }
+
+            return new ChangeInstallTokenReply
+            {
+                AuthToken = await SetNewAuthToken(),
             };
         }
     }
