@@ -11,6 +11,10 @@ p {
   line-height: 1.6;
 }
 
+.light-shadow {
+  box-shadow: 0 1rem 3rem rgba(0,0,0,.06);
+}
+
 .loader {
   position: absolute;
   left: 50%;

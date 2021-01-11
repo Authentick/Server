@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using AuthServer.Server.Services.User;
 using AuthServer.Shared.Admin;
+using Gatekeeper.Server.Services.FileStorage;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
@@ -11,16 +12,19 @@ using Microsoft.AspNetCore.Identity;
 
 namespace AuthServer.Server.GRPC.Admin
 {
-    [Authorize(Policy="SuperAdministrator")]
+    [Authorize(Policy = "SuperAdministrator")]
     public class UsersService : AuthServer.Shared.Admin.Users.UsersBase
     {
         private readonly UserManager _userManager;
+        private readonly ProfileImageManager _profileImageManager;
 
         public UsersService(
-            UserManager userManager
+            UserManager userManager,
+            ProfileImageManager profileImageManager
             )
         {
             _userManager = userManager;
+            _profileImageManager = profileImageManager;
         }
 
         public override async Task<CreateUserResponse> CreateUser(CreateUserRequest request, ServerCallContext context)
@@ -31,9 +35,9 @@ namespace AuthServer.Server.GRPC.Admin
                 Email = request.Email,
                 EmailConfirmed = true,
             };
-            
+
             IdentityResult result = await _userManager.CreateAsync(user, request.Password);
-            if(!result.Succeeded)
+            if (!result.Succeeded)
             {
                 return new CreateUserResponse
                 {
@@ -48,7 +52,7 @@ namespace AuthServer.Server.GRPC.Admin
             };
         }
 
-        public override Task<UserListReply> ListUsers(Empty request, ServerCallContext context)
+        public override async Task<UserListReply> ListUsers(Empty request, ServerCallContext context)
         {
             IEnumerable<AppUser> users = _userManager.GetAllUsers();
 
@@ -56,11 +60,19 @@ namespace AuthServer.Server.GRPC.Admin
 
             foreach (AppUser user in users)
             {
-                User userElement = new User { Id = user.Id.ToString(), Name = user.UserName };
+                User userElement = new User
+                {
+                    Id = user.Id.ToString(),
+                    Name = user.UserName,
+                    Email = user.Email,
+                    IsAdmin = await _userManager.IsInRoleAsync(user, "admin"),
+                    IsEnabled = true,
+                    HasPicture = _profileImageManager.HasProfileImage(user.Id),
+                };
                 reply.Users.Add(userElement);
             }
 
-            return Task.FromResult(reply);
+            return reply;
         }
 
         public override string? ToString()

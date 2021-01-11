@@ -14,23 +14,60 @@
 
 @if (UserListReply != null)
 {
-    <div class="table-responsive mb-2">
-        <table class="table table-hover table-bordered mb-4 table-secondary table-striped">
-            <thead class="bg-secondary-dark">
-                <tr>
-                    <th scope="col" class="border-0">Name</th>
-                </tr>
-            </thead>
-            <tbody>
-
-                @foreach (User user in UserListReply.Users)
+    <div class="d-flex flex-column light-shadow rounded p-2 my-4">
+          @foreach (User user in UserListReply.Users)
                 {
-                    <tr>
-                        <td>@user.Name</td>
-                    </tr>
+                    <div class="d-flex flex-row justify-content-between py-3 align-items-left align-items-lg-center text-left">
+                        <div class="d-flex flex-row col-4">
+                            @if(user.HasPicture)
+                            {
+                                <img src="/api/profile/image/@user.Id" class="avatar avatar__sm mr-2">
+                            }
+                            else
+                            {
+                                <span class="material-icons text-primary md-icon-42 mr-1">face</span>       
+                            }
+                            <div class="d-flex flex-column">
+                                <span class="mb-0">@user.Name</span> 
+                                <span class="text-sm font-weight-light flex-row"> 
+                                    <span class="text-sm font-weight-bold mr-2 d-lg-none">Email</span>
+                                    @user.Email
+                                </span>
+                                <span class="d-flex flex-row d-lg-none font-weight-light text-sm">
+                                    <span class="text-black font-weight-bold mr-2">Username</span>
+                                    @user.Name
+                                </span>
+                                <span class="d-flex flex-row d-lg-none font-weight-light text-sm">
+                                    <span class="font-weight-bold mr-2">Status</span>
+                                    @if(user.IsEnabled)
+                                    {
+                                        <span class="text-green">Enabled</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-watermelon">Disabled</span>
+                                    }
+                                </span>
+                                <span class="d-flex flex-row d-lg-none font-weight-light text-sm">
+                                    <span class="text-black font-weight-bold mr-2">Role</span>
+                                    @GetRoleName(user.IsAdmin)
+                                </span>
+                            </div>
+                        </div>
+
+                        <span class="d-lg-flex d-none col-3">@user.Name</span>
+                        @if(user.IsEnabled)
+                        {
+                            <span class="d-lg-flex d-none text-green col-2">Enabled</span>
+                        }
+                        else
+                        {
+                            <span class="d-lg-flex d-none text-watermelon col-2">Disabled</span>
+                        }
+                        <span class="d-lg-flex d-none col-2">@GetRoleName(user.IsAdmin)</span>
+                        <i class="fas fa-ellipsis-h col-2"></i>
+                    </div>
                 }
-            </tbody>
-        </table>
     </div>
 }
 
@@ -42,5 +79,10 @@
     protected override async Task OnInitializedAsync()
     {
         UserListReply = await UsersClient.ListUsersAsync(new Google.Protobuf.WellKnownTypes.Empty());
+    }
+
+    private string GetRoleName(bool isAdmin)
+    {
+        return isAdmin ? "Admin" : "Member";
     }
 }
