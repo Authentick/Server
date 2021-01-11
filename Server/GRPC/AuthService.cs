@@ -205,6 +205,7 @@ namespace Gatekeeper.Server.GRPC
                 {
                     result.ProfilePicture = "/api/profile/image/" + user.Id.ToString();
                 }
+                result.UserName = user.UserName;
             }
             else
             {
