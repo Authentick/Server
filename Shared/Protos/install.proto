@@ -9,6 +9,32 @@ service Install {
   rpc SetupInstance (SetupInstanceRequest) returns (SetupInstanceReply);
   rpc StartSetup (google.protobuf.Empty) returns (StartSetupReply);
   rpc CheckIsInstalled (google.protobuf.Empty) returns (CheckIsInstalledReply);
+  rpc IssueTlsCertificate (IssueTlsCertificateRequest) returns (google.protobuf.Empty);
+  rpc IsTlsCertificateSetup (IsTlsCertificateSetupRequest) returns (IsTlsCertificateSetupReply);
+  rpc ChangeInstallToken (ChangeInstallTokenRequest) returns (ChangeInstallTokenReply);
+}
+
+message ChangeInstallTokenRequest {
+  string auth_token = 1;
+}
+
+message ChangeInstallTokenReply {
+  string auth_token = 1;
+}
+
+message IsTlsCertificateSetupRequest {
+  string domain = 1;
+  string auth_token = 2;
+}
+
+message IsTlsCertificateSetupReply {
+  bool success = 1;
+}
+
+message IssueTlsCertificateRequest {
+  string domain = 1;
+  string contact_email = 2;
+  string auth_token = 3;
 }
 
 message CheckIsInstalledReply {
@@ -19,8 +45,6 @@ message SetupInstanceRequest {
   SetupSmtpData smtp_settings = 1;
   SetupAccountData account_data = 2;
   string auth_token = 3;
-  SetupTlsData tls_data = 4;
-  google.protobuf.StringValue primary_domain = 5;
 }
 
 message StartSetupReply {
@@ -28,10 +52,6 @@ message StartSetupReply {
   google.protobuf.StringValue auth_token = 2;
 }
 
-message SetupTlsData {
-  string domain = 1;
-  string contact_email = 2;
-}
 
 message SetupSmtpData {
   string username = 1;

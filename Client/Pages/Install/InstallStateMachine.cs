@@ -12,10 +12,18 @@ namespace AuthServer.Client.Pages.Install
         private IStep? PreviousStep;
         private IStep? NextStep;
         private SetupInstanceRequest _setupInstanceRequest = new SetupInstanceRequest();
+        public string? AuthToken;
+        public string? DomainName;
+        public string? AcmeContactEmailAddress;
 
-        internal void Initialize()
+        public void Initialize()
         {
             _currentStep = new InitialSetupStep();
+        }
+
+        public void ResumeFromHttps()
+        {
+            _currentStep = new EmailSelectionStep();
         }
 
         internal SetupInstanceRequest GetSetupInstanceRequest()
@@ -38,13 +46,8 @@ namespace AuthServer.Client.Pages.Install
                     };
                     break;
                 case ConfigureLetsEncryptCertificateStep tlsStep:
-                    _setupInstanceRequest.TlsData = new SetupTlsData
-                    {
-                        Domain = tlsStep.letsEncryptCertificateSettings.DomainName,
-                        ContactEmail = tlsStep.letsEncryptCertificateSettings.Email,
-                    };
-
-                    _setupInstanceRequest.PrimaryDomain = tlsStep.letsEncryptCertificateSettings.DomainName;
+                    DomainName = tlsStep.letsEncryptCertificateSettings.DomainName;
+                    AcmeContactEmailAddress = tlsStep.letsEncryptCertificateSettings.Email;
                     break;
                 case AccountCreationStep accountCreationStep:
                     _setupInstanceRequest.AccountData = new SetupAccountData

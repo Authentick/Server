@@ -1,0 +1,54 @@
+@implements IStep
+
+@inject AuthServer.Shared.Install.InstallClient InstallClient
+@inject NavigationManager NavigationManager
+
+@using AuthServer.Shared
+@using System.Web
+
+<h1>Configuring certificates</h1>
+
+<p>Gatekeeper is currently configuring the requested HTTPS certificates. Upon completion, you will be automatically redirected.</p>
+
+@code {
+    [Parameter]
+    public InstallStateMachine StateMachine { get; set; }
+
+    protected override void OnInitialized() 
+    {
+        StateMachine.SetNextStep(null);
+        StateMachine.SetPreviousStep(null);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RequestTlsCertificate();
+        await Task.Delay(5000);
+        await CheckCertificateValidityLoop();
+    }
+
+    private async Task RequestTlsCertificate()
+    {
+        await InstallClient.IssueTlsCertificateAsync(new IssueTlsCertificateRequest{
+            AuthToken = StateMachine.AuthToken,
+            Domain = StateMachine.DomainName,
+            ContactEmail = StateMachine.AcmeContactEmailAddress,
+        });
+    }
+
+    private async Task CheckCertificateValidityLoop()
+    {
+        IsTlsCertificateSetupReply reply = await InstallClient.IsTlsCertificateSetupAsync(new IsTlsCertificateSetupRequest {
+            AuthToken = StateMachine.AuthToken,
+            Domain = StateMachine.DomainName,
+        });
+
+        if(reply.Success)
+        {
+            NavigationManager.NavigateTo("https://" + StateMachine.DomainName + "/install/" + HttpUtility.UrlPathEncode(StateMachine.AuthToken));
+        } else {
+            await Task.Delay(5000);
+            await CheckCertificateValidityLoop();
+        }
+    }
+}
