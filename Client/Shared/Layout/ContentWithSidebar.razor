@@ -2,6 +2,8 @@
 
 @implements IDisposable
 
+@using AuthServer.Client.Shared.Components.Avatar
+
 @inject Util.MobileNavigationStateProvider MobileNavigationStateProvider
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
@@ -27,11 +29,13 @@
             </div>
         </div>
         <div class="d-lg-flex d-none justify-content-center">
-            <a href="/profile">
+            <a href="/profile" class="text-decoration-none">
                 @if(_profileImageUrl != null) {
                     <img src="@_profileImageUrl" class="avatar avatar__sm">
                 } else {
-                    <span class="material-icons" style="font-size: 40px; color: white;">face</span>                    
+                    <AvatarPlaceholder 
+                        Name="@_userName"
+                        Size="AvatarPlaceholder.SizeEnum.Small" />
                 }
             </a>
         </div>
@@ -56,7 +60,9 @@
             @if(_profileImageUrl != null) {
                 <img src="@_profileImageUrl" class="avatar avatar__sm">
             } else {
-                <span class="material-icons" style="font-size: 40px; color: white;">face</span>                    
+                <AvatarPlaceholder 
+                    Name="@_userName"
+                    Size="AvatarPlaceholder.SizeEnum.Small" />
             }        
         </a>
     </div>
@@ -75,12 +81,14 @@
     private string _visibleContentClass = "";
     private string _customClass = "";
     private string? _profileImageUrl;
+    private string? _userName;
 
     protected override void OnInitialized() 
     {
         MobileNavigationStateProvider.ActiveContentChanged += ActiveContentChanged;
         ActiveContentChanged(MobileNavigationStateProvider.GetActiveContent());
         _profileImageUrl = ((AuthServer.Client.Util.AuthStateProvider)AuthenticationStateProvider).ProfileImageUrl;
+        _userName = ((AuthServer.Client.Util.AuthStateProvider)AuthenticationStateProvider).UserName;
     }
     
     private void SetNavActive(string name)

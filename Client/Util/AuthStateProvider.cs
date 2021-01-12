@@ -11,6 +11,7 @@ namespace AuthServer.Client.Util
         private readonly AuthClient _authClient;
         private readonly InstallationStateProvider _installationStateProvider;
         public string? ProfileImageUrl;
+        public string? UserName;
 
         public AuthStateProvider(
             AuthClient authClient,
@@ -26,6 +27,7 @@ namespace AuthServer.Client.Util
             var identityResult = await _authClient.WhoAmIAsync(new Google.Protobuf.WellKnownTypes.Empty());
             _installationStateProvider.IsInstalled = identityResult.IsInstalled;
             ProfileImageUrl = (identityResult.ProfilePicture != "") ? identityResult.ProfilePicture : null;
+            UserName = (!System.String.IsNullOrEmpty(identityResult.UserName)) ? identityResult.UserName : null;
 
             List<Claim> claims = new List<Claim>();
             if (identityResult.IsAuthenticated)

@@ -28,6 +28,7 @@ message WhoAmIReply {
   bool is_installed = 3;
   repeated string roles = 4;
   google.protobuf.StringValue profile_picture = 5;
+  string user_name = 6;
 }
 
 message LoginRequest {
