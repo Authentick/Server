@@ -4,6 +4,8 @@
 @layout AdminShell
 
 @using AuthServer.Shared.Admin
+@using AuthServer.Client.Shared.Components.Avatar
+
 
 @inject AuthServer.Shared.Admin.Users.UsersClient UsersClient
 
@@ -25,7 +27,11 @@
                             }
                             else
                             {
-                                <span class="material-icons text-primary md-icon-42 mr-1">face</span>       
+                                <AvatarPlaceholder 
+                                Name="@user.Name" 
+                                Size="AvatarPlaceholder.SizeEnum.Small"
+                                OptionalClasses="mr-2"
+                                 />      
                             }
                             <div class="d-flex flex-column">
                                 <span class="mb-0">@user.Name</span> 

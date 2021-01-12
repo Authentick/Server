@@ -4,6 +4,7 @@
 @layout ProfileShell
 
 @using AuthServer.Shared
+@using AuthServer.Client.Shared.Components.Avatar
 
 @inject UserProfile.UserProfileClient UserProfileClient
 @inject HttpClient HttpClient
@@ -16,7 +17,10 @@
                 @if(_profileImageUrl != null) {
                     <img src="@_profileImageUrl" class="avatar avatar__lg">
                 } else {
-                    <span class="material-icons" style="font-size: 100px;">face</span>                    
+                    <AvatarPlaceholder 
+                                Name="@UserReply.Username" 
+                                Size="AvatarPlaceholder.SizeEnum.Large"
+                                 />                      
                 }
                 <InputFile OnChange="@OnInputFileChange" class="btn btn-secondary-dark mt-3" />
             </div>

@@ -1,4 +1,7 @@
-<div class="@GetSizeClass()" style="background-color: @GetAvatarColor()">
+<div 
+    class="avatar @GetSizeClass() d-flex justify-content-center align-items-center text-white font-weight-bold @OptionalClasses" 
+    style="background-color: @GetAvatarColor()"
+>
     @if (Name != null && Name.Length > 0)
     {
         @Name[0].ToString().ToUpper()
@@ -9,7 +12,9 @@
     [Parameter]
     public SizeEnum Size { get; set; }
     [Parameter]
-    public string Name { get; set; }
+    public string Name { get; set; } = null!;
+    [Parameter]
+    public string OptionalClasses { get; set; } = "";
 
     public enum SizeEnum { Small, Medium, Large }
 
@@ -33,7 +38,7 @@
             case SizeEnum.Medium:
                 return "avatar__md";
             case SizeEnum.Large:
-                return "avatar__lg";
+                return "avatar__lg text-lg";
             default:
                 throw new InvalidOperationException("No size provided");
         }
