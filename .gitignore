@@ -34,8 +34,8 @@ msbuild.wrn
 .vs/
 
 # NPM
-Client/node_modules/
-Server.Tests.Visual/node_modules/
+Gatekeeper.Client/node_modules/
+Gatekeeper.Server.Web.Tests.Visual/node_modules/
 
 # Generated CSS
 Client/wwwroot/css/

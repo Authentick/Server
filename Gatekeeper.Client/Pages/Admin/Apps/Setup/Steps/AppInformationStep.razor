@@ -1,0 +1,79 @@
+@implements IStep
+
+@using AuthServer.Shared.Admin
+@using Gatekeeper.Client.Shared.Components.Form
+@using Gatekeeper.Client.Shared.Components.Form.FormValidator
+
+@inject AuthServer.Shared.ConnectivityCheckService.ConnectivityCheckServiceClient ConnectivityCheckServiceClient
+
+<h2>Application information</h2>
+
+ <ValidatingFormWrapper FormValidityChangedCallback="FormValidityChangedCallback">
+    <ValidatingInput 
+        Name="Name"
+        Placeholder="Name"
+        @bind-Value="Name"
+        Required="true"
+        FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator()}"
+    />
+
+    <ValidatingTextarea 
+        Name="Description"
+        Placeholder="Description shown to users"
+        @bind-Value="Description"
+        Required="true"
+        FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator()}"
+    />
+
+    @if (StateMachine.GetAddNewAppRequest().HostingType != HostingType.NonWeb)
+    {
+        <ValidatingInput 
+            Name="URL"
+            Placeholder="URL shown to users"
+            @bind-Value="Url"
+            Required="true"
+            FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator(), new ValidUrlValidator()}"
+        />
+    }
+
+    @if (StateMachine.GetAddNewAppRequest().HostingType == HostingType.WebGatekeeperProxy)
+    {
+        <ValidatingInput 
+            Name="Public Domain Name"
+            Placeholder="example.com"
+            @bind-Value="PublicDomain"
+            Required="true"
+            FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator(), new DomainPublicAccessibleValidator(ConnectivityCheckServiceClient)}"
+        />
+        <ValidatingInput 
+            Name="Internal URL"
+            Placeholder="http://192.168.1.28"
+            @bind-Value="InternalUrl"
+            Required="true"
+            FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator(), new ValidUrlValidator()}"
+        />
+    }
+</ValidatingFormWrapper>
+
+@code {
+    [Parameter]
+    public SetupAppStateMachine StateMachine { get; set; } = null!;
+
+    public string Name { get; set; } = "";
+    public string Description { get; set; } = "";
+    public string Url { get; set; } = "";
+    public string PublicDomain { get; set; } = "";
+    public string InternalUrl { get; set; } = "";
+
+    private async Task FormValidityChangedCallback(bool valid)
+    {
+        if (valid) 
+        {
+            StateMachine.SetNextStep(new ChooseAuthMethodStep());
+        }
+        else
+        {
+            StateMachine.SetNextStep(null);
+        }
+    }
+}

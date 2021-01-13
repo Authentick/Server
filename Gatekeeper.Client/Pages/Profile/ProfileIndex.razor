@@ -1,0 +1,90 @@
+@page "/profile/"
+@attribute [Authorize]
+
+@layout ProfileShell
+
+@using AuthServer.Shared
+@using Gatekeeper.Client.Shared.Components.Avatar
+
+@inject UserProfile.UserProfileClient UserProfileClient
+@inject HttpClient HttpClient
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@if(UserReply != null) {
+    <div class="d-flex flex-column justify-content-center"> 
+        <div class="d-flex flex-column flex-lg-row">
+            <div class="d-flex flex-column justify-content-center align-items-center mb-3 mb-lg-0 mr-0 mr-lg-5">
+                @if(_profileImageUrl != null) {
+                    <img src="@_profileImageUrl" class="avatar avatar__lg">
+                } else {
+                    <AvatarPlaceholder 
+                                Name="@UserReply.Username" 
+                                Size="AvatarPlaceholder.SizeEnum.Large"
+                                 />                      
+                }
+                <InputFile OnChange="@OnInputFileChange" class="btn btn-secondary-dark mt-3" />
+            </div>
+
+            <div class="user-profile__details form-group d-flex flex-row flex-wrap justify-content-center justify-content-lg-start">
+                <div class="px-4 pb-lg-5 pb-3 width-md-100">
+                    <span class="text-md font-weight-bold">Name</span>
+                    <input type="text" class="form-control bg-secondary" disabled value="@UserReply.Username" />
+                </div>
+                <div class="px-4 pb-lg-5 pb-3 width-md-100">
+                    <span class="text-md font-weight-bold">Username</span>
+                    <input type="text" class="form-control bg-secondary" disabled value="@UserReply.Username" />
+                </div>
+                <div class="px-4 pb-lg-5 pb-3 width-md-100">
+                    <span class="text-md font-weight-bold">Email</span>
+                    <input type="text" class="form-control bg-secondary" disabled value="@UserReply.Email" />
+                </div>
+                <div class="px-4 pb-lg-5 pb-3 width-md-100">
+                    <span class="text-md font-weight-bold">Language</span>
+                    <input type="text" class="form-control bg-secondary" disabled value="English" />
+                </div>
+
+            </div>
+        </div>
+    </div>
+     @if(UserReply.GroupNames.Count > 0) {
+        <div class="d-flex flex-column px-4 px-lg-0 mt-0 mt-lg-4">
+            <span class="text-md font-weight-bold">Your groups</span>
+                @foreach (string name in UserReply.GroupNames)
+                {
+                    <div>@name</div>
+                }
+        </div>
+     }
+
+     <p>Gatekeeper is made possible by the <a href="https://gatekeeper.page">Gatekeeper project</a> and <a href="/credits.txt">other open source software</a>.</p>
+}
+
+@code {
+    private UserReply? UserReply;
+    private string? _profileImageUrl;
+
+    protected override void OnInitialized()
+    {
+        _profileImageUrl = ((Gatekeeper.Client.Util.AuthStateProvider)AuthenticationStateProvider).ProfileImageUrl;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        UserReply = await UserProfileClient.GetUserAsync(new Google.Protobuf.WellKnownTypes.Empty());
+    }
+    
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        string format = "image/jpeg";
+
+        var resizedImageFile = await e.File.RequestImageFileAsync(format,  256, 256);
+
+        var buffer = new byte[resizedImageFile.Size];
+        await resizedImageFile.OpenReadStream().ReadAsync(buffer);
+
+        MultipartFormDataContent content = new MultipartFormDataContent {
+            { new ByteArrayContent(buffer), "\"upload\"", resizedImageFile.Name}
+        };
+        await HttpClient.PutAsync("api/profile/image/", content);
+    }
+}

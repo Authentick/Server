@@ -72,9 +72,9 @@ jobs:
       with:
         dotnet-version: '5.0'
     - name: Install dependencies
-      run: dotnet restore Server/AuthServer.Server.csproj 
+      run: dotnet restore Gatekeeper.Server.Web/Gatekeeper.Server.Web.csproj 
     - name: Build
-      run: dotnet build --configuration Release Server/AuthServer.Server.csproj
+      run: dotnet build --configuration Release Gatekeeper.Server.Web/Gatekeeper.Server.Web.csproj
   
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1

@@ -1,0 +1,23 @@
+@using Gatekeeper.Client.Shared.Layout.Sidebar
+@using Gatekeeper.Client.Shared.Layout.Sidebar.Item
+@using AuthServer.Shared
+
+@inject Auth.AuthClient AuthClient
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<LeftSidebarRoot Header="Profile">
+    <SingleLineItem 
+        Name="Profile"
+        Uri="profile"
+    />
+    <a href="#" @onclick="@Logout" class="py-2 sidebar__menu-item px-3">
+        Logout
+    </a>
+</LeftSidebarRoot>
+
+@code {
+    private async Task Logout() {
+        await AuthClient.LogoutAsync(new Google.Protobuf.WellKnownTypes.Empty());
+        ((Util.AuthStateProvider) AuthenticationStateProvider).StateHasChanged();
+    }
+}
