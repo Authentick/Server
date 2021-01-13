@@ -1,0 +1,81 @@
+@page "/admin/users/create"
+@attribute [Authorize(Policy = "SuperAdministrator")]
+
+@layout AdminShell
+
+@using AuthServer.Shared.Admin
+@using Gatekeeper.Client.Shared.Components.Form
+@using Gatekeeper.Client.Shared.Components.Form.FormValidator
+
+@inject NavigationManager NavigationManager
+@inject AuthServer.Shared.Admin.Users.UsersClient UsersClient
+@inject AuthServer.Shared.Auth.AuthClient AuthClient
+
+<h2 class="text-lg">Add a new user</h2>
+
+@if(_errorMessage != null)
+{
+    <PostSubmissionAlert 
+        Message="@_errorMessage"/>
+}
+
+<ValidatingFormWrapper FormValidityChangedCallback="FormValidityChangedCallback">
+    <ValidatingInput 
+        Name="Username"
+        Placeholder="Username"
+        @bind-Value="@Username"
+        Required="true"
+        FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator()}"
+    />
+    <ValidatingInput 
+        Name="Email"
+        InputType="email"
+        Placeholder="Email"
+        @bind-Value="@Email"
+        Required="true"
+        FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator(), new EmailValidator()}"
+    />
+    <ValidatingInput 
+        Name="Password"
+        InputType="password"
+        Placeholder="Password"
+        @bind-Value="@Password"
+        Required="true"
+        FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator(), new PasswordPolicyValidator(AuthClient)}"
+    />
+</ValidatingFormWrapper>
+
+<button @onclick="SubmitForm" type="submit" class="btn btn-secondary-dark btn-add" disabled="@Disabled">Add</button>
+
+@code {
+    private string Username = "";
+    private string Email = "";
+    private string Password = "";
+    private bool Disabled = true;
+    private string? _errorMessage;
+
+    private async Task FormValidityChangedCallback(bool valid)
+    {
+        Disabled = !valid;
+    }
+    
+    private async Task SubmitForm() 
+    {
+        CreateUserRequest createUserRequest = new CreateUserRequest 
+        {
+            Username = Username,
+            Email = Email,
+            Password = Password,
+        };
+        
+        CreateUserResponse response = await UsersClient.CreateUserAsync(createUserRequest);
+        if (response.Success)
+        {
+            NavigationManager.NavigateTo("/admin/users/");
+        }
+        else
+        {
+            _errorMessage = response.Error;
+        }
+    }
+}

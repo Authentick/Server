@@ -1,0 +1,36 @@
+@implements IStep
+
+@using Gatekeeper.Client.Pages.Admin.Apps.Setup.Steps.Layouts.CardChoose
+
+<h2>What is the type of your application?</h2>
+
+<CardChooseItems 
+    CardItems="@CardItems"
+    OnSelect="@OnSelect" />
+
+@code {
+    [Parameter]
+    public SetupAppStateMachine StateMachine { get; set; } = null!;
+
+    public string? Type { get; set; }
+
+    private readonly List<CardItem> CardItems = new List<CardItem>(){
+        new CardItem("Web", "Applications accessible via a browser", "/img/nounproject/website.svg"),
+        new CardItem("Other", "Applications accessible via another mean", "/img/nounproject/data-analytics.svg"),
+    };
+
+    private Task OnSelect(CardItem cardItem)
+    {
+        Type = cardItem.Name;
+        if (cardItem.Name == "Web")
+        {
+            StateMachine.SetNextStep(new WebHostingTypeSelectionStep());
+        }
+        else
+        {
+            StateMachine.SetNextStep(new AppInformationStep());
+        }
+
+        return Task.CompletedTask;
+    }
+}

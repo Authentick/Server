@@ -1,0 +1,86 @@
+@using AuthServer.Shared.Admin
+@using Gatekeeper.Client.Shared.Components.Form
+@using Gatekeeper.Client.Shared.Components.Form.FormValidator
+
+@inject AuthServer.Shared.Admin.AdminApps.AdminAppsClient AppsClient
+
+@if (TabData != null) {
+    <br />
+    <ValidatingFormWrapper FormValidityChangedCallback="FormValidityChangedCallback">
+        <div class="col-12 col-md-6 p-0">
+            <ValidatingInput 
+                Name="Name"
+                Placeholder="Name"
+                @bind-Value="@TabData.Name"
+                Required="true"
+                FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator()}"
+            />
+        </div>
+
+        <div class="col-12 col-md-6 p-0">
+            <ValidatingTextarea 
+                Name="Description"
+                Placeholder="Description shown to users"
+                @bind-Value="@TabData.Description"
+                Required="true"
+                FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator()}"
+            />
+        </div>
+
+        @if (@TabData.Url != null) {
+            <div class="col-12 col-md-6 p-0">
+                <ValidatingInput 
+                    Name="URL"
+                    Placeholder="URL shown to users"
+                    @bind-Value="@TabData.Url"
+                    Required="true"
+                    FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator(), new ValidUrlValidator()}"
+                />
+            </div>
+        }
+    </ValidatingFormWrapper>
+
+    <Gatekeeper.Client.Shared.Components.Button.SavingButton
+        ButtonClickedCallback="@SaveButtonClicked"
+        Configuration="_saveButtonConfiguration" />
+}
+
+@code {
+    [Parameter]
+    public AppInfoTabData? TabData { get; set;}
+
+    [Parameter]
+    public EventCallback<AppInfoTabData?> TabDataChangedCallBack { get; set; }
+
+    private Gatekeeper.Client.Shared.Components.Button.SavingButton.ButtonConfiguration _saveButtonConfiguration = new Shared.Components.Button.SavingButton.ButtonConfiguration();
+
+    public class AppInfoTabData
+    {
+        public string AppId { get; set; }
+        public string? Name { get; set;}
+        public string? Description { get; set; }
+        public string? Url { get; set; }
+    }
+
+    private async Task FormValidityChangedCallback(bool valid)
+    {
+        _saveButtonConfiguration.IsDisabled = !valid;
+    }
+
+    private async Task SaveButtonClicked() 
+    {
+        _saveButtonConfiguration.State = Shared.Components.Button.SavingButton.ButtonStateEnum.Processing;
+        SaveAppInformationRequest request = new SaveAppInformationRequest {
+            AppId = TabData.AppId,
+            Description = TabData.Description,
+            Name = TabData.Name,
+            Url = TabData.Url,
+        };
+        
+        await AppsClient.SaveAppInformationAsync(request);
+        _saveButtonConfiguration.State = Shared.Components.Button.SavingButton.ButtonStateEnum.Finished;
+        await TabDataChangedCallBack.InvokeAsync(TabData);
+        await Task.Delay(1000);
+        _saveButtonConfiguration.State = Shared.Components.Button.SavingButton.ButtonStateEnum.Default;
+    }
+}

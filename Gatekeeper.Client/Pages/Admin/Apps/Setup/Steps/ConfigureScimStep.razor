@@ -1,0 +1,51 @@
+@implements IStep
+
+@using Gatekeeper.Client.Shared.Components.Form.FormValidator
+@using Gatekeeper.Client.Shared.Components.Form
+
+<h2>SCIM details</h2>
+
+<ValidatingFormWrapper FormValidityChangedCallback="FormValidityChangedCallback">
+    <ValidatingInput 
+        InputType="url"
+        Name="Endpoint"
+        Placeholder="https://example.com/scim/v2/"
+        @bind-Value="scimSettings.Endpoint"
+        Required="true"
+        FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator(), new ValidUrlValidator()}"
+    />
+
+    <ValidatingInput 
+        InputType="password"
+        Name="Credentials"
+        Placeholder="SCIM credentials"
+        @bind-Value="scimSettings.Credentials"
+        Required="true"
+        FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator()}"
+    />
+</ValidatingFormWrapper>
+
+@code {
+    [Parameter]
+    public SetupAppStateMachine StateMachine { get; set; } = null!;
+    internal ScimSettings scimSettings = new ScimSettings();
+
+    private async Task FormValidityChangedCallback(bool valid)
+    {
+    
+        if(valid)
+        {
+            StateMachine.SetNextStep(new ConfigureAccessGroupsStep());
+        }
+        else
+        {
+            StateMachine.SetNextStep(null);
+        }
+    }
+
+    internal class ScimSettings
+    {
+        public string Endpoint { get; set; } = "";
+        public string Credentials { get; set; } = "";
+    }
+}

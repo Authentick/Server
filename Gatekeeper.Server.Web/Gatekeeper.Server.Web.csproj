@@ -42,7 +42,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Client\AuthServer.Client.csproj" />
+    <ProjectReference Include="..\Gatekeeper.Client\Gatekeeper.Client.csproj" />
     <ProjectReference Include="..\Gatekeeper.Shared.ClientAndWeb\Gatekeeper.Shared.ClientAndWeb.csproj" />
   </ItemGroup>
 

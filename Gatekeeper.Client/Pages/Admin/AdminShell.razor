@@ -1,0 +1,20 @@
+@layout MainLayout
+
+@inherits OwningComponentBase
+
+@using Gatekeeper.Client.Shared.Layout
+
+<ContentWithSidebar>
+    <Sidebar>
+        <AdminSidebar />
+    </Sidebar>
+
+    <Content>
+        @Body
+    </Content>
+</ContentWithSidebar>
+
+@code {
+    [Parameter]
+    public RenderFragment Body { get; set; }
+}

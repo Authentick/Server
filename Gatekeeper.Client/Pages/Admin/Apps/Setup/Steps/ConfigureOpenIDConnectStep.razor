@@ -1,0 +1,36 @@
+@implements IStep
+
+@using Gatekeeper.Client.Shared.Components.Form.FormValidator
+@using Gatekeeper.Client.Shared.Components.Form
+
+<h2>Configure OpenID Connect</h2>
+
+<ValidatingFormWrapper FormValidityChangedCallback="FormValidityChangedCallback">
+    <ValidatingInput 
+        InputType="url"
+        Name="Redirect URL"
+        Placeholder="https://example.com/oidc/redirect_url"
+        @bind-Value="RedirectUrl"
+        Required="true"
+        FormValidators="new List<IFormValidator>(){new NotEmptyStringValidator(), new ValidUrlValidator()}"
+    />
+</ValidatingFormWrapper>
+
+@code {
+    [Parameter]
+    public SetupAppStateMachine StateMachine { get; set; } = null!;
+
+    public string RedirectUrl { get; set; } = "";
+
+    private async Task FormValidityChangedCallback(bool valid)
+    {
+        if(valid)
+        {
+            StateMachine.SetNextStep(new ChooseDirectoryMethodStep());
+        }
+        else
+        {
+            StateMachine.SetNextStep(null);
+        }
+    }
+}
