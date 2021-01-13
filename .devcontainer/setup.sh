@@ -6,7 +6,7 @@ cd $DIR/Gatekeeper.Server.Web/ && dotnet restore
 cd $DIR/Client/ && dotnet restore
 cd $DIR/Client.Tests/ && dotnet restore
 cd $DIR/Gatekeeper.Server.Web.Tests/ && dotnet restore
-cd $DIR/Shared/ && dotnet restore
+cd $DIR/Gatekeeper.Shared.ClientAndWeb/ && dotnet restore
 
 # Install NPM dependencies and compile CSS
 cd $DIR/Client && npm install

@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Shared\AuthServer.Shared.csproj" />
+    <ProjectReference Include="..\Gatekeeper.Shared.ClientAndWeb\Gatekeeper.Shared.ClientAndWeb.csproj" />
   </ItemGroup>
 
 </Project>
