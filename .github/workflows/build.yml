@@ -18,11 +18,11 @@ jobs:
       with:
         dotnet-version: '5.0'
     - name: Install dependencies
-      run: dotnet restore Server/AuthServer.Server.csproj 
+      run: dotnet restore Gatekeeper.Server.Web/Gatekeeper.Server.Web.csproj 
     - name: Build
-      run: dotnet build --configuration Release Server/AuthServer.Server.csproj
-    - name: Test Server
-      run: dotnet test Server.Tests --collect:"XPlat Code Coverage" -r TestResults/ --settings Server.Tests/coverlet.runsettings
+      run: dotnet build --configuration Release Gatekeeper.Server.Web/Gatekeeper.Server.Web.csproj
+    - name: Test Gatekeeper.Server.Web
+      run: dotnet test Gatekeeper.Server.Web.Tests --collect:"XPlat Code Coverage" -r TestResults/ --settings Gatekeeper.Server.Web.Tests/coverlet.runsettings
     - name: Test Client
       run: dotnet test Client.Tests --collect:"XPlat Code Coverage" -r TestResults/
     - uses: codecov/codecov-action@v1
@@ -41,7 +41,7 @@ jobs:
       working-directory: ./Client/
     - name: Perform Percy Tests
       run: ./test.sh
-      working-directory: ./Server.Tests.Visual
+      working-directory: ./Gatekeeper.Server.Web.Tests.Visual
       timeout-minutes: 5
       env:
         PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}

@@ -10,7 +10,7 @@ updates:
     interval: daily
   open-pull-requests-limit: 10
 - package-ecosystem: nuget
-  directory: "/Server"
+  directory: "/Gatekeeper.Server.Web"
   schedule:	
     interval: daily	
   open-pull-requests-limit: 10	
@@ -20,7 +20,7 @@ updates:
     interval: daily	
   open-pull-requests-limit: 10	
 - package-ecosystem: nuget	
-  directory: "/Server.Tests"
+  directory: "/Gatekeeper.Server.Web.Tests"
   schedule:	
     interval: daily	
   open-pull-requests-limit: 10	

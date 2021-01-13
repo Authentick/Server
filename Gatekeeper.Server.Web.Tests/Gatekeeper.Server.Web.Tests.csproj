@@ -21,7 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Server\AuthServer.Server.csproj" />
+      <ProjectReference Include="..\Gatekeeper.Server.Web\Gatekeeper.Server.Web.csproj" />
     </ItemGroup>
 
 </Project>
