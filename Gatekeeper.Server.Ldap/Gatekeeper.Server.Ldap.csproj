@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <OutputType>exe</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Gatekeeper.LdapServerLibrary" Version="0.0.9-alpha" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Gatekeeper.Shared.LdapAndWeb\Gatekeeper.Shared.LdapAndWeb.csproj" />
+  </ItemGroup>
+  
+</Project>

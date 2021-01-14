@@ -1,5 +1,8 @@
+using System;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
@@ -8,6 +11,7 @@ using AuthServer.Server.Services.TLS;
 using AuthServer.Server.Services.TLS.BackgroundJob;
 using AuthServer.Server.Services.User;
 using AuthServer.Shared;
+using Gatekeeper.Server.Services.FileStorage;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Hangfire;
@@ -138,6 +142,20 @@ namespace AuthServer.Server.GRPC
                     Value = "false"
                 };
                 _authDbContext.AddRange(primaryDomainSetting, tlsCertificateSetting);
+            }
+
+            string snapFolder = PathProvider.GetApplicationDataFolder();
+            string primaryDomainConfigFile = snapFolder + "/primary-domain.txt";
+            await File.WriteAllTextAsync(primaryDomainConfigFile, primaryDomainSetting.Value);
+
+            if (!CertificateRepository.TryGetCertificate(primaryDomainSetting.Value, out _))
+            {
+                ECDsa ecdsa = ECDsa.Create();
+                CertificateRequest req = new CertificateRequest("cn=" + primaryDomainSetting.Value, ecdsa, HashAlgorithmName.SHA256);
+                X509Certificate2 cert = req.CreateSelfSigned(DateTimeOffset.Now, DateTimeOffset.Now.AddYears(15));
+
+                CertificateRepository repository = new CertificateRepository();
+                repository.StoreCertificate(primaryDomainSetting.Value, cert.Export(X509ContentType.Pfx));
             }
 
             _authDbContext.AddRange(installSetting, smtpHostnameSetting, smtpUsernameSetting, smtpPasswordSetting, smtpSenderAddress);

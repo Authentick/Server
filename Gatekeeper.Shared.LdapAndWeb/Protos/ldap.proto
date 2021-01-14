@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "Gatekeeper.Shared.LdapAndWeb";
+
+service Ldap {
+  rpc ExecuteBindRequest (BindRequest) returns (BindReply);
+  rpc ExecuteSearchRequest (SearchRequest) returns (SearchReply);
+  rpc GetCertificatePath (google.protobuf.Empty) returns (CertificatePathReply);
+}
+
+message CertificatePathReply {
+  string path = 1;
+}
+
+message UserIdentity {
+  repeated string cn = 1;
+  repeated string dc = 2;
+  repeated string ou = 3;
+}
+
+message BindRequest {
+  UserIdentity user_identity = 1;
+  string password = 2;
+  string ip_address = 3;
+  bool is_encrypted_request = 4;
+}
+
+message BindReply {
+  bool was_bind_successful = 1;
+}
+
+message SearchRequest {
+  bytes raw_packet = 1;
+  UserIdentity user_identity = 2;
+}
+
+message SearchReply {
+  repeated ResultEntry results = 1;
+
+  message ResultEntry {
+    string rdn = 1;
+    repeated ResultAttribute attributes = 2;
+
+    message ResultAttribute {
+      string name = 1;
+      repeated string value = 2;
+    }
+  }
+}

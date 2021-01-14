@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -45,8 +46,9 @@ namespace AuthServer.Server
             }
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
@@ -55,28 +57,38 @@ namespace AuthServer.Server
                         kestrelOptions.AddServerHeader = false;
 
                         kestrelOptions.ListenAnyIP(443, listenOptions =>
-                           {
-                               listenOptions.UseHttps(async (stream, clientHelloInfo, state, cancellationToken) =>
-                               {
-                                   await Task.Yield();
+                        {
+                            listenOptions.UseHttps(async (stream, clientHelloInfo, state, cancellationToken) =>
+                            {
+                                await Task.Yield();
+                                SslServerAuthenticationOptions options = new SslServerAuthenticationOptions
+                                {
+                                    ApplicationProtocols = new System.Collections.Generic.List<SslApplicationProtocol>()
+                                    {
+                                           SslApplicationProtocol.Http2,
+                                           SslApplicationProtocol.Http11,
+                                    },
+                                };
 
-                                   SslServerAuthenticationOptions options = new SslServerAuthenticationOptions { };
+                                X509Certificate2? certificate;
+                                bool hasCertificate = CertificateRepository.TryGetCertificate(clientHelloInfo.ServerName, out certificate);
 
-                                   X509Certificate2? certificate;
-                                   bool hasCertificate = CertificateRepository.TryGetCertificate(clientHelloInfo.ServerName, out certificate);
+                                if (!hasCertificate)
+                                {
+                                    string snapFolder = PathProvider.GetApplicationDataFolder();
+                                    string primaryDomainConfigFile = snapFolder + "/primary-domain.txt";
+                                    if (File.Exists(primaryDomainConfigFile))
+                                    {
+                                        string value = await File.ReadAllTextAsync(primaryDomainConfigFile);
+                                        CertificateRepository.TryGetCertificate(value, out certificate);
+                                    }
+                                }
 
-                                   if (hasCertificate)
-                                   {
-                                       options.ServerCertificate = certificate;
-                                   }
-                                   else
-                                   {
-                                       // FIXME: Use default certificate
-                                   }
+                                options.ServerCertificate = certificate;
 
-                                   return options;
-                               }, state: null);
-                           });
+                                return options;
+                            }, state: null);
+                        });
                         kestrelOptions.ListenAnyIP(80);
                     });
                 })
@@ -86,5 +98,6 @@ namespace AuthServer.Server
                     logging.SetMinimumLevel(LogLevel.Trace);
                 })
                 .UseNLog();
+        }
     }
 }
