@@ -12,7 +12,7 @@
     <PackageReference Include="Grpc.AspNetCore" Version="2.34.0" />
     <PackageReference Include="Grpc.AspNetCore.Web" Version="2.34.0" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.7.18" />
-    <PackageReference Include="HangFire.Core" Version="1.7.18" />
+    <PackageReference Include="HangFire.Core" Version="1.7.19" />
     <PackageReference Include="Hangfire.PostgreSql" Version="1.8.1" />
     <PackageReference Include="JWT" Version="7.3.1" />
     <PackageReference Include="MailKit" Version="2.10.1" />
