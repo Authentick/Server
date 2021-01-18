@@ -39,6 +39,7 @@ using Gatekeeper.Server.Services.Authentication.PasswordPolicy;
 using Gatekeeper.Server.Services.GeoLocation;
 using Gatekeeper.Server.Services.Authentication.BackgroundJob;
 using Gatekeeper.Server.Services.DeviceDetection;
+using Gatekeeper.Server.Web.GRPC;
 
 namespace AuthServer.Server
 {
@@ -139,10 +140,6 @@ namespace AuthServer.Server
             // Configuration
             services.AddScoped<Services.ConfigurationProvider>();
 
-            // LDAP
-            services.AddScoped<LdapEventListener>();
-            services.AddHostedService<LdapServerListener>();
-
             // SCIM
             services.AddScoped<ISyncHandler, SyncHandler>();
 
@@ -181,7 +178,7 @@ namespace AuthServer.Server
             services.AddHttpProxy();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        // This method gets called by the runtime. Use this method to configure the ro request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             UpdateDatabase(app);
@@ -246,6 +243,7 @@ namespace AuthServer.Server
                 endpoints.MapGrpcService<ConnectivityServiceCheck>();
                 endpoints.MapGrpcService<SsoTokenService>();
                 endpoints.MapGrpcService<LetsEncryptService>();
+                endpoints.MapGrpcService<LdapService>();
                 endpoints.MapFallbackToPage("/_Host");
             });
         }

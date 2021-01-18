@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 using AuthServer.Server.Models;
 using AuthServer.Server.Services.Ldap;
 using Xunit;
-using static Gatekeeper.LdapServerLibrary.Session.Events.ISearchEvent;
+using static Gatekeeper.LdapPacketParserLibrary.Models.Operations.Request.SearchRequest;
 
 namespace AuthServer.Server.Tests.Services.Ldap
 {

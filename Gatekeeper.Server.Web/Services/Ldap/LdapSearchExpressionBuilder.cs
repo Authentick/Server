@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
-using static Gatekeeper.LdapServerLibrary.Session.Events.ISearchEvent;
+using static Gatekeeper.LdapPacketParserLibrary.Models.Operations.Request.SearchRequest;
 
 [assembly: InternalsVisibleTo("Gatekeeper.Server.Web.Tests")]
 namespace AuthServer.Server.Services.Ldap
@@ -14,7 +14,6 @@ namespace AuthServer.Server.Services.Ldap
     {
         public Expression Build(IFilterChoice filter, Expression itemExpression)
         {
-
             Expression? filterExpr = null;
             switch (filter)
             {
