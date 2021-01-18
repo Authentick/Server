@@ -99,7 +99,7 @@ namespace Gatekeeper.Server.Web.GRPC
 
                         return new BindReply
                         {
-                            WasBindSuccessful = true
+                            WasBindSuccessful = isCorrectPassword
                         };
                     }
                 }
