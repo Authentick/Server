@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Gatekeeper.LdapServerLibrary;
@@ -38,6 +39,7 @@ namespace Gatekeeper.Server.Ldap
             LdapServer server = new LdapServer
             {
                 Port = 389,
+                IPAddress = IPAddress.Parse("0.0.0.0"),
             };
             server.RegisterLogger(new ConsoleLogger());
             server.RegisterEventListener(new LdapEventListener(client));
