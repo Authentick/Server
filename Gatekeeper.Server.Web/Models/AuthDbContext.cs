@@ -16,6 +16,8 @@ namespace AuthServer.Server.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasPostgresExtension("hstore");
+
             modelBuilder.Entity<AuthSessionIp>()
                 .HasIndex(b => b.IpAddress);
 
@@ -38,6 +40,8 @@ namespace AuthServer.Server.Models
         public DbSet<ScimUserSyncState> ScimUserSyncStates { get; set; } = null!;
         public DbSet<ScimGroupSyncState> ScimGroupSyncStates { get; set; } = null!;
         public DbSet<AuthSessionIp> AuthSessionIps { get; set; } = null!;
+        public DbSet<SystemSecurityAlert> SystemSecurityAlerts { get; set; } = null!;
+        public DbSet<UserSecurityAlert> UserSecurityAlerts { get; set; } = null!;
     }
 
     public class SystemSetting
@@ -82,6 +86,21 @@ namespace AuthServer.Server.Models
             LDAP = 1,
             OIDC = 2,
         }
+    }
+
+    public class SystemSecurityAlert : SecurityAlert
+    { }
+
+    public class UserSecurityAlert : SecurityAlert
+    {
+        public AppUser Recipient { get; set; } = null!;
+    }
+
+    public class SecurityAlert
+    {
+        public Guid Id { get; set; }
+        public Gatekeeper.Server.Web.Services.Alerts.Types.AlertTypeEnum AlertType { get; set; }
+        public Dictionary<string, string> KeyValueStore { get; set; } = null!;
     }
 
     public class SCIMAppSettings

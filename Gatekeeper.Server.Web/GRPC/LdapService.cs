@@ -12,6 +12,8 @@ using AuthServer.Server.Models;
 using AuthServer.Server.Services.Crypto;
 using AuthServer.Server.Services.Ldap;
 using Gatekeeper.Server.Services.FileStorage;
+using Gatekeeper.Server.Web.Services.Alerts;
+using Gatekeeper.Server.Web.Services.Alerts.Types;
 using Gatekeeper.Shared.LdapAndWeb;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
@@ -22,19 +24,22 @@ namespace Gatekeeper.Server.Web.GRPC
 {
     public class LdapService : Gatekeeper.Shared.LdapAndWeb.Ldap.LdapBase
     {
-        private readonly IDbContextFactory<AuthDbContext> _authDbContextFactory;
+        private readonly AuthDbContext _authDbContext;
         private readonly IDataProtector _ldapSettingsDataProtector;
         private readonly Hasher _hasher;
+        private readonly AlertManager _alertManager;
 
         public LdapService(
-            IDbContextFactory<AuthDbContext> authDbContextFactory,
+            AuthDbContext authDbContext,
             IDataProtectionProvider dataProtectionProvider,
-            Hasher hasher
+            Hasher hasher,
+            AlertManager alertManager
             )
         {
-            _authDbContextFactory = authDbContextFactory;
+            _authDbContext = authDbContext;
             _ldapSettingsDataProtector = dataProtectionProvider.CreateProtector("LdapSettingsDataProtector");
             _hasher = hasher;
+            _alertManager = alertManager;
         }
 
         // TODO: This should actually use some kind of authentication that isn't IP-based
@@ -78,19 +83,32 @@ namespace Gatekeeper.Server.Web.GRPC
             List<string> ous = request.UserIdentity.Ou.ToList();
 
             Guid appGuid = new Guid(dcs[0]);
+            LdapAppSettings? settings = await _authDbContext.LdapAppSettings
+                .Include(s => s.AuthApp)
+                .SingleOrDefaultAsync(s => s.AuthApp.Id == appGuid);
+
+            if (settings == null)
+            {
+                return new BindReply
+                {
+                    WasBindSuccessful = false
+                };
+            }
+
+            if (!request.IsEncryptedRequest)
+            {
+                LdapUnencryptedConnectionAlert alert = new LdapUnencryptedConnectionAlert
+                (
+                    IPAddress.Parse(request.IpAddress),
+                    settings
+                );
+                await _alertManager.AddAlertAsync(alert);
+            }
 
             if (cns.Count > 0 && dcs.Count > 0)
             {
                 if (cns[0] == "BindUser" && ous.Count == 0)
                 {
-                    LdapAppSettings? settings;
-                    using (var authDbContext = _authDbContextFactory.CreateDbContext())
-                    {
-                        settings = await authDbContext.LdapAppSettings
-                            .Include(s => s.AuthApp)
-                            .SingleOrDefaultAsync(s => s.AuthApp.Id == appGuid);
-                    }
-
                     if (settings != null)
                     {
                         byte[] correctPassword = Encoding.ASCII.GetBytes(_ldapSettingsDataProtector.Unprotect(settings.BindUserPassword));
@@ -106,15 +124,10 @@ namespace Gatekeeper.Server.Web.GRPC
                 else if (ous.Count > 0 && ous[0] == "people")
                 {
                     Guid userId = new Guid(cns[0]);
-                    IEnumerable<LdapAppUserCredentials> creds = new List<LdapAppUserCredentials>();
-
-                    using (var authDbContext = _authDbContextFactory.CreateDbContext())
-                    {
-                        creds = await authDbContext.LdapAppUserCredentials
-                           .Where(c => c.User.Id == userId)
-                           .Where(c => c.LdapAppSettings.AuthApp.Id == appGuid)
-                           .ToListAsync();
-                    }
+                    IEnumerable<LdapAppUserCredentials> creds = await _authDbContext.LdapAppUserCredentials
+                        .Where(c => c.User.Id == userId)
+                        .Where(c => c.LdapAppSettings.AuthApp.Id == appGuid)
+                        .ToListAsync();
 
                     bool validCredentials = false;
 
@@ -154,7 +167,7 @@ namespace Gatekeeper.Server.Web.GRPC
             };
         }
 
-        public override Task<SearchReply> ExecuteSearchRequest(SearchRequest request, ServerCallContext context)
+        public override async Task<SearchReply> ExecuteSearchRequest(SearchRequest request, ServerCallContext context)
         {
             if (!RequestIsFromLoopback(context))
             {
@@ -181,18 +194,14 @@ namespace Gatekeeper.Server.Web.GRPC
                 var queryLambda = Expression.Lambda<Func<AppUser, bool>>(conditions, itemExpression);
                 var predicate = queryLambda.Compile();
 
-                List<AppUser> results = new List<AppUser>();
-                using (var authDbContext = _authDbContextFactory.CreateDbContext())
-                {
-                    results = authDbContext.Users
+                List<AppUser> results = await _authDbContext.Users
                         .AsNoTracking()
                         .Include(u => u.Groups)
                             .ThenInclude(g => g.AuthApps)
                         .Where(queryLambda)
                         .Where(u => u.Groups.Any(g => g.AuthApps.Any(a => a.Id == appId)))
                         .AsSplitQuery()
-                        .ToList();
-                }
+                        .ToListAsync();
 
                 SearchReply.Types.ResultEntry entry = new SearchReply.Types.ResultEntry { };
 
@@ -232,7 +241,7 @@ namespace Gatekeeper.Server.Web.GRPC
                 }
             }
 
-            return Task.FromResult(reply);
+            return reply;
         }
     }
 }

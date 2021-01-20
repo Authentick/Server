@@ -34,6 +34,7 @@ namespace Gatekeeper.Client
             builder.Services.AddScoped(services => { return new AuthServer.Shared.ConnectivityCheckService.ConnectivityCheckServiceClient(GetGrpcChannel(services)); });
             builder.Services.AddScoped(services => { return new AuthServer.Shared.SsoTokenService.SsoTokenServiceClient(GetGrpcChannel(services)); });
             builder.Services.AddScoped(services => { return new AuthServer.Shared.Admin.LetsEncrypt.LetsEncryptClient(GetGrpcChannel(services)); });
+            builder.Services.AddScoped(services => { return new Gatekeeper.Shared.ClientAndWeb.Admin.AdminAlerts.AdminAlertsClient(GetGrpcChannel(services)); });
 
             builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
             builder.Services.AddScoped<InstallationStateProvider>();

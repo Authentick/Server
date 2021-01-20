@@ -40,6 +40,10 @@ using Gatekeeper.Server.Services.GeoLocation;
 using Gatekeeper.Server.Services.Authentication.BackgroundJob;
 using Gatekeeper.Server.Services.DeviceDetection;
 using Gatekeeper.Server.Web.GRPC;
+using Gatekeeper.Server.Web.GRPC.Admin;
+using Gatekeeper.Server.Web.Services.Alerts;
+using Npgsql;
+using System.Linq;
 
 namespace AuthServer.Server
 {
@@ -157,6 +161,9 @@ namespace AuthServer.Server
             // HIBP
             services.AddScoped<HIBPClient>();
 
+            // Alerts
+            services.AddScoped<AlertManager>();
+
             // Hangfire
             SqlMapper.AddTypeHandler(new NodaDateTimeHandler());
             services.AddHangfire(config =>
@@ -244,6 +251,7 @@ namespace AuthServer.Server
                 endpoints.MapGrpcService<SsoTokenService>();
                 endpoints.MapGrpcService<LetsEncryptService>();
                 endpoints.MapGrpcService<LdapService>();
+                endpoints.MapGrpcService<AdminAlertsService>();
                 endpoints.MapFallbackToPage("/_Host");
             });
         }
@@ -261,7 +269,10 @@ namespace AuthServer.Server
                 throw new Exception("AuthDbContext is null");
             }
 
-            authDbContext.Database.Migrate();
+            if (authDbContext.Database.GetPendingMigrations().Any())
+            {
+                authDbContext.Database.Migrate();
+            }
 
             using var keyStorageDbContext = serviceScope.ServiceProvider.GetService<KeyStorageDbContext>();
 
