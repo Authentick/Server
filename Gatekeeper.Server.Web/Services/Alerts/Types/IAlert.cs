@@ -9,7 +9,7 @@ namespace Gatekeeper.Server.Web.Services.Alerts.Types
         AlertTypeEnum AlertType { get; set; }
         Dictionary<string, string> GetDictionary();
     }
-    
+
     public enum AlertTypeEnum
     {
         UnencryptedLdapBindAlert = 1,
