@@ -16,6 +16,8 @@ namespace AuthServer.Server.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasPostgresExtension("hstore");
+
             modelBuilder.Entity<AuthSessionIp>()
                 .HasIndex(b => b.IpAddress);
 

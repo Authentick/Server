@@ -42,6 +42,8 @@ using Gatekeeper.Server.Services.DeviceDetection;
 using Gatekeeper.Server.Web.GRPC;
 using Gatekeeper.Server.Web.GRPC.Admin;
 using Gatekeeper.Server.Web.Services.Alerts;
+using Npgsql;
+using System.Linq;
 
 namespace AuthServer.Server
 {
@@ -267,7 +269,10 @@ namespace AuthServer.Server
                 throw new Exception("AuthDbContext is null");
             }
 
-            authDbContext.Database.Migrate();
+            if (authDbContext.Database.GetPendingMigrations().Any())
+            {
+                authDbContext.Database.Migrate();
+            }
 
             using var keyStorageDbContext = serviceScope.ServiceProvider.GetService<KeyStorageDbContext>();
 

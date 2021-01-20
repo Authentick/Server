@@ -10,6 +10,7 @@ namespace AuthServer.Server.Tests
     {
         private static readonly object _lock = new object();
         private static bool _databaseInitialized;
+        public NpgsqlConnection Connection { get; }
 
         public SharedDatabaseFixture()
         {
@@ -17,10 +18,11 @@ namespace AuthServer.Server.Tests
 
             Seed();
 
-            Connection.Open();
+            if(Connection.State != System.Data.ConnectionState.Open)
+            {
+                Connection.Open();
+            }
         }
-
-        public DbConnection Connection { get; }
 
         public AuthDbContext CreateContext(DbTransaction transaction = null)
         {
