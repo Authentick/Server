@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "Gatekeeper.Shared.ClientAndWeb.Admin";
+
+service AdminAlerts {
+  rpc ListAlerts (google.protobuf.Empty) returns (AlertListReply);
+  rpc DismissAlert (DismissAlertRequest) returns (DismissAlertReply);
+}
+
+message DismissAlertRequest {
+  string id = 1;
+}
+
+message DismissAlertReply {
+  bool success = 1;
+}
+
+message AlertListReply {
+  repeated Alert alerts = 1;
+}
+
+message Alert {
+  string id = 1;
+  LevelEnum level = 2; 
+
+  oneof AlertData {
+    UnencryptedLdapConnectionAlert ldap_connection_alert = 3;
+  }
+
+  message UnencryptedLdapConnectionAlert {
+    string app_name = 1;
+    string ip_address = 2;
+  }
+
+  enum LevelEnum {
+    High = 0;
+    Medium = 1;
+    Low = 2;
+  }
+}

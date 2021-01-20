@@ -1,0 +1,50 @@
+@page "/admin/alerts"
+@attribute [Authorize(Policy = "SuperAdministrator")]
+
+@layout AdminShell
+
+@using Gatekeeper.Shared.ClientAndWeb.Admin
+@inject Gatekeeper.Shared.ClientAndWeb.Admin.AdminAlerts.AdminAlertsClient AdminAlertsClient
+
+@if(_alerts != null)
+{
+    <h4 class="font-weight-bold">Action required</h4>
+    @foreach(Alert alert in _alerts)
+    {
+        @switch(alert.AlertDataCase) {
+            case Alert.AlertDataOneofCase.LdapConnectionAlert:
+                <div class="alert-card alert-card__red p-3 mb-4">
+                    <p class="font-weight-bold">Unencrypted LDAP bind</p>
+                    <p>We have identified an unencrypted LDAP bind. This means that sensitive information is transferred unencrypted over the network.</p>
+                    <p class="font-weight-bold">Technical details</p>
+                    <p>App Name: @alert.LdapConnectionAlert.AppName</p>
+                    <p>Source IP: @alert.LdapConnectionAlert.IpAddress</p>
+                    <p class="font-weight-bold">Recommendation</p>
+                    <p>Configure your LDAP clients to connect using an encrypted connection using STARTTLS.</p>
+                    <div class="d-flex flex-column flex-md-row">
+                        <button class="btn btn-secondary-dark btn-sm-100" @onclick="(() => DismissAlert(alert))">Dismiss alert</button>
+                    </div>
+                </div>
+                break;
+        }
+    }
+}
+    
+@code {
+    private List<Alert>? _alerts = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AlertListReply alertListReply = await AdminAlertsClient.ListAlertsAsync(new Google.Protobuf.WellKnownTypes.Empty());
+        _alerts = alertListReply.Alerts.ToList();
+    }
+
+    private async Task DismissAlert(Alert alert)
+    {
+        if(_alerts != null)
+        {
+            _alerts.Remove(alert);
+        }
+        await AdminAlertsClient.DismissAlertAsync(new DismissAlertRequest{Id = alert.Id});
+    }
+}
