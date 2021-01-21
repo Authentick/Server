@@ -43,8 +43,6 @@ jobs:
       run: ./test.sh
       working-directory: ./Gatekeeper.Server.Web.Tests.Visual
       timeout-minutes: 5
-      env:
-        PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
 
     services:
       postgres:
