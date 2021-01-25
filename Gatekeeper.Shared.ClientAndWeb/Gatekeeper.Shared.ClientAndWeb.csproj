@@ -31,8 +31,8 @@
     <Protobuf Include="Protos\Admin\settings.proto" />
     <Protobuf Include="Protos\Admin\users.proto" />
     <Protobuf Include="Protos\Apps\apps.proto" />
+    <Protobuf Include="Protos\Security\alerts.proto" />
     <Protobuf Include="Protos\Security\settings.proto" />
-    <Protobuf Include="Protos\Security\Sessions.proto" />
-    <Protobuf Include="Protos\Security\Alerts.proto" />
+    <Protobuf Include="Protos\Security\sessions.proto" />
   </ItemGroup>
 </Project>

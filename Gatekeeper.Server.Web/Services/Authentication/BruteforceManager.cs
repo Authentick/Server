@@ -3,6 +3,8 @@ using System.Net;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using AuthServer.Server.Services.User;
+using Gatekeeper.Server.Web.Services.Alerts;
+using Gatekeeper.Server.Web.Services.Alerts.Types;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
 
@@ -12,13 +14,16 @@ namespace AuthServer.Server.Services.Authentication
     {
         private readonly AuthDbContext _authDbContext;
         private readonly UserManager _userManager;
+        private readonly AlertManager _alertManager;
 
         public BruteforceManager(
             AuthDbContext authDbContext,
-            UserManager userManager)
+            UserManager userManager,
+            AlertManager alertManager)
         {
             _authDbContext = authDbContext;
             _userManager = userManager;
+            _alertManager = alertManager;
         }
 
         public async Task MarkInvalidLoginAttemptAsync(IPAddress ipAddress, string userAgent, string userName)
@@ -35,6 +40,30 @@ namespace AuthServer.Server.Services.Authentication
             };
             _authDbContext.Add(attempt);
             await _authDbContext.SaveChangesAsync();
+
+            await IssueAlertIfIpIsNowBlocked(ipAddress);
+            if (user != null)
+            {
+                await IssueAlertIfUserIsNowBlocked(user);
+            }
+        }
+
+        private async Task IssueAlertIfIpIsNowBlocked(IPAddress ipAddress)
+        {
+            if (await IsIpBlockedAsync(ipAddress))
+            {
+                BruteforceIpAddressAlert alert = new BruteforceIpAddressAlert(ipAddress);
+                await _alertManager.AddAlertAsync(alert);
+            }
+        }
+
+        private async Task IssueAlertIfUserIsNowBlocked(AppUser user)
+        {
+            if (await IsUserBlockedAsync(user))
+            {
+                BruteforceUserAlert alert = new BruteforceUserAlert(user);
+                await _alertManager.AddAlertAsync(alert);
+            }
         }
 
         public async Task MarkInvalidTwoFactorAttemptAsync(IPAddress ipAddress, string userAgent, AppUser targetUser)
@@ -65,7 +94,8 @@ namespace AuthServer.Server.Services.Authentication
             return attemptCount >= 10;
         }
 
-        public async Task<bool> IsUserBlockedAsync(AppUser user) {
+        public async Task<bool> IsUserBlockedAsync(AppUser user)
+        {
             Duration duration = Duration.FromMinutes(10);
             Instant currentTime = SystemClock.Instance.GetCurrentInstant();
 

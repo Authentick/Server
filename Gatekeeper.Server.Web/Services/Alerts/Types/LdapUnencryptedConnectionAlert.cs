@@ -5,10 +5,12 @@ using AuthServer.Server.Models;
 
 namespace Gatekeeper.Server.Web.Services.Alerts.Types
 {
-    public class LdapUnencryptedConnectionAlert : IAlert
+    public class LdapUnencryptedConnectionAlert : ISystemAlert
     {
         public AlertTypeEnum AlertType { get => AlertTypeEnum.UnencryptedLdapBindAlert; set => throw new System.NotImplementedException(); }
         public Guid Id { get; set; }
+        public AlertLevelEnum AlertLevel { get => AlertLevelEnum.High; set => throw new NotImplementedException(); }
+        public bool IsActionable { get => true; set => throw new NotImplementedException(); }
 
         public readonly IPAddress IpAddress;
         public readonly Guid LdapAppSettingsId;

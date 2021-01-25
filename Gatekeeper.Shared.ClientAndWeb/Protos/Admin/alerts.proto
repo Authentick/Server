@@ -23,15 +23,21 @@ message AlertListReply {
 
 message Alert {
   string id = 1;
-  LevelEnum level = 2; 
+  LevelEnum level = 2;
+  bool is_actionable = 3;
 
   oneof AlertData {
-    UnencryptedLdapConnectionAlert ldap_connection_alert = 3;
+    UnencryptedLdapConnectionAlert ldap_connection_alert = 4;
+    BruteforceIpAddressAlert bruteforce_ip_address_alert = 5;
   }
 
   message UnencryptedLdapConnectionAlert {
     string app_name = 1;
     string ip_address = 2;
+  }
+
+  message BruteforceIpAddressAlert {
+    string ip_address = 1;
   }
 
   enum LevelEnum {

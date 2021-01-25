@@ -9,11 +9,12 @@
 @if(_alerts != null)
 {
     <h4 class="font-weight-bold">Action required</h4>
-    @foreach(Alert alert in _alerts)
+
+    @foreach(Alert alert in _alerts.Where(a => a.IsActionable == true))
     {
         @switch(alert.AlertDataCase) {
             case Alert.AlertDataOneofCase.LdapConnectionAlert:
-                <div class="alert-card alert-card__red p-3 mb-4">
+                <div class="alert-card @MapLevelToAlertCss(alert.Level) p-3 mb-4">
                     <p class="font-weight-bold">Unencrypted LDAP bind</p>
                     <p>We have identified an unencrypted LDAP bind. This means that sensitive information is transferred unencrypted over the network.</p>
                     <p class="font-weight-bold">Technical details</p>
@@ -26,8 +27,30 @@
                     </div>
                 </div>
                 break;
+            case Alert.AlertDataOneofCase.BruteforceIpAddressAlert:
+                break;
         }
     }
+
+    <h4 class="font-weight-bold">No action required</h4>
+    @foreach(Alert alert in _alerts.Where(a => a.IsActionable == false))
+    {
+        @switch(alert.AlertDataCase) {
+            case Alert.AlertDataOneofCase.BruteforceIpAddressAlert:
+                <div class="alert-card @MapLevelToAlertCss(alert.Level) p-3 mb-4">
+                    <p class="font-weight-bold">Bruteforce attempt</p>
+                    <p>We have identified a bruteforce attempt and blocked the attack.</p>
+                    <p class="font-weight-bold">Technical details</p>
+                    <p>Source IP: @alert.BruteforceIpAddressAlert.IpAddress</p>
+                    <p class="font-weight-bold">Recommendation</p>
+                    <p>No action is required. The issue has been mitigated automatically.</p>
+                    <div class="d-flex flex-column flex-md-row">
+                        <button class="btn btn-secondary-dark btn-sm-100" @onclick="(() => DismissAlert(alert))">Dismiss alert</button>
+                    </div>
+                </div>
+                break;
+        }
+    }    
 }
     
 @code {
@@ -46,5 +69,20 @@
             _alerts.Remove(alert);
         }
         await AdminAlertsClient.DismissAlertAsync(new DismissAlertRequest{Id = alert.Id});
+    }
+
+    private string MapLevelToAlertCss(Alert.Types.LevelEnum alertLevel)
+    {
+        switch(alertLevel)
+        {
+            case Alert.Types.LevelEnum.High:
+                return "alert-card__red";
+            case Alert.Types.LevelEnum.Medium:
+                return "alert-card__yellow";
+            case Alert.Types.LevelEnum.Low:
+                return "alert-card__green";
+        }
+        
+        throw new Exception(alertLevel  + " is not supported.");
     }
 }

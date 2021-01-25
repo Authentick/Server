@@ -10,14 +10,24 @@ service Alerts {
 }
 
 message AlertListReply {
-    repeated Alert alerts = 1;
+  repeated Alert alerts = 1;
 }
 
 message Alert {
-    string id = 1;
-    string title = 2;
-    string message = 3;
-    repeated string ipAdresses = 4;
-    string time = 5;
-    string recommendation = 6;
+  string id = 1;
+  LevelEnum level = 2;
+
+  oneof AlertData {
+    BruteforceUserAlert bruteforce_user_alert = 3;
+  }
+
+  message BruteforceUserAlert {
+    string ip_address = 1;
+  }
+
+  enum LevelEnum {
+    HIGH = 0;
+    MEDIUM = 1;
+    LOW = 2;
+  }
 }
