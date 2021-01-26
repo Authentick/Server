@@ -51,49 +51,116 @@
                     />
             }
 
-            <h2>Authentication mode</h2>
             switch(appDetailReply.AuthSettingCase) {
                 case AppDetailReply.AuthSettingOneofCase.LdapAuthSetting:
-                    <span>Base DN: @appDetailReply.LdapAuthSetting.BaseDn</span>
+                    <div class="d-flex p-4 light-border my-4 rounded flex-column">
+                        <div class="d-flex flex-row align-items-center justify-content-between w-100">
+                            <div class="d-flex flex-column">
+                                <p class="font-weight-bold">LDAP authentication</p>
+                                <p>Base DN</p>
+                            </div>
+                            <div class="d-flex flex-column">
+                                <p class="font-weight-bold">Value</p>
+                                <p>@appDetailReply.LdapAuthSetting.BaseDn</p>
+                            </div>
+                        </div>
+                    </div>
                     break;
 
                 case AppDetailReply.AuthSettingOneofCase.OidcAuthSetting:
-                    <p>Client ID: @appDetailReply.OidcAuthSetting.ClientId</p>
-                    <p>Client Secret: @appDetailReply.OidcAuthSetting.ClientSecret</p>
-                    <p>Redirect URI: @appDetailReply.OidcAuthSetting.RedirectUri</p>
+                    <div class="d-flex p-4 light-border my-4 rounded flex-column">
+                        <div class="d-flex flex-row align-items-center justify-content-between w-100">
+                            <div class="d-flex flex-column">
+                                <p class="font-weight-bold">OIDC Authentication</p>
+                                <p>Client ID</p>
+                                <p>Client Secret</p>
+                                <p>Redirect URI</p>
+                            </div>
+                            <div class="d-flex flex-column">
+                                <p class="font-weight-bold">Value</p>
+                                <p>@appDetailReply.OidcAuthSetting.ClientId</p>
+                                <p>@appDetailReply.OidcAuthSetting.ClientSecret</p>
+                                <p>@appDetailReply.OidcAuthSetting.RedirectUri</p>
+                                
+                            </div>
+                        </div>
+                    </div>
                     break;
 
                 case AppDetailReply.AuthSettingOneofCase.None:
-                    <p>No further authentication is configured.</p>
+                    <div class="d-flex p-4 light-border my-4 rounded flex-column">
+                        <p>No further authentication is configured.</p>
+                    </div>
                     break;
             }
             break;
         case Tabs.Directory:
             switch(appDetailReply.DirectorySettingCase) {
                 case AppDetailReply.DirectorySettingOneofCase.LdapDirectorySetting:
-                    <p>Base DN: @appDetailReply.LdapDirectorySetting.BaseDn</p>
-                    <p>Bind user: @appDetailReply.LdapDirectorySetting.Username</p>
-                    <p>Bind password: @appDetailReply.LdapDirectorySetting.Password</p>
+                    <div class="d-flex p-4 light-border my-4 rounded flex-column">
+                        <div class="d-flex flex-row align-items-center justify-content-between w-100">
+                            <div class="d-flex flex-column">
+                                <p class="font-weight-bold">LDAP configuration</p>
+                                <p>Base DN</p>
+                                <p>Bind user</p>
+                                <p>Bind password</p>
+                            </div>
+                            <div class="d-flex flex-column">
+                                <p class="font-weight-bold">Value</p>
+                                <p>@appDetailReply.LdapDirectorySetting.BaseDn</p>
+                                <p>@appDetailReply.LdapDirectorySetting.Username</p>
+                                <p>@appDetailReply.LdapDirectorySetting.Password</p>
+                            </div>
+                        </div>
+                    </div>
                     break;
                 case AppDetailReply.DirectorySettingOneofCase.ScimDirectorySetting:
-                    <p>Endpoint: @appDetailReply.ScimDirectorySetting.Endpoint</p>
-                    <p><button @onclick="TriggerScimSync">Trigger sync</button></p>
+                    <div class="d-flex p-4 light-border my-4 rounded flex-column">
+                         <div class="d-flex flex-row align-items-center justify-content-between w-100">
+                             <div class="d-flex flex-column">
+                                <p class="font-weight-bold">SCIM configuration</p>
+                                <p>Endpoint</p>
+                            </div>
+                            <div class="d-flex flex-column">
+                                <p class="font-weight-bold">Value</p>
+                                <p>@appDetailReply.ScimDirectorySetting.Endpoint</p>
+                            </div>
+                            <div class="d-flex flex-column">
+                                <p class="font-weight-bold">Action</p>
+                                <button @onclick="TriggerScimSync" class="btn btn-secondary-dark">Trigger sync</button>
+                            </div>
+                         </div>
+                    </div>
                     break;
                 case AppDetailReply.DirectorySettingOneofCase.None:
-                    <span>None configured</span>
+                    <div class="d-flex p-4 light-border my-4 rounded flex-column">
+                        <p>None configured</p>
+                    </div>
                     break;
             }
             break;
+         
         case Tabs.Permissions:
-                <p>Groups:</p>
+                <div class="d-flex p-4 light-border my-4 rounded flex-column">
+                    <div class="d-flex flex-row align-items-center justify-content-between w-100">
+                        <p class="font-weight-bold">Groups</p>
+                        <p class="font-weight-bold">Action</p>
+                    </div>
+                    
                 @foreach (GrantedAppGroup group in appDetailReply.Groups)
                 {
-                    <li>@group.Name (@group.Id) <button @onclick="@(async () => await RemoveGroupFromApp(group))">Remove access</button></li>
+                    <div class="d-flex flex-row align-items-center justify-content-between w-100 mb-2"> 
+                        <p>@group.Name </p> 
+                        <button class="btn btn-secondary-dark btn-delete" @onclick="@(async () => await RemoveGroupFromApp(group))">
+                            Remove access
+                        </button>
+                    </div>
                 }
+                </div>
 
-                <form @onsubmit="@AddGroupToApp">
-                    <input type="text" @bind="@GroupId" />
-                    <button type="submit">Add group</button>
+                <form @onsubmit="@AddGroupToApp" class="form-group d-flex flex-column flex-lg-row col-12 col-md-6">
+                    <input type="text" @bind="@GroupId" class="form-control bg-secondary mr-0 mr-lg-3 mb-3 mb-lg-0" />
+                    <button type="submit" class="btn btn-secondary-dark btn-add">Add group</button>
                 </form>
             break;
     }
