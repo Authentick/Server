@@ -38,7 +38,7 @@ Gatekeeper.Client/node_modules/
 Gatekeeper.Server.Web.Tests.Visual/node_modules/
 
 # Generated CSS
-Client/wwwroot/css/
+Gatekeeper.Client/wwwroot/css/
 
 # Code coverage
 TestResults/
