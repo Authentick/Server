@@ -23,7 +23,7 @@ namespace Gatekeeper.Server.Web.GRPC.Admin
 
         public override async Task<DismissAlertReply> DismissAlert(DismissAlertRequest request, ServerCallContext context)
         {
-            bool wasSuccessful = await _alertManager.TryDismissAlertAsync(new Guid(request.Id));
+            bool wasSuccessful = await _alertManager.TryDismissSystemAlertAsync(new Guid(request.Id));
 
             return new DismissAlertReply
             {
@@ -33,27 +33,38 @@ namespace Gatekeeper.Server.Web.GRPC.Admin
 
         public override async Task<AlertListReply> ListAlerts(Empty request, ServerCallContext context)
         {
-            List<IAlert> alerts = await _alertManager.GetAlertsAsync();
+            List<IAlert> alerts = await _alertManager.GetSystemAlertsAsync();
             AlertListReply reply = new AlertListReply { };
 
             foreach (IAlert alert in alerts)
             {
-                if (alert.GetType() == typeof(LdapUnencryptedConnectionAlert))
+                System.Type alertType = alert.GetType();
+                Alert replyAlert = new Alert
+                {
+                    Id = alert.Id.ToString(),
+                    Level = AlertProtobufConverter.ConvertEnum(alert.AlertLevel),
+                    IsActionable = alert.IsActionable,
+                };
+
+                if (alertType == typeof(LdapUnencryptedConnectionAlert))
                 {
                     var castedAlert = (LdapUnencryptedConnectionAlert)alert;
-                    Alert replyAlert = new Alert
-                    {
-                        Id = alert.Id.ToString(),
-                        Level = Alert.Types.LevelEnum.High,
-                    };
                     replyAlert.LdapConnectionAlert = new Alert.Types.UnencryptedLdapConnectionAlert
                     {
                         AppName = castedAlert.LdapAppSettingsId.ToString(),
                         IpAddress = (castedAlert.IpAddress.IsIPv4MappedToIPv6) ? castedAlert.IpAddress.MapToIPv4().ToString() : castedAlert.IpAddress.ToString(),
                     };
-
-                    reply.Alerts.Add(replyAlert);
                 }
+                else if (alertType == typeof(BruteforceIpAddressAlert))
+                {
+                    var castedAlert = (BruteforceIpAddressAlert)alert;
+                    replyAlert.BruteforceIpAddressAlert = new Alert.Types.BruteforceIpAddressAlert
+                    {
+                        IpAddress = (castedAlert.IpAddress.IsIPv4MappedToIPv6) ? castedAlert.IpAddress.MapToIPv4().ToString() : castedAlert.IpAddress.ToString(),
+                    };
+                }
+
+                reply.Alerts.Add(replyAlert);
             }
 
             return reply;

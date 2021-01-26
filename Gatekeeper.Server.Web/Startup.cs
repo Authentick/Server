@@ -20,7 +20,6 @@ using AuthServer.Server.Services.Authentication;
 using AuthServer.Server.Services.Authentication.Session;
 using AuthServer.Server.Services.User;
 using AuthServer.Server.GRPC.Admin;
-using AuthServer.Server.Services.Ldap;
 using AuthServer.Server.Services.Crypto;
 using AuthServer.Server.Services.TLS;
 using AuthServer.Server.Services.Authentication.Filter;
@@ -44,6 +43,7 @@ using Gatekeeper.Server.Web.GRPC.Admin;
 using Gatekeeper.Server.Web.Services.Alerts;
 using Npgsql;
 using System.Linq;
+using Gatekeeper.Server.Web.GRPC.Security;
 
 namespace AuthServer.Server
 {
@@ -252,6 +252,7 @@ namespace AuthServer.Server
                 endpoints.MapGrpcService<LetsEncryptService>();
                 endpoints.MapGrpcService<LdapService>();
                 endpoints.MapGrpcService<AdminAlertsService>();
+                endpoints.MapGrpcService<SecurityAlertsService>();
                 endpoints.MapFallbackToPage("/_Host");
             });
         }

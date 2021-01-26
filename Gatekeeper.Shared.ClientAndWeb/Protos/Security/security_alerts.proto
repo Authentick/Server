@@ -2,9 +2,9 @@ syntax = "proto3";
 
 import "google/protobuf/empty.proto";
 
-option csharp_namespace = "Gatekeeper.Shared.ClientAndWeb.Admin";
+option csharp_namespace = "Gatekeeper.Shared.ClientAndWeb.Security";
 
-service AdminAlerts {
+service SecurityAlerts {
   rpc ListAlerts (google.protobuf.Empty) returns (AlertListReply);
   rpc DismissAlert (DismissAlertRequest) returns (DismissAlertReply);
 }
@@ -24,20 +24,12 @@ message AlertListReply {
 message Alert {
   string id = 1;
   LevelEnum level = 2;
-  bool is_actionable = 3;
 
   oneof AlertData {
-    UnencryptedLdapConnectionAlert ldap_connection_alert = 4;
-    BruteforceIpAddressAlert bruteforce_ip_address_alert = 5;
+    BruteforceUserAlert bruteforce_user_alert = 3;
   }
 
-  message UnencryptedLdapConnectionAlert {
-    string app_name = 1;
-    string ip_address = 2;
-  }
-
-  message BruteforceIpAddressAlert {
-    string ip_address = 1;
+  message BruteforceUserAlert {
   }
 
   enum LevelEnum {
