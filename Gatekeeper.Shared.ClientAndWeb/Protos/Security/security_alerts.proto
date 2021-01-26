@@ -2,11 +2,19 @@ syntax = "proto3";
 
 import "google/protobuf/empty.proto";
 
-option csharp_namespace = "AuthServer.Shared.Security";
+option csharp_namespace = "Gatekeeper.Shared.ClientAndWeb.Security";
 
-service Alerts {
-  rpc ListActiveAlerts (google.protobuf.Empty) returns (AlertListReply);
-  rpc ListMitigatedAlerts (google.protobuf.Empty) returns (AlertListReply);
+service SecurityAlerts {
+  rpc ListAlerts (google.protobuf.Empty) returns (AlertListReply);
+  rpc DismissAlert (DismissAlertRequest) returns (DismissAlertReply);
+}
+
+message DismissAlertRequest {
+  string id = 1;
+}
+
+message DismissAlertReply {
+  bool success = 1;
 }
 
 message AlertListReply {
@@ -22,7 +30,6 @@ message Alert {
   }
 
   message BruteforceUserAlert {
-    string ip_address = 1;
   }
 
   enum LevelEnum {

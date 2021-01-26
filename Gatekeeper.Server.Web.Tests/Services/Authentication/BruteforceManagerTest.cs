@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using AuthServer.Server.Services.Authentication;
 using AuthServer.Server.Services.User;
+using Gatekeeper.Server.Web.Services.Alerts;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Moq;
@@ -30,7 +31,14 @@ namespace AuthServer.Server.Tests.Services.Authentication.Session
                     AppUser returnedUser = await context.Users.SingleAsync(u => u.Email == "test1@example.com");
                     userManagerMock.Setup(u => u.FindByNameAsync("JohnDoe"))
                         .ReturnsAsync(returnedUser);
-                    BruteforceManager manager = new BruteforceManager(context, (UserManager)userManagerMock.Object);
+
+                    Mock<AlertManager> alertManagerMock = new Mock<AlertManager>(context);
+
+                    BruteforceManager manager = new BruteforceManager(
+                        context,
+                        userManagerMock.Object,
+                        alertManagerMock.Object
+                    );
 
                     IPAddress ip = IPAddress.Parse("192.168.5.34");
                     IPAddress otherIp = IPAddress.Parse("192.168.5.35");

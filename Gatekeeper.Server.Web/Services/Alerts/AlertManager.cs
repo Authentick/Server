@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using Gatekeeper.Server.Web.Services.Alerts.Types;
@@ -16,7 +17,23 @@ namespace Gatekeeper.Server.Web.Services.Alerts
             _authDbContext = authDbContext;
         }
 
-        public async Task<bool> TryDismissAlertAsync(Guid alertId)
+        public async Task<bool> TryDismissUserAlertAsync(AppUser user, Guid alertId)
+        {
+            UserSecurityAlert? alert = await _authDbContext.UserSecurityAlerts
+                .Where(a => a.Recipient == user)
+                .SingleOrDefaultAsync(s => s.Id == alertId);
+            if (alert == null)
+            {
+                return false;
+            }
+
+            _authDbContext.Remove(alert);
+            await _authDbContext.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> TryDismissSystemAlertAsync(Guid alertId)
         {
             SystemSecurityAlert? alert = await _authDbContext.SystemSecurityAlerts
                 .SingleOrDefaultAsync(s => s.Id == alertId);
@@ -70,6 +87,7 @@ namespace Gatekeeper.Server.Web.Services.Alerts
                 {
                     case AlertTypeEnum.BruteforceUserAlert:
                         BruteforceUserAlert bruteforceUserAlert = new BruteforceUserAlert(user);
+                        bruteforceUserAlert.Id = alert.Id;
                         alertList.Add(bruteforceUserAlert);
                         break;
                 }

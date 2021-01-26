@@ -23,7 +23,7 @@ namespace Gatekeeper.Server.Web.GRPC.Admin
 
         public override async Task<DismissAlertReply> DismissAlert(DismissAlertRequest request, ServerCallContext context)
         {
-            bool wasSuccessful = await _alertManager.TryDismissAlertAsync(new Guid(request.Id));
+            bool wasSuccessful = await _alertManager.TryDismissSystemAlertAsync(new Guid(request.Id));
 
             return new DismissAlertReply
             {
