@@ -44,6 +44,7 @@ using Gatekeeper.Server.Web.Services.Alerts;
 using Npgsql;
 using System.Linq;
 using Gatekeeper.Server.Web.GRPC.Security;
+using Gatekeeper.Server.Web.Services.Authentication.DeviceCookie;
 
 namespace AuthServer.Server
 {
@@ -134,6 +135,7 @@ namespace AuthServer.Server
             // Authentication
             services.AddScoped<SessionManager>();
             services.AddScoped<BruteforceManager>();
+            services.AddScoped<DeviceCookieManager>();
 
             // Crypto
             services.AddScoped<SecureRandom>();

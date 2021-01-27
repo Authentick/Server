@@ -42,6 +42,7 @@ namespace AuthServer.Server.Models
         public DbSet<AuthSessionIp> AuthSessionIps { get; set; } = null!;
         public DbSet<SystemSecurityAlert> SystemSecurityAlerts { get; set; } = null!;
         public DbSet<UserSecurityAlert> UserSecurityAlerts { get; set; } = null!;
+        public DbSet<DeviceCookie> DeviceCookies { get; set; } = null!;
     }
 
     public class SystemSetting
@@ -196,6 +197,13 @@ namespace AuthServer.Server.Models
         public string? UserAgent { get; set; }
         [Column(TypeName = "jsonb")]
         public DeviceInformation? DeviceInfo { get; set; }
+        public DeviceCookie DeviceCookie { get; set; } = null!;
+    }
+
+    public class DeviceCookie
+    {
+        public Guid Id { get; set; }
+        public ICollection<AuthSession> AuthSessions { get; set; } = null!;
     }
 
     public class DeviceInformation
