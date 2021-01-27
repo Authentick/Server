@@ -6,6 +6,7 @@ using AuthServer.Server.Models;
 using AuthServer.Server.Services.Authentication.Session;
 using AuthServer.Server.Services.User;
 using Gatekeeper.Server.Services.Authentication.BackgroundJob;
+using Gatekeeper.Server.Web.Services.Authentication.DeviceCookie;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
@@ -19,16 +20,19 @@ namespace AuthServer.Server.Services.Authentication
         private readonly AuthDbContext _authDbContext;
         private readonly UserManager _userManager;
         private readonly SessionManager _sessionManager;
+        private readonly DeviceCookieManager _deviceCookieManager;
 
         public CookieAuthenticationEventListener(
             AuthDbContext authDbContext,
             UserManager userManager,
-            SessionManager sessionManager
+            SessionManager sessionManager,
+            DeviceCookieManager deviceCookieManager
         )
         {
             _authDbContext = authDbContext;
             _userManager = userManager;
             _sessionManager = sessionManager;
+            _deviceCookieManager = deviceCookieManager;
         }
 
         public override async Task SigningIn(CookieSigningInContext context)
@@ -38,11 +42,46 @@ namespace AuthServer.Server.Services.Authentication
             StringValues userAgent;
             context.HttpContext.Request.Headers.TryGetValue("User-Agent", out userAgent);
 
+            string? deviceId;
+            context.HttpContext.Request.Cookies.TryGetValue(DeviceCookieManager.DEVICE_COOKIE_STRING, out deviceId);
+            DeviceCookie deviceCookie;
+
+            if (deviceId == null)
+            {
+                deviceCookie = _deviceCookieManager.BuildNewDeviceCookie();
+                _authDbContext.Add(deviceCookie);
+                EncryptedDeviceCookie encryptedDeviceCookie = _deviceCookieManager.GetEncryptedDeviceCookie(deviceCookie);
+
+                context.Response.Cookies.Append(
+                    DeviceCookieManager.DEVICE_COOKIE_STRING,
+                    encryptedDeviceCookie.EncryptedValue,
+                    new Microsoft.AspNetCore.Http.CookieOptions
+                    {
+                        IsEssential = true,
+                        Expires = new DateTimeOffset(2038, 1, 1, 0, 0, 0, TimeSpan.FromHours(0)),
+                        HttpOnly = true,
+                    }
+                );
+            }
+            else
+            {
+                DeviceCookie? potentialDeviceCookie = await _deviceCookieManager.GetDeviceCookieAsync(
+                    new EncryptedDeviceCookie(deviceId)
+                );
+                if (potentialDeviceCookie == null)
+                {
+                    throw new Exception("User has an invalid device cookie: " + deviceId);
+                }
+
+                deviceCookie = potentialDeviceCookie;
+            }
+
             AuthSession session = new AuthSession
             {
                 CreationTime = SystemClock.Instance.GetCurrentInstant(),
                 User = user,
                 UserAgent = userAgent,
+                DeviceCookie = deviceCookie,
             };
             _authDbContext.AuthSessions.Add(session);
 
