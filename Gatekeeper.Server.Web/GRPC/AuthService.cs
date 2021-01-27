@@ -9,6 +9,7 @@ using AuthServer.Server.Services.User;
 using AuthServer.Shared;
 using Gatekeeper.Server.Services.Authentication.PasswordPolicy;
 using Gatekeeper.Server.Services.FileStorage;
+using Gatekeeper.Server.Web.Services.Authentication.DeviceCookie;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.AspNetCore.Http;
@@ -28,6 +29,7 @@ namespace Gatekeeper.Server.GRPC
         private readonly SessionManager _sessionManager;
         private readonly ProfileImageManager _profileImageManager;
         private readonly HIBPClient _hibpClient;
+        private readonly DeviceCookieManager _deviceCookieManager;
 
         public AuthService(
             UserManager userManager,
@@ -36,7 +38,8 @@ namespace Gatekeeper.Server.GRPC
             BruteforceManager bruteforceManager,
             SessionManager sessionManager,
             ProfileImageManager profileImageManager,
-            HIBPClient hibpClient
+            HIBPClient hibpClient,
+            DeviceCookieManager deviceCookieManager
             )
         {
             _userManager = userManager;
@@ -46,6 +49,7 @@ namespace Gatekeeper.Server.GRPC
             _sessionManager = sessionManager;
             _profileImageManager = profileImageManager;
             _hibpClient = hibpClient;
+            _deviceCookieManager = deviceCookieManager;
         }
 
         public override async Task<CheckPasswordBreachReply> CheckPasswordBreach(CheckPasswordBreachRequest request, ServerCallContext context)
@@ -77,13 +81,29 @@ namespace Gatekeeper.Server.GRPC
             }
 
             bool isUserBlocked = false;
+            bool isUserOnTrustedDevice = false;
             if (user != null)
             {
                 isUserBlocked = await _bruteforceManager.IsUserBlockedAsync(user);
+
+                string? encryptedDeviceId;
+                context.GetHttpContext().Request.Cookies.TryGetValue(DeviceCookieManager.DEVICE_COOKIE_STRING, out encryptedDeviceId);
+
+                if (encryptedDeviceId != null)
+                {
+                    isUserOnTrustedDevice = await _deviceCookieManager.IsCookieTrustedForUser(
+                        new EncryptedDeviceCookie(encryptedDeviceId),
+                        user
+                    );
+                }
             }
             bool isIpBlocked = await _bruteforceManager.IsIpBlockedAsync(ip);
 
-            if (isUserBlocked || isIpBlocked)
+            if (
+                !isUserOnTrustedDevice
+                &&
+                (isUserBlocked || isIpBlocked)
+            )
             {
                 return new LoginReply
                 {
