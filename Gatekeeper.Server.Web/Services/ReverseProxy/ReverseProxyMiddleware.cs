@@ -118,10 +118,10 @@ namespace AuthServer.Server.Services.ReverseProxy
                     );
 
                     await _httpProxy.ProxyAsync(
-                        context, 
-                        route.InternalHostname, 
-                        _httpClient, 
-                        proxyOptions, 
+                        context,
+                        route.InternalHostname,
+                        _httpClient,
+                        proxyOptions,
                         new Gatekeeper.Server.Web.Services.ReverseProxy.Transformer.RequestTransformer(route)
                     );
                     return;
