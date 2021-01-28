@@ -8,9 +8,7 @@ using AuthServer.Server.Services.ReverseProxy.Authentication;
 using AuthServer.Server.Services.ReverseProxy.Configuration;
 using AuthServer.Server.Services.TLS;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Net.Http.Headers;
 using Microsoft.ReverseProxy.Service.Proxy;
-using Microsoft.ReverseProxy.Service.RuntimeModel.Transforms;
 
 namespace AuthServer.Server.Services.ReverseProxy
 {
@@ -114,44 +112,18 @@ namespace AuthServer.Server.Services.ReverseProxy
                         }
                     }
 
-                    Dictionary<string, RequestHeaderTransform> requestHeaderTransforms = new Dictionary<string, RequestHeaderTransform>()
-                    {
-                        {
-                            "X-Forwarded-For",
-                            new RequestHeaderValueTransform(context.Connection.RemoteIpAddress.ToString(), append: false)
-                        },
-                        {
-                            "X-Forwarded-Host",
-                            new RequestHeaderValueTransform(route.PublicHostname, append: false)
-                        },
-                        {
-                            HeaderNames.Host,
-                            new RequestHeaderValueTransform(String.Empty, append: false)
-                        }
-                    };
+                    RequestProxyOptions proxyOptions = new RequestProxyOptions(
+                        TimeSpan.FromSeconds(100),
+                        null
+                    );
 
-                    if (context.Request.Cookies.TryGetValue(AuthenticationManager.AUTH_COOKIE, out string? authCookieValue))
-                    {
-                        // FIXME: This is currently also sent as cookie. Remove this and only send it as header.
-                        requestHeaderTransforms.Add(
-                            "X-Gatekeeper-Jwt-Assertion",
-                            new RequestHeaderValueTransform(authCookieValue, append: false)
-                        );
-                    }
-
-                    RequestProxyOptions proxyOptions = new RequestProxyOptions()
-                    {
-                        RequestTimeout = TimeSpan.FromSeconds(100),
-                        Transforms = new Transforms(
-                            copyRequestHeaders: true,
-                            requestTransforms: Array.Empty<RequestParametersTransform>(),
-                            requestHeaderTransforms: requestHeaderTransforms,
-                            responseHeaderTransforms: new Dictionary<string, ResponseHeaderTransform>(),
-                            responseTrailerTransforms: new Dictionary<string, ResponseHeaderTransform>()
-                        )
-                    };
-
-                    await _httpProxy.ProxyAsync(context, route.InternalHostname, _httpClient, proxyOptions);
+                    await _httpProxy.ProxyAsync(
+                        context, 
+                        route.InternalHostname, 
+                        _httpClient, 
+                        proxyOptions, 
+                        new Gatekeeper.Server.Web.Services.ReverseProxy.Transformer.RequestTransformer(route)
+                    );
                     return;
                 }
             }
