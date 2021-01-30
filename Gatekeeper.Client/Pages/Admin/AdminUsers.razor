@@ -6,7 +6,6 @@
 @using AuthServer.Shared.Admin
 @using Gatekeeper.Client.Shared.Components.Avatar
 
-
 @inject AuthServer.Shared.Admin.Users.UsersClient UsersClient
 
 <div class="d-flex flex-column flex-md-row justify-content-between">
@@ -71,7 +70,26 @@
                             <span class="d-lg-flex d-none text-watermelon col-2">Disabled</span>
                         }
                         <span class="d-lg-flex d-none col-2">@GetRoleName(user.IsAdmin)</span>
-                        <i class="fas fa-ellipsis-h col-2"></i>
+                        <Gatekeeper.Client.Shared.Components.Dropdown.Dropdown>
+                            <Gatekeeper.Client.Shared.Components.Dropdown.DropdownTrigger>
+                                <button class="btn btn-secondary dropdown-toggle">
+                                    Actions
+                                </button>
+                            </Gatekeeper.Client.Shared.Components.Dropdown.DropdownTrigger>
+
+                            <Gatekeeper.Client.Shared.Components.Dropdown.DropdownContent>
+                                <span class="dropdown-item" @onclick="(() => ToggleAdminState(user))">
+                                    @if(user.IsAdmin)
+                                    {
+                                        <text>Demote to member</text>
+                                    }
+                                    else
+                                    {
+                                        <text>Promote to admin</text>
+                                    }
+                                </span>
+                            </Gatekeeper.Client.Shared.Components.Dropdown.DropdownContent>
+                        </Gatekeeper.Client.Shared.Components.Dropdown.Dropdown>
                     </div>
                 }
     </div>
@@ -90,5 +108,14 @@
     private string GetRoleName(bool isAdmin)
     {
         return isAdmin ? "Admin" : "Member";
+    }
+
+    private async Task ToggleAdminState(User user)
+    {
+        await UsersClient.ChangeAdminStateAsync(new ChangeAdminStateRequest{
+            Id = user.Id,
+            IsAdmin = !user.IsAdmin,
+        });
+        user.IsAdmin = !user.IsAdmin;
     }
 }

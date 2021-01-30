@@ -8,6 +8,16 @@ option csharp_namespace = "AuthServer.Shared.Admin";
 service Users {
   rpc ListUsers (google.protobuf.Empty) returns (UserListReply);
   rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
+  rpc ChangeAdminState (ChangeAdminStateRequest) returns (ChangeAdminStateResponse);
+}
+
+message ChangeAdminStateRequest {
+  string id = 1;
+  bool is_admin = 2;
+}
+
+message ChangeAdminStateResponse {
+  bool success = 1;
 }
 
 message UserListReply {

@@ -17,6 +17,7 @@ namespace AuthServer.Server.GRPC.Admin
     {
         private readonly UserManager _userManager;
         private readonly ProfileImageManager _profileImageManager;
+        private const string ADMIN_ROLE = "admin";
 
         public UsersService(
             UserManager userManager,
@@ -25,6 +26,24 @@ namespace AuthServer.Server.GRPC.Admin
         {
             _userManager = userManager;
             _profileImageManager = profileImageManager;
+        }
+
+        public override async Task<ChangeAdminStateResponse> ChangeAdminState(ChangeAdminStateRequest request, ServerCallContext context)
+        {
+            AppUser user = await _userManager.FindByIdAsync(request.Id);
+            if (request.IsAdmin)
+            {
+                await _userManager.AddToRoleAsync(user, ADMIN_ROLE);
+            }
+            else
+            {
+                await _userManager.RemoveFromRoleAsync(user, ADMIN_ROLE);
+            }
+
+            return new ChangeAdminStateResponse
+            {
+                Success = true,
+            };
         }
 
         public override async Task<CreateUserResponse> CreateUser(CreateUserRequest request, ServerCallContext context)
@@ -65,7 +84,7 @@ namespace AuthServer.Server.GRPC.Admin
                     Id = user.Id.ToString(),
                     Name = user.UserName,
                     Email = user.Email,
-                    IsAdmin = await _userManager.IsInRoleAsync(user, "admin"),
+                    IsAdmin = await _userManager.IsInRoleAsync(user, ADMIN_ROLE),
                     IsEnabled = true,
                     HasPicture = _profileImageManager.HasProfileImage(user.Id),
                 };
