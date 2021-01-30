@@ -1,0 +1,23 @@
+<span @ref="Trigger" @onclick="Toggle">
+    @ChildContent
+</span>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; } = null!;
+
+    [CascadingParameter]
+    public Dropdown Dropdown { get; set; } = null!;
+
+    private ElementReference Trigger;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        Dropdown.Trigger = Trigger;
+    }
+
+    private void Toggle()
+    {
+        Dropdown.Toggle();
+    }
+}
