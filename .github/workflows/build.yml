@@ -39,6 +39,9 @@ jobs:
     - name: Build CSS
       run: gulp sass
       working-directory: ./Gatekeeper.Client/
+    - name: Build JavaScript
+      run: gulp javascript
+      working-directory: ./Gatekeeper.Client/
     - name: Perform Percy Tests
       run: ./test.sh
       working-directory: ./Gatekeeper.Server.Web.Tests.Visual

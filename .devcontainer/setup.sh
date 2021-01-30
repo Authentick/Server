@@ -11,3 +11,4 @@ cd $DIR/Gatekeeper.Shared.ClientAndWeb/ && dotnet restore
 # Install NPM dependencies and compile CSS
 cd $DIR/Gatekeeper.Client && npm install
 cd $DIR/Gatekeeper.Client && gulp sass
+cd $DIR/Gatekeeper.Client && gulp javascript

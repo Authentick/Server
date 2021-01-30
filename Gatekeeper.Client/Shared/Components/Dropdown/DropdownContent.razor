@@ -1,0 +1,18 @@
+<div @ref="Content" class="@(Dropdown.IsToggled ? "d-block" : "d-none") dropdown-menu">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [CascadingParameter]
+    public Dropdown Dropdown { get; set; }
+
+    private ElementReference Content;
+
+    protected override void OnAfterRender(bool firstRender) 
+    {
+        Dropdown.DropdownContent = Content;
+    }
+}

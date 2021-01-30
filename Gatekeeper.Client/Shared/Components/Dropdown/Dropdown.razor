@@ -1,0 +1,25 @@
+@inject IJSRuntime JS
+
+<CascadingValue Value=this>
+    @ChildContent
+</CascadingValue>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; } = null!;
+
+    public bool IsToggled = false;
+    public ElementReference Trigger;
+    public ElementReference DropdownContent;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await JS.InvokeVoidAsync("addPopup", Trigger, DropdownContent, "bottom");
+    }
+
+    public void Toggle()
+    {
+        IsToggled = !IsToggled;
+        StateHasChanged();
+    }
+}

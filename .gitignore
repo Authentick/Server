@@ -37,8 +37,9 @@ msbuild.wrn
 Gatekeeper.Client/node_modules/
 Gatekeeper.Server.Web.Tests.Visual/node_modules/
 
-# Generated CSS
+# Generated CSS and JS
 Gatekeeper.Client/wwwroot/css/
+Gatekeeper.Client/wwwroot/js/
 
 # Code coverage
 TestResults/
