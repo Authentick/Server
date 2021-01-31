@@ -35,7 +35,7 @@ jobs:
       run: npm install
       working-directory: ./Gatekeeper.Client/
     - name: Install Gulp
-      run: sudo npm install --global gulp-cli
+      run: sudo npm install --global gulp-cli --force
     - name: Build CSS
       run: gulp sass
       working-directory: ./Gatekeeper.Client/
