@@ -26,7 +26,13 @@ namespace AuthServer.Server.Services.Authentication.Session
         public async Task<AuthSession?> GetActiveSessionById(Guid userId, Guid sessionId)
         {
             return await _authDbContext.AuthSessions
-                .SingleOrDefaultAsync(s => s.User.Id == userId && s.Id == sessionId && s.ExpiredTime == null);
+                .SingleOrDefaultAsync(
+                    s =>
+                        s.User.Id == userId &&
+                        s.User.IsDisabled == false &&
+                        s.Id == sessionId &&
+                        s.ExpiredTime == null
+                );
         }
 
         public void ExpireSession(AppUser user, Guid sessionId)

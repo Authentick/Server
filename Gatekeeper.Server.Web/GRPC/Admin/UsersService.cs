@@ -85,7 +85,7 @@ namespace AuthServer.Server.GRPC.Admin
                     Name = user.UserName,
                     Email = user.Email,
                     IsAdmin = await _userManager.IsInRoleAsync(user, ADMIN_ROLE),
-                    IsEnabled = true,
+                    IsEnabled = !user.IsDisabled,
                     HasPicture = _profileImageManager.HasProfileImage(user.Id),
                 };
                 reply.Users.Add(userElement);
@@ -94,9 +94,15 @@ namespace AuthServer.Server.GRPC.Admin
             return reply;
         }
 
-        public override string? ToString()
+        public override async Task<ChangeEnabledStateResponse> ChangeEnabledState(ChangeEnabledStateRequest request, ServerCallContext context)
         {
-            return base.ToString();
+            AppUser user = await _userManager.FindByIdAsync(request.Id);
+            await _userManager.SetDisabledStateAsync(user, request.IsDisabled);
+
+            return new ChangeEnabledStateResponse
+            {
+                Success = true,
+            };
         }
     }
 }

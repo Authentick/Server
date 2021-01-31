@@ -126,6 +126,7 @@ namespace Gatekeeper.Server.Web.GRPC
                     Guid userId = new Guid(cns[0]);
                     IEnumerable<LdapAppUserCredentials> creds = await _authDbContext.LdapAppUserCredentials
                         .Where(c => c.User.Id == userId)
+                        .Where(c => c.User.IsDisabled == false)
                         .Where(c => c.LdapAppSettings.AuthApp.Id == appGuid)
                         .ToListAsync();
 
@@ -174,6 +175,14 @@ namespace Gatekeeper.Server.Web.GRPC
                 throw new Exception("Request is not from loopback");
             }
 
+            List<string> cns = request.UserIdentity.Cn.ToList();
+            List<string> ous = request.UserIdentity.Ou.ToList();
+            if (cns[0] != "BindUser" && ous.Count != 0)
+            {
+                throw new Exception("Search by Non-BindUser");
+            }
+
+
             SearchReply reply = new SearchReply { };
 
             Guid appId = new Guid(request.UserIdentity.Dc[0]);
@@ -184,7 +193,6 @@ namespace Gatekeeper.Server.Web.GRPC
             {
                 LdapPacketParserLibrary.Models.Operations.Request.SearchRequest searchRequest =
                     (LdapPacketParserLibrary.Models.Operations.Request.SearchRequest)message.ProtocolOp;
-
 
                 int? limit = searchRequest.SizeLimit;
 

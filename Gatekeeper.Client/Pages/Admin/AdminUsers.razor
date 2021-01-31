@@ -88,6 +88,17 @@
                                         <text>Promote to admin</text>
                                     }
                                 </span>
+                                <span class="dropdown-item" @onclick="(() => ToggleDisabledState(user))">
+                                    @if(user.IsEnabled)
+                                    {
+                                        <text>Disable user</text>
+                                    }
+                                    else
+                                    {
+                                        <text>Enable user</text>
+                                    }
+                                </span>
+
                             </Gatekeeper.Client.Shared.Components.Dropdown.DropdownContent>
                         </Gatekeeper.Client.Shared.Components.Dropdown.Dropdown>
                     </div>
@@ -117,5 +128,15 @@
             IsAdmin = !user.IsAdmin,
         });
         user.IsAdmin = !user.IsAdmin;
+    }
+
+    private async Task ToggleDisabledState(User user)
+    {
+        await UsersClient.ChangeEnabledStateAsync(new ChangeEnabledStateRequest{
+            Id = user.Id,
+            IsDisabled = user.IsEnabled,
+        });
+
+        user.IsEnabled = !user.IsEnabled;
     }
 }

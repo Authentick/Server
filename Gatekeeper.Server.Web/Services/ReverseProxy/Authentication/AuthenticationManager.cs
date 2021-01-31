@@ -27,14 +27,15 @@ namespace AuthServer.Server.Services.ReverseProxy.Authentication
         }
 
 
-        public string GetToken(AppUser user, ProxyAppSettings setting, Guid sessionId) {
-            string token =  _jwtFactory.Build()
+        public string GetToken(AppUser user, ProxyAppSettings setting, Guid sessionId)
+        {
+            string token = _jwtFactory.Build()
                 .Subject(user.Id.ToString())
                 .Id(sessionId)
                 .Audience(setting.InternalHostname)
                 .IssuedAt(DateTime.UtcNow)
                 .Encode();
-                
+
             return token;
         }
 
@@ -53,7 +54,7 @@ namespace AuthServer.Server.Services.ReverseProxy.Authentication
                 Dictionary<string, object> decodedToken = _jwtFactory.Build()
                     .MustVerifySignature()
                     .Decode<Dictionary<string, object>>(authCookie);
-                
+
                 sessionId = new Guid((string)decodedToken["jti"]);
                 return true;
             }
@@ -68,7 +69,18 @@ namespace AuthServer.Server.Services.ReverseProxy.Authentication
         {
             ProxyAppSettings proxyAppSetting = await _authDbContext.ProxyAppSettings
                 .AsNoTracking()
-                .Where(p => p.AuthApp.UserGroups.Any(u => u.Members.Any(m => m.Sessions.Any(s => s.Id == sessionId && s.ExpiredTime == null))))
+                .Where(
+                    p => p.AuthApp.UserGroups.Any(
+                        u => u.Members.Any(
+                            m => m.Sessions.Any(
+                                s =>
+                                    s.Id == sessionId &&
+                                    s.ExpiredTime == null &&
+                                    m.IsDisabled == false
+                            )
+                        )
+                    )
+                )
                 .SingleOrDefaultAsync(p => p.Id == route.ProxySettingId);
 
             if (proxyAppSetting == null)

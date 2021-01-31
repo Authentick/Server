@@ -69,7 +69,10 @@ namespace Gatekeeper.Server.GRPC
             IPAddress? ip = httpContext.Connection.RemoteIpAddress;
             if (ip == null)
             {
-                return new LoginReply { State = LoginStateEnum.Failed };
+                return new LoginReply
+                {
+                    State = LoginStateEnum.Failed
+                };
             }
 
             StringValues userAgent;
@@ -77,7 +80,10 @@ namespace Gatekeeper.Server.GRPC
 
             if (userAgent.Count != 1)
             {
-                return new LoginReply { State = LoginStateEnum.Failed };
+                return new LoginReply
+                {
+                    State = LoginStateEnum.Failed
+                };
             }
 
             bool isUserBlocked = false;
@@ -123,6 +129,16 @@ namespace Gatekeeper.Server.GRPC
                 {
                     State = LoginStateEnum.Failed
                 };
+            }
+            else
+            {
+                if (user.IsDisabled)
+                {
+                    return new LoginReply
+                    {
+                        State = LoginStateEnum.Disabled
+                    };
+                }
             }
 
             Microsoft.AspNetCore.Identity.SignInResult result =

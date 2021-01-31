@@ -9,6 +9,16 @@ service Users {
   rpc ListUsers (google.protobuf.Empty) returns (UserListReply);
   rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
   rpc ChangeAdminState (ChangeAdminStateRequest) returns (ChangeAdminStateResponse);
+  rpc ChangeEnabledState (ChangeEnabledStateRequest) returns (ChangeEnabledStateResponse);
+}
+
+message ChangeEnabledStateRequest {
+  string id = 1;
+  bool is_disabled = 2;
+}
+
+message ChangeEnabledStateResponse {
+  bool success = 1;
 }
 
 message ChangeAdminStateRequest {
