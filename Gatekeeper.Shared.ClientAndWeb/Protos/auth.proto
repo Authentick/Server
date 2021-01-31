@@ -45,6 +45,7 @@ enum LoginStateEnum {
   success = 1;
   twoFactorRequired = 2;
   blocked = 3;
+  disabled = 4;
 }
 
 message VerifyEmailRequest {

@@ -59,6 +59,9 @@
                 ((Util.AuthStateProvider) AuthenticationStateProvider).StateHasChanged();
                 NavigationManager.NavigateTo("/");
                 break;
+            case LoginStateEnum.Disabled:
+                _failReason = "Account disabled.";
+                break;
         }
     }
 }

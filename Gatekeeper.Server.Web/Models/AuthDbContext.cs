@@ -259,6 +259,7 @@ namespace AuthServer.Server.Models
         public ICollection<InvalidLoginAttempt> InvalidLoginAttempts { get; set; } = null!;
         public ICollection<InvalidTwoFactorAttempt> InvalidTwoFactorAttempts { get; set; } = null!;
         public ICollection<ScimUserSyncState> ScimUserSyncState { get; set; } = null!;
+        public bool IsDisabled { get; set; }
     }
 
     public class InvalidLoginAttempt

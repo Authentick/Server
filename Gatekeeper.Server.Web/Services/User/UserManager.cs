@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AuthServer.Server.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
@@ -33,6 +34,17 @@ namespace AuthServer.Server.Services.User
             List<AppUser> users = _authDbContext.Users.ToList();
 
             return users;
+        }
+
+        public async Task SetDisabledStateAsync(AppUser user, bool isDisabled)
+        {
+            user.IsDisabled = isDisabled;
+            await _authDbContext.SaveChangesAsync();
+        }
+
+        public bool IsDisabled(AppUser user)
+        {
+            return user.IsDisabled;
         }
     }
 }
