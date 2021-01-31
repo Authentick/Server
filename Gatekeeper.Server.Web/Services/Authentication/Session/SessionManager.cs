@@ -27,11 +27,11 @@ namespace AuthServer.Server.Services.Authentication.Session
         {
             return await _authDbContext.AuthSessions
                 .SingleOrDefaultAsync(
-                    s => 
-                    s.User.Id == userId &&
-                    s.User.IsDisabled == false &&
-                    s.Id == sessionId && 
-                    s.ExpiredTime == null
+                    s =>
+                        s.User.Id == userId &&
+                        s.User.IsDisabled == false &&
+                        s.Id == sessionId &&
+                        s.ExpiredTime == null
                 );
         }
 
