@@ -1,7 +1,15 @@
-import { createPopper } from '@popperjs/core';
+import { auto, createPopper } from '@popperjs/core';
 
 export function addPopup(popcorn, tooltip, direction) {
     createPopper(popcorn, tooltip, {
-        placement: direction,
+        placement: auto,
+        modifiers: [
+            {
+              name: 'offset',
+              options: {
+                offset: [0, 0],
+              },
+            },
+          ],
     });
 }

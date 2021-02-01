@@ -19,7 +19,7 @@
           @foreach (User user in UserListReply.Users)
                 {
                     <div class="d-flex flex-row justify-content-between py-3 align-items-left align-items-lg-center text-left">
-                        <div class="d-flex flex-row col-4">
+                        <div class="d-flex flex-row col-10 col-lg-4">
                             @if(user.HasPicture)
                             {
                                 <img src="/api/profile/image/@user.Id" class="avatar avatar__sm mr-2">
@@ -72,8 +72,8 @@
                         <span class="d-lg-flex d-none col-2">@GetRoleName(user.IsAdmin)</span>
                         <Gatekeeper.Client.Shared.Components.Dropdown.Dropdown>
                             <Gatekeeper.Client.Shared.Components.Dropdown.DropdownTrigger>
-                                <button class="btn btn-secondary dropdown-toggle">
-                                    Actions
+                                <button class="btn-unstyled">
+                                    <i class="fas fa-ellipsis-h"></i>
                                 </button>
                             </Gatekeeper.Client.Shared.Components.Dropdown.DropdownTrigger>
 
