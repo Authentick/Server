@@ -23,3 +23,26 @@
   color: white;
   border-color: $dark-green;
 }
+
+.btn-unstyled {
+  background: transparent;
+  box-shadow: 0px 0px 0px transparent;
+  border: 0px solid transparent;
+  text-shadow: 0px 0px 0px transparent;
+}
+
+.btn-unstyled:hover {
+  background: transparent;
+  box-shadow: 0px 0px 0px transparent;
+  border: 0px solid transparent;
+  text-shadow: 0px 0px 0px transparent;
+}
+
+.btn-unstyled:active {
+  outline: none;
+  border: none;
+}
+
+.btn-unstyled:focus {
+  outline: 0;
+}
