@@ -4,6 +4,7 @@
 @layout AdminShell
 
 @using AuthServer.Shared.Admin
+@using Gatekeeper.Client.Shared.Components.Avatar
 
 @inject AuthServer.Shared.Admin.Groups.GroupsClient GroupsClient
 
@@ -14,28 +15,35 @@
 
 @if (groupsListReply != null)
 {
-    <div class="table-responsive mb-2">
-        <table class="table table-hover table-bordered mb-4 table-secondary table-striped">
-            <thead class="bg-secondary-dark">
-                <tr>
-                    <th scope="col" class="border-0">Name</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-
-                @foreach (Group group in groupsListReply.Groups)
+    <div class="d-flex flex-column simple-card p-2 my-4">
+        @foreach (Group group in groupsListReply.Groups)
                 {
-                    <tr>
-                        <td>@group.Name</td>
-                        <td>
-                            <a href="/admin/groups/details/@group.Id" class="btn btn-secondary-dark btn-add">Edit</a> 
-                            <button class="btn btn-secondary-dark btn-delete" @onclick="@(() => Delete(group))">Delete</button>
-                        </td>
-                    </tr>
+                    <div class="d-flex flex-row justify-content-between p-3">
+                        <div class="d-flex flex-row align-items-center">
+                            <AvatarPlaceholder 
+                            Name="@group.Name" 
+                            Size="AvatarPlaceholder.SizeEnum.Small"
+                            OptionalClasses="mr-2"
+                            />      
+                            @group.Name
+                        </div>
+                        <div class="d-flex flex-row">
+                            <Gatekeeper.Client.Shared.Components.Dropdown.Dropdown>
+                            <Gatekeeper.Client.Shared.Components.Dropdown.DropdownTrigger>
+                                <button class="btn-unstyled">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                            </Gatekeeper.Client.Shared.Components.Dropdown.DropdownTrigger>
+
+                            <Gatekeeper.Client.Shared.Components.Dropdown.DropdownContent>
+                                <a href="/admin/groups/details/@group.Id" class="dropdown-item">Edit</a> 
+
+                                <span class="dropdown-item" @onclick="@(() => Delete(group))">Delete</span>
+                            </Gatekeeper.Client.Shared.Components.Dropdown.DropdownContent>
+                        </Gatekeeper.Client.Shared.Components.Dropdown.Dropdown>
+                        </div>
+                    </div>
                 }
-            </tbody>
-        </table>
     </div>
 }
 
