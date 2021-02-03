@@ -6,6 +6,7 @@
 @using AuthServer.Shared.Admin
 @using AuthServer.Shared
 @using Gatekeeper.Client.Shared.Components.Typeahead
+@using Gatekeeper.Client.Shared.Components.Avatar
 
 @inject AuthServer.Shared.Admin.Groups.GroupsClient GroupsClient
 
@@ -25,28 +26,22 @@
         </div>
     </form>
 
-    <div class="table-responsive mb-2">
-
-        <table class="table table-hover table-bordered mb-4 table-secondary table-striped">
-            <thead class="bg-secondary-dark">
-                <tr>
-                    <th scope="col" class="border-0">Member</th>
-                    <th scope="col" class="border-0">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach(GroupMember member in GroupDetails.Members)
+    <div class="d-flex flex-column simple-card p-2 my-4">
+         @foreach(GroupMember member in GroupDetails.Members)
                 {
-                    <tr>
-                        <td>@member.Name</td>
-                        <td><button class="btn btn-secondary-dark btn-delete" @onclick="@(async () => await RemoveMember(member))">Remove</button></td>
-                    </tr>
+                    <div class="d-flex flex-row justify-content-between p-3">
+                        <div class="d-flex flex-row align-items-center">
+                            <AvatarPlaceholder 
+                            Name="@member.Name" 
+                            Size="AvatarPlaceholder.SizeEnum.Small"
+                            OptionalClasses="mr-2"
+                        />      
+                        @member.Name
+                        </div>
+                        <button class="btn btn-secondary-dark btn-delete" @onclick="@(async () => await RemoveMember(member))">Remove</button>
+                    </div>
                 }
-            
-            </tbody>
-        </table>
     </div>
-
 }
 
 @code {

@@ -21,6 +21,12 @@
   }
 }
 
+.simple-card {
+  background-color: $secondary-theme-color;
+  border: 1px solid $secondary-theme-dark-color;
+  border-radius: 4px;
+}
+
 .alert-card {
   background-color: $light-gray;
   border-left: 6px solid;

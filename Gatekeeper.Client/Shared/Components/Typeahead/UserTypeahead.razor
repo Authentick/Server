@@ -2,7 +2,7 @@
 
 @inject AuthServer.Shared.Typeahead.TypeaheadClient TypeaheadClient
 
-<input type="text" class="form-control bg-secondary" @bind-value="Username" @bind-value:event="oninput"  @onkeyup="@SearchKeyUpEvent" placeholder="User Id..." />
+<input type="text" class="form-control bg-secondary" @bind-value="Username" @bind-value:event="oninput"  @onkeyup="@SearchKeyUpEvent" placeholder="Search user..." />
 <div class="typeahead-dropdown list-group">
     @if(SearchUserReply != null) {
         foreach(SearchUserEntry entry in SearchUserReply.Entries) {
