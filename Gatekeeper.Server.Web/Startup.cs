@@ -45,6 +45,8 @@ using Npgsql;
 using System.Linq;
 using Gatekeeper.Server.Web.GRPC.Security;
 using Gatekeeper.Server.Web.Services.Authentication.DeviceCookie;
+using Gatekeeper.Server.Web.Services.Email.Credentials;
+using Gatekeeper.Server.Web.Services.Email;
 
 namespace AuthServer.Server
 {
@@ -128,6 +130,8 @@ namespace AuthServer.Server
 
             // Email
             services.AddScoped<IEmailSender, SmtpEmailSender>();
+            services.AddScoped<SmtpCredentialManager>();
+            services.AddScoped<SmtpConnectivityChecker>();
 
             // User
             services.AddScoped<UserManager>();
@@ -255,6 +259,7 @@ namespace AuthServer.Server
                 endpoints.MapGrpcService<LdapService>();
                 endpoints.MapGrpcService<AdminAlertsService>();
                 endpoints.MapGrpcService<SecurityAlertsService>();
+                endpoints.MapGrpcService<SmtpService>();
                 endpoints.MapFallbackToPage("/_Host");
             });
         }

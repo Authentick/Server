@@ -12,6 +12,7 @@ using AuthServer.Server.Services.TLS.BackgroundJob;
 using AuthServer.Server.Services.User;
 using AuthServer.Shared;
 using Gatekeeper.Server.Services.FileStorage;
+using Gatekeeper.Server.Web.Services.Email.Credentials;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Hangfire;
@@ -27,15 +28,18 @@ namespace AuthServer.Server.GRPC
         public const string INSTALLED_KEY = "installer.is_installed";
         public const string PRIMARY_DOMAIN_KEY = "installer.domain";
         private readonly UserManager _userManager;
+        private readonly SmtpCredentialManager _smtpCredentialManager;
 
         public InstallService(
             AuthDbContext authDbContext,
             SecureRandom secureRandom,
-            UserManager userManager)
+            UserManager userManager,
+            SmtpCredentialManager smtpCredentialManager)
         {
             _authDbContext = authDbContext;
             _secureRandom = secureRandom;
             _userManager = userManager;
+            _smtpCredentialManager = smtpCredentialManager;
         }
 
         private async Task<bool> IsAlreadyInstalled()
@@ -96,35 +100,20 @@ namespace AuthServer.Server.GRPC
             await _userManager.CreateAsync(user, request.AccountData.Password);
             await _userManager.AddToRoleAsync(user, "admin");
 
+            SmtpCredentials smtpCredentials = new SmtpCredentials
+            {
+                Hostname = request.SmtpSettings.Hostname,
+                Username = request.SmtpSettings.Username,
+                Password = request.SmtpSettings.Password,
+                SenderAddress = request.SmtpSettings.SenderAddress,
+                Port = request.SmtpSettings.Port
+            };
+            await _smtpCredentialManager.StoreCredentialsAsync(smtpCredentials);
+
             SystemSetting installSetting = new SystemSetting
             {
                 Name = INSTALLED_KEY,
                 Value = "true",
-            };
-            SystemSetting smtpHostnameSetting = new SystemSetting
-            {
-                Name = "smtp.hostname",
-                Value = request.SmtpSettings.Hostname,
-            };
-            SystemSetting smtpUsernameSetting = new SystemSetting
-            {
-                Name = "smtp.username",
-                Value = request.SmtpSettings.Username,
-            };
-            SystemSetting smtpPasswordSetting = new SystemSetting
-            {
-                Name = "smtp.password",
-                Value = request.SmtpSettings.Password,
-            };
-            SystemSetting smtpSenderAddress = new SystemSetting
-            {
-                Name = "smtp.senderAddress",
-                Value = request.SmtpSettings.SenderAddress,
-            };
-            SystemSetting smtpPort = new SystemSetting
-            {
-                Name = "smtp.port",
-                Value = request.SmtpSettings.Port.ToString(),
             };
 
             SystemSetting? primaryDomainSetting = await _authDbContext.SystemSettings
@@ -158,7 +147,7 @@ namespace AuthServer.Server.GRPC
                 repository.StoreCertificate(primaryDomainSetting.Value, cert.Export(X509ContentType.Pfx));
             }
 
-            _authDbContext.AddRange(installSetting, smtpHostnameSetting, smtpUsernameSetting, smtpPasswordSetting, smtpSenderAddress);
+            _authDbContext.AddRange(installSetting);
             await _authDbContext.SaveChangesAsync();
 
             return new SetupInstanceReply
