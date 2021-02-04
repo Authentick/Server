@@ -9,11 +9,33 @@ service LetsEncrypt {
   rpc ListCertificates (google.protobuf.Empty) returns (CertificateListReply);
 }
 
+service Smtp {
+  rpc GetSmtpSettings (google.protobuf.Empty) returns (SmtpSettingsMessage);
+  rpc ChangeSmtpSettings (SmtpSettingsMessage) returns (ChangeSmtpSettingsReply);
+  rpc ValidateSmtpSettings (SmtpSettingsMessage) returns (ValidateSmtpSettingsReply);
+}
+
+message SmtpSettingsMessage {
+  string hostname = 1;
+  string username = 2;
+  string password = 3;
+  string sender_address = 4;
+  int32 port = 5;
+}
+
+message ValidateSmtpSettingsReply {
+  bool success = 1;
+}
+
+message ChangeSmtpSettingsReply {
+  bool success = 1;
+}
+
 message CertificateListReply {
-    repeated Certificate certificates = 1;
+  repeated Certificate certificates = 1;
 }
 
 message Certificate {
-    string domain = 1;
-    google.protobuf.Timestamp last_issued = 2;
+  string domain = 1;
+  google.protobuf.Timestamp last_issued = 2;
 }

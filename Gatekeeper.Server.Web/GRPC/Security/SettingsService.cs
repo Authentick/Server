@@ -71,11 +71,6 @@ namespace AuthServer.Server.GRPC.Security
             return new ChangePasswordReply { Success = false };
         }
 
-        public override bool Equals(object? obj)
-        {
-            return base.Equals(obj);
-        }
-
         public override Task<NewAuthenticatorSecret> GetNewAuthenticatorSecret(Empty request, ServerCallContext context)
         {
             return Task.FromResult(new NewAuthenticatorSecret
