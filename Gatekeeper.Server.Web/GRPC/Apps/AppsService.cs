@@ -97,6 +97,7 @@ namespace AuthServer.Server.GRPC.Apps
                 {
                     Id = app.Id.ToString(),
                     Name = app.Name,
+                    Description = app.Description,
                 });
             }
 
