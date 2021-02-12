@@ -43,4 +43,5 @@ message AppListReply {
 message AppListEntry {
   string id = 1;
   string name = 2;
+  string description = 3;
 }

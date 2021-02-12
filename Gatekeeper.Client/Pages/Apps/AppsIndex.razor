@@ -4,15 +4,25 @@
 @layout AppShell
 
 @using AuthServer.Shared.Apps
+@using Gatekeeper.Client.Shared.Components.Avatar
 
 @inject AuthServer.Shared.Apps.Apps.AppsClient AppsClient
+
 
 <div class="d-flex flex-row flex-wrap">
     @if(appsReply != null) {
         foreach(AppListEntry entry in appsReply.Apps) {
             <a href="/apps/details/@entry.Id" class="text-decoration-none">
                 <div class="logo-card d-flex flex-column align-items-center text-center p-3 m-3">
-                    <p class="text-lg font-weight-bold pt-2">@entry.Name</p>
+                    <i class="fas fa-star align-self-end"></i>
+                    <AvatarPlaceholder 
+                    Name="@entry.Name" 
+                    Size="AvatarPlaceholder.SizeEnum.Medium"
+                    OptionalClasses=""
+                    />      
+                    <p class="text-lg font-weight-bold pt-3 mb-0">@entry.Name</p>
+                    <p class="text-md text-black mb-0">@entry.Description</p>
+                    <i class="fas fa-long-arrow-alt-right align-self-end fa-2x"></i>
                 </div>
             </a>
         }
