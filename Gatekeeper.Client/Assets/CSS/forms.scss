@@ -1,0 +1,10 @@
+.custom-input {
+  position: relative;
+
+  &__icon {
+    position: absolute;
+    right: 6px;
+    top: 3px;
+    padding: 9px 8px;
+  }
+}
