@@ -6,32 +6,47 @@
 @using AuthServer.Shared.Apps
 
 @inject AuthServer.Shared.Apps.Apps.AppsClient AppsClient
+@inject IJSRuntime JsRuntime
 
 @if(appReply != null) {
     <h2>@appReply.Name</h2>
 
-    <p>@appReply.Description</p>
+    <p class="mb-0 col-lg-7 col-12 px-0">@appReply.Description</p>
 
     @if(appReply.HasLdapAuth)
     {
-        <h2>Credentials</h2>
+        <h4 class="pt-4">Credentials</h4>
 
-        <p>@appReply.Name requires you to provide a username and application-specific password to authenticate.</p>
-        <button @onclick="@CreateLdapPassword">Generate application specific password</button>
-        @if(newLdapPassword != null) {
-            <p>@newLdapPassword</p>
-        }
+        <p class="col-lg-7 col-12 px-0"><strong>@appReply.Name</strong> requires you to provide a username and application-specific password to authenticate.</p>
+        <div class="d-flex flex-column mt-2">
+            <button @onclick="@CreateLdapPassword" class="btn btn-secondary-dark col-lg-7 col-12">Generate application specific password</button>
+            @if(newLdapPassword != null) {
+                <div class="custom-input mt-3 col-lg-7 col-12 px-0">
+                    <input 
+                        type="text" 
+                        @bind="@newLdapPassword" 
+                        class="form-control bg-secondary" 
+                        readonly
+                        @ref="PasswordElementReference"
+                    />
+                    <i class="custom-input__icon far fa-copy fa-lg fa-fw" aria-hidden="true" @onclick="CopyPassword"></i>
+                </div>
+            }
+        </div>
     } 
 
     @if(appReply.LoginUrl != null)
     {
-        <h2>Access</h2>
-        <div class="alert alert-danger" role="alert">
-            <h4 class="alert-heading">Keep your Gatekeeper password safe</h4>
-            <p>Do not provide your Gatekeeper credentials to any other application. @appReply.Name does not need it to identify you.</p>
+        <h4 class="pt-4">Access</h4>
+        <div class="alert alert-warning d-flex flex-row mt-3 col-lg-7 col-12 mx-0" role="alert">
+            <i class="fas fa-exclamation-triangle align-self-center fa-2x"></i>
+            <div class="d-flex flex-column pt-2 ml-3">
+                <h5 class="alert-heading">Keep your Gatekeeper password safe</h5>
+                <p>Do not provide your Gatekeeper credentials to any other application. <strong>@appReply.Name</strong> does not need it to identify you.</p>
+            </div>
         </div>
 
-        <a href="@appReply.LoginUrl" class="btn btn-primary">Proceed to @appReply.Name</a>
+        <a href="@appReply.LoginUrl" class="btn btn-primary mt-4">Proceed to @appReply.Name</a>
     }
 }
 
@@ -41,6 +56,7 @@
 
     private GetAppDetailsReply? appReply;
     private string? newLdapPassword;
+    private ElementReference PasswordElementReference;
 
     protected override async Task OnInitializedAsync()
     {
@@ -49,6 +65,11 @@
         };
 
         appReply = await AppsClient.GetAppDetailsAsync(request);
+    }
+
+    private async Task CopyPassword()
+    {
+        await JsRuntime.InvokeVoidAsync("copyClipboardByElement", PasswordElementReference);
     }
 
     private async Task CreateLdapPassword() 
