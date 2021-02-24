@@ -1,6 +1,6 @@
 @if (Configuration != null) {
     <button 
-        class="btn btn-secondary-dark" 
+        class="btn btn-primary" 
         disabled="@(Configuration.IsDisabled || Configuration.State != ButtonStateEnum.Default)" 
         @onclick="ButtonClicked">
         @GetText()

@@ -19,7 +19,7 @@
 
         <p class="col-lg-7 col-12 px-0"><strong>@appReply.Name</strong> requires you to provide a username and application-specific password to authenticate.</p>
         <div class="d-flex flex-column mt-2">
-            <button @onclick="@CreateLdapPassword" class="btn btn-secondary-dark col-lg-7 col-12">Generate application specific password</button>
+            <button @onclick="@CreateLdapPassword" class="btn btn-primary col-lg-7 col-12">Generate application specific password</button>
             @if(newLdapPassword != null) {
                 <div class="custom-input mt-3 col-lg-7 col-12 px-0">
                     <input 

@@ -1,6 +1,20 @@
 .btn {
-  height: 40px;
   white-space: nowrap;
+  height: 40px;
+  font-weight: 600;
+}
+
+.btn-primary {
+  color: white;
+  border-radius: 8px;
+  background-color: #082650;
+  font-size: 16px;
+  border: none;
+}
+
+.btn-primary:hover {
+ transform: scale(0.95);
+ background-color: #061a36;
 }
 
 .btn-sm-100 {
@@ -16,6 +30,7 @@
   background-color: $watermelon;
   color: white;
   border-color: $watermelon;
+  transform: scale(0.95);
 }
 
 .btn-add:hover {

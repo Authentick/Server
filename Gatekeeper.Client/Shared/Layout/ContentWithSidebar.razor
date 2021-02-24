@@ -31,10 +31,11 @@
         <div class="d-lg-flex d-none justify-content-center">
             <a href="/profile" class="text-decoration-none">
                 @if(_profileImageUrl != null) {
-                    <img src="@_profileImageUrl" class="avatar avatar__sm">
+                    <img src="@_profileImageUrl" class="avatar avatar__sm white-border">
                 } else {
                     <AvatarPlaceholder 
                         Name="@_userName"
+                        OptionalClasses="white-border"
                         Size="AvatarPlaceholder.SizeEnum.Small" />
                 }
             </a>
@@ -58,10 +59,11 @@
     <div class="d-lg-none d-flex justify-content-center pr-2">
         <a href="/profile">
             @if(_profileImageUrl != null) {
-                <img src="@_profileImageUrl" class="avatar avatar__sm">
+                <img src="@_profileImageUrl" class="avatar avatar__sm white-border">
             } else {
                 <AvatarPlaceholder 
                     Name="@_userName"
+                    OptionalClasses="white-border"
                     Size="AvatarPlaceholder.SizeEnum.Small" />
             }        
         </a>

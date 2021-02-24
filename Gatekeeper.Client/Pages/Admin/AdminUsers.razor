@@ -10,7 +10,7 @@
 
 <div class="d-flex flex-column flex-md-row justify-content-between">
     <h2>Users</h2>
-    <a class="btn btn-secondary-dark mb-3 mb-md-0" href="/admin/users/create">Add a new user</a>
+    <a class="btn btn-primary mb-3 mb-md-0" href="/admin/users/create"><i class="fas fa-plus mr-2"></i>Add a new user</a>
 </div>
 
 @if (UserListReply != null)
@@ -46,7 +46,7 @@
                                     <span class="font-weight-bold mr-2">Status</span>
                                     @if(user.IsEnabled)
                                     {
-                                        <span class="text-green">Enabled</span>
+                                        <span class="text-primary">Enabled</span>
                                     }
                                     else
                                     {
@@ -63,7 +63,7 @@
                         <span class="d-lg-flex d-none col-3">@user.Name</span>
                         @if(user.IsEnabled)
                         {
-                            <span class="d-lg-flex d-none text-green col-2">Enabled</span>
+                            <span class="d-lg-flex d-none text-primary col-2">Enabled</span>
                         }
                         else
                         {
