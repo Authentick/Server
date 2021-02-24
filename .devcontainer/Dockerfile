@@ -40,8 +40,8 @@ RUN apt-get update && apt-get install -y \
     && ln -s /var/run/docker-host.sock /var/run/docker.sock  \
     && npm install --global gulp-cli \
     && sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended \
-    && dotnet tool install --global dotnet-ef --version 5.0.2 \
+    && dotnet tool install --global dotnet-ef --version 5.0.3 \
     && dotnet tool install --global dotnet-format \
-    && dotnet tool install --global dotnet-aspnet-codegenerator --version 5.0.2 \
+    && dotnet tool install --global dotnet-aspnet-codegenerator --version 5.0. \
     && echo "export PATH=\"$PATH:/root/.dotnet/tools\"" >> ~/.bash_profile \
     && rm -rf /var/lib/apt/lists/*
