@@ -7,37 +7,35 @@
 
 @inject AuthServer.Shared.Admin.AdminApps.AdminAppsClient AppsClient
 
-<div class="d-flex flex-lg-row flex-column justify-content-between pb-2">
-    <h2 class="text-lg">Applications</h2>
-    <a href="/admin/apps/setup/" class="btn btn-secondary-dark mb-lg-0 mb-3">Add a new app</a>
+<div class="d-flex flex-lg-row flex-column justify-content-between">
+    <h2>Applications</h2>
+    <a href="/admin/apps/setup/" class="btn btn-primary mb-lg-0 mb-3"><i class="fas fa-plus mr-2"></i>Add a new app</a>
 </div>
 
 @if(appsReply != null) {
-    <div class="table-responsive mb-2">
-        <table class="table table-hover table-bordered mb-4 table-secondary table-striped">
-            <thead class="bg-secondary-dark">
-                <tr>
-                    <th scope="col" class="border-0">Application Name</th>
-                    <th scope="col" class="border-0">Type</th>
-                    <th scope="col" class="border-0">Groups assigned</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
 
-            @foreach(AppListEntry entry in appsReply.Apps) {
-                <tr>
-                    <td>@entry.Name</td>
-                    <td>@entry.HostingType</td>
-                    <td>@entry.GroupsAssigned</td>
-                    <td>
-                        <a href="/admin/apps/details/@entry.Id" class="btn btn-secondary-dark btn-add">Edit</a> 
-                        <button class="btn btn-secondary-dark btn-delete" @onclick="@(() => Delete(entry))">Delete</button>
-                    </td>
-                </tr>
-            }
-            </tbody>
-        </table>
+    <div class="d-flex flex-column simple-card p-2 my-4">
+        @foreach(AppListEntry entry in appsReply.Apps) {
+            <div class="d-flex flex-row justify-content-between p-3">
+                <p class="col-3">@entry.Name</p>
+                <p class="col-3">@entry.HostingType</p>
+                <p class="col-3">@entry.GroupsAssigned assigned groups</p>
+                <Gatekeeper.Client.Shared.Components.Dropdown.Dropdown>
+                            <Gatekeeper.Client.Shared.Components.Dropdown.DropdownTrigger>
+                                <button class="btn-unstyled">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
+                            </Gatekeeper.Client.Shared.Components.Dropdown.DropdownTrigger>
+
+                            <Gatekeeper.Client.Shared.Components.Dropdown.DropdownContent>
+                                <a href="/admin/apps/details/@entry.Id" class="dropdown-item">Edit</a> 
+
+                                <span class="dropdown-item" @onclick="@(() => Delete(entry))">Delete</span>
+                            </Gatekeeper.Client.Shared.Components.Dropdown.DropdownContent>
+                        </Gatekeeper.Client.Shared.Components.Dropdown.Dropdown>
+            </div>
+        }
+
     </div>
 }
 
