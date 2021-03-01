@@ -14,7 +14,7 @@
     <PackageReference Include="Hangfire.AspNetCore" Version="1.7.19" />
     <PackageReference Include="HangFire.Core" Version="1.7.19" />
     <PackageReference Include="Hangfire.PostgreSql" Version="1.8.1" />
-    <PackageReference Include="JWT" Version="8.1.0" />
+    <PackageReference Include="JWT" Version="8.1.2" />
     <PackageReference Include="MailKit" Version="2.10.1" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="5.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="5.0.3" />
