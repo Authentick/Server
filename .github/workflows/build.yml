@@ -25,6 +25,8 @@ jobs:
       run: dotnet test Gatekeeper.Server.Web.Tests --collect:"XPlat Code Coverage" -r TestResults/ --settings Gatekeeper.Server.Web.Tests/coverlet.runsettings
     - name: Test Gatekeeper.Client
       run: dotnet test Gatekeeper.Client.Tests --collect:"XPlat Code Coverage" -r TestResults/
+    - name: Test Authentick.DotNetSaml
+      run: dotnet test Authentick.DotNetSaml.Tests --collect:"XPlat Code Coverage" -r TestResults/ 
     - uses: codecov/codecov-action@v1
       with:
         directory: TestResults/
