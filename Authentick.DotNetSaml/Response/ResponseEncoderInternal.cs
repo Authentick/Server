@@ -19,8 +19,8 @@ namespace Authentick.DotNetSaml.Response
             XmlWriterSettings xws = new XmlWriterSettings();
             xws.OmitXmlDeclaration = true;
 
-            Guid samlIdentifier = _guidService.NewGuid();
-            Guid samlAssertionIdentifier = _guidService.NewGuid();
+            string samlIdentifier = "id-" + _guidService.NewGuid();
+            string samlAssertionIdentifier = "id-" + _guidService.NewGuid();
 
             using (StringWriter sw = new StringWriter())
             {
@@ -28,7 +28,7 @@ namespace Authentick.DotNetSaml.Response
                 {
                     xw.WriteStartElement("samlp", "Response", "urn:oasis:names:tc:SAML:2.0:protocol");
                     xw.WriteAttributeString("xmlns", "saml", null, "urn:oasis:names:tc:SAML:2.0:assertion");
-                    xw.WriteAttributeString("ID", samlIdentifier.ToString());
+                    xw.WriteAttributeString("ID", samlIdentifier);
                     xw.WriteAttributeString("Version", "2.0");
                     xw.WriteAttributeString("InResponseTo", model.InResponseTo);
                     xw.WriteAttributeString("IssueInstant", model.TimeStamp.ToSamlInstant());
@@ -46,7 +46,7 @@ namespace Authentick.DotNetSaml.Response
 
                     xw.WriteStartElement("saml", "Assertion", null);
                     xw.WriteAttributeString("xmlns", "saml", null, "urn:oasis:names:tc:SAML:2.0:assertion");
-                    xw.WriteAttributeString("ID", samlAssertionIdentifier.ToString());
+                    xw.WriteAttributeString("ID", samlAssertionIdentifier);
                     xw.WriteAttributeString("Version", "2.0");
                     xw.WriteAttributeString("IssueInstant", model.TimeStamp.ToSamlInstant());
                     xw.WriteStartElement("saml", "Issuer", null);
