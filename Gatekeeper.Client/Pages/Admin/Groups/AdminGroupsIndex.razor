@@ -13,7 +13,7 @@
     <a class="btn btn-primary mb-3 mb-md-0" href="/admin/groups/create"><i class="fas fa-plus mr-2"></i>Add a new group</a>
 </div>
 
-@if (groupsListReply != null)
+@if (groupsListReply != null && groupsListReply.Groups.Count != 0)
 {
     <div class="d-flex flex-column simple-card p-2 my-4">
         @foreach (Group group in groupsListReply.Groups)

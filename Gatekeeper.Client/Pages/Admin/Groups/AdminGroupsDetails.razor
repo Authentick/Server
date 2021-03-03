@@ -26,8 +26,10 @@
         </div>
     </form>
 
-    <div class="d-flex flex-column simple-card p-2 my-4">
-         @foreach(GroupMember member in GroupDetails.Members)
+    @if (GroupDetails.Members.Count != 0)
+    {
+        <div class="d-flex flex-column simple-card p-2 my-4">
+            @foreach(GroupMember member in GroupDetails.Members)
                 {
                     <div class="d-flex flex-row justify-content-between p-3">
                         <div class="d-flex flex-row align-items-center">
@@ -41,7 +43,8 @@
                         <button class="btn btn-secondary-dark btn-delete" @onclick="@(async () => await RemoveMember(member))">Remove</button>
                     </div>
                 }
-    </div>
+        </div>
+    }
 }
 
 @code {

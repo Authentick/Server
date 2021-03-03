@@ -39,3 +39,15 @@
 .text-sm {
   @include font-size(0.8rem);
 }
+
+@mixin image-size ($width: auto, $height: auto) {
+  width: $width;
+  height: $height;
+}
+
+.image-md {
+  @include image-size(90%);
+  @include media-breakpoint-up(md) {
+    @include image-size(450px);
+  }
+}
