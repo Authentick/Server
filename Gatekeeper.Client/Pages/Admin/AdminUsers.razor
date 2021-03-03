@@ -13,7 +13,7 @@
     <a class="btn btn-primary mb-3 mb-md-0" href="/admin/users/create"><i class="fas fa-plus mr-2"></i>Add a new user</a>
 </div>
 
-@if (UserListReply != null)
+@if (UserListReply != null && UserListReply.Users.Count != 0)
 {
     <div class="d-flex flex-column simple-card p-2 my-4">
           @foreach (User user in UserListReply.Users)
