@@ -2,13 +2,6 @@
 	"name": "AuthServer",
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "authserverdev",
-	"forwardPorts": [
-		80,
-		389,
-		443,
-		8080,
-		8025
-	],
 	// Set *default* container specific settings.json values on container create.
 	"settings": {
 		"terminal.integrated.shell.linux": "/bin/zsh",

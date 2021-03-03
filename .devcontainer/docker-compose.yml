@@ -7,9 +7,12 @@ services:
         - /var/run/docker.sock:/var/run/docker-host.sock
       command: /bin/sh -c "while sleep 1000; do :; done"
       ports:
-        - 1025:1025
-        - 8080:8080
-        - 8025:8025
+        - 127.0.0.1:80:80
+        - 127.0.0.1:389:389
+        - 127.0.0.1:443:443
+        - 127.0.0.1:1025:1025
+        - 127.0.0.1:8080:8080
+        - 127.0.0.1:8025:8025
   db:
       image: postgres
       restart: always
