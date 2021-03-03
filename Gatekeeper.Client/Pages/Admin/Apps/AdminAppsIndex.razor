@@ -12,7 +12,7 @@
     <a href="/admin/apps/setup/" class="btn btn-primary mb-lg-0 mb-3"><i class="fas fa-plus mr-2"></i>Add a new app</a>
 </div>
 
-@if(appsReply != null) {
+@if(appsReply != null && appsReply.Apps.Count != 0) {
 
     <div class="d-flex flex-column simple-card p-2 my-4">
         @foreach(AppListEntry entry in appsReply.Apps) {
