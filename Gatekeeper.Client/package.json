@@ -3,7 +3,7 @@
   "main": "gulpfile.js",
   "dependencies": {
     "@popperjs/core": "^2.8.6",
-    "bootstrap": "^4.5.3"
+    "bootstrap": "^4.6.0"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^11.2.0",
