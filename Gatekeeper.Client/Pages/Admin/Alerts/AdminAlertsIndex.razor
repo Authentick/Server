@@ -6,7 +6,7 @@
 @using Gatekeeper.Shared.ClientAndWeb.Admin
 @inject Gatekeeper.Shared.ClientAndWeb.Admin.AdminAlerts.AdminAlertsClient AdminAlertsClient
 
-@if(_alerts != null)
+@if(_alerts != null && _alerts.Count != 0)
 {
     <h4 class="font-weight-bold">Action required</h4>
 
@@ -49,6 +49,12 @@
                 break;
         }
     }    
+} else {
+    <div class="d-flex flex-column justify-content-center">
+        <img class="image-md mx-auto" src="/img/undraw/all-caught-up.svg" />
+        <h2 class="text-center mt-2">All caught up!</h2>
+    </div>
+    
 }
     
 @code {
