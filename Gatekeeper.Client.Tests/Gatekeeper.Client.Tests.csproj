@@ -5,7 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="bunit.web" Version="1.0.0-preview-01" />
+        <PackageReference Include="bunit.web" Version="1.0.19" />
         <PackageReference Include="bunit.xunit" Version="1.0.0-preview-01" />
         <PackageReference Include="coverlet.collector" Version="3.0.3">
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
